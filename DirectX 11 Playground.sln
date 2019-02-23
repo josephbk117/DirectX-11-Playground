@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27703.2018
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DirectX 11 Playground", "DirectX 11 Playground\DirectX 11 Playground.vcxproj", "{023DC59A-E453-4DA9-AA10-404D232D3390}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{023DC59A-E453-4DA9-AA10-404D232D3390}.Debug|x64.ActiveCfg = Debug|x64
+		{023DC59A-E453-4DA9-AA10-404D232D3390}.Debug|x64.Build.0 = Debug|x64
+		{023DC59A-E453-4DA9-AA10-404D232D3390}.Debug|x86.ActiveCfg = Debug|Win32
+		{023DC59A-E453-4DA9-AA10-404D232D3390}.Debug|x86.Build.0 = Debug|Win32
+		{023DC59A-E453-4DA9-AA10-404D232D3390}.Release|x64.ActiveCfg = Release|x64
+		{023DC59A-E453-4DA9-AA10-404D232D3390}.Release|x64.Build.0 = Release|x64
+		{023DC59A-E453-4DA9-AA10-404D232D3390}.Release|x86.ActiveCfg = Release|Win32
+		{023DC59A-E453-4DA9-AA10-404D232D3390}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {13258093-CA80-4CF0-943D-86A896D2C788}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,114 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\Input">
+      <UniqueIdentifier>{f224d46b-98aa-4739-80c0-7442fd2b5552}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Input\Keyboard">
+      <UniqueIdentifier>{6253facb-b7c6-45a8-9f81-0a1f94ec5465}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Input">
+      <UniqueIdentifier>{9e19da74-a380-42f7-ada6-0895d0e1601d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Input\Keyboard">
+      <UniqueIdentifier>{1c6c20b0-71f1-4121-92ef-68b2c2bb34c5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Input\Mouse">
+      <UniqueIdentifier>{831d155b-c143-4d36-85a5-151925ce371d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Input\Mouse">
+      <UniqueIdentifier>{c5dbc38c-6209-413c-a69f-92135c677a4f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Graphics">
+      <UniqueIdentifier>{a3a7dae9-2a9d-4019-a264-8dbcfff4ecf6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Graphics">
+      <UniqueIdentifier>{4859fb3e-5547-4240-b755-d211ac8065bd}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Src\MainApp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RenderWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Engine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\WindowContainer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Keyboard\KeyboardEvent.cpp">
+      <Filter>Source Files\Input\Keyboard</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Keyboard\KeyboardInput.cpp">
+      <Filter>Source Files\Input\Keyboard</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Mouse\MouseEvent.cpp">
+      <Filter>Source Files\Input\Mouse</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Mouse\MouseInput.cpp">
+      <Filter>Source Files\Input\Mouse</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Graphics\Graphics.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Graphics\AdapterReader.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Graphics\Vertex.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Src\ErrorLogger.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\StringConverter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\RenderWindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Engine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\WindowContainer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Keyboard\KeyboardInput.h">
+      <Filter>Header Files\Input\Keyboard</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Keyboard\KeyboardEvent.h">
+      <Filter>Header Files\Input\Keyboard</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Mouse\MouseInput.h">
+      <Filter>Header Files\Input\Mouse</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Mouse\MouseEvent.h">
+      <Filter>Header Files\Input\Mouse</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Graphics\Graphics.h">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Graphics\AdapterReader.h">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Graphics\Vertex.h">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
