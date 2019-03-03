@@ -4,6 +4,7 @@
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "DirectXTK.lib")
 #include "AdapterReader.h"
+#include "Shader.h"
 
 class Graphics
 {
@@ -12,11 +13,12 @@ public:
 	void renderFrame();
 private:
 	bool initDirectX(HWND hwnd, int width, int height);
+	bool initShaders();
 
 	Microsoft::WRL::ComPtr<ID3D11Device> device;
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> context;
 	Microsoft::WRL::ComPtr<IDXGISwapChain> swapchain;
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> renderTargetView;
-	Microsoft::WRL::ComPtr<ID3D11InputLayout> inputLayout;
+	VertexShader vertexShader;
 };
 

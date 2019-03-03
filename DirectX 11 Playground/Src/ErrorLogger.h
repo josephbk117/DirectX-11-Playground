@@ -16,4 +16,10 @@ public:
 		std::wstring errorMsg = L"Error :" + StringConverter::StringToWide(message) + L"\n" + comError.ErrorMessage();
 		MessageBoxW(NULL, errorMsg.c_str(), L"Error", MB_ICONERROR);
 	}
+	static void log(HRESULT hr, const std::wstring& message)
+	{
+		_com_error comError(hr);
+		std::wstring errorMsg = L"Error :" + message + L"\n" + comError.ErrorMessage();
+		MessageBoxW(NULL, errorMsg.c_str(), L"Error", MB_ICONERROR);
+	}
 };

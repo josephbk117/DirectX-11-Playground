@@ -5,12 +5,16 @@ bool Graphics::init(HWND hwnd, int width, int height)
 {
 	if (!initDirectX(hwnd, width, height))
 		return false;
+
+	if (!initShaders())
+		return false;
+
 	return true;
 }
 
 void Graphics::renderFrame()
 {
-	float bgColour[] = { 1,1,0,1 };
+	float bgColour[] = { 0,1,0,1 };
 
 	context->ClearRenderTargetView(renderTargetView.Get(), bgColour);
 
@@ -75,8 +79,23 @@ bool Graphics::initDirectX(HWND hwnd, int width, int height)
 		ErrorLogger::log(hr, "Failed to create render target view");
 		return false;
 	}
-
 	context->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), NULL);
 
-	return false;
+	return true;
+}
+
+bool Graphics::initShaders()
+{
+	D3D11_INPUT_ELEMENT_DESC layout[] =
+	{
+		{"POSITION", 0, DXGI_FORMAT::DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0 }
+	};
+
+	UINT numElements = ARRAYSIZE(layout);
+
+	if (!vertexShader.init(device, L"..\\x64\\Debug\\vertexShader.cso", layout, numElements))
+		return false;
+
+
+	return true;
 }
