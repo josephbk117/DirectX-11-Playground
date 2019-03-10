@@ -17,7 +17,7 @@ bool Graphics::init(HWND hwnd, int width, int height)
 
 void Graphics::renderFrame()
 {
-	float bgColour[] = { 0,1,0,1 };
+	float bgColour[] = { 0.1f,0.1f,0.1f,1 };
 
 	context->ClearRenderTargetView(renderTargetView.Get(), bgColour);
 
@@ -137,6 +137,7 @@ bool Graphics::initShaders()
 	D3D11_INPUT_ELEMENT_DESC layout[] =
 	{
 		{"POSITION", 0, DXGI_FORMAT::DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0  },
+		{"COLOR", 0, DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0  },
 	};
 
 	UINT numElements = ARRAYSIZE(layout);
@@ -153,7 +154,7 @@ bool Graphics::initShaders()
 bool Graphics::initScene()
 {
 
-	Vertex v[] = { Vertex(-0.4f,0.0f), Vertex(0.0f,0.4f), Vertex(0.4f,0.0f) };
+	Vertex v[] = { Vertex(-0.5f,-0.5f, 1,0,0), Vertex(0.0f,0.5f,0,1,0), Vertex(0.5f,-0.5f,0,0,1) };
 
 	D3D11_BUFFER_DESC vertexBufferDesc;
 	ZeroMemory(&vertexBufferDesc, sizeof(vertexBufferDesc));
