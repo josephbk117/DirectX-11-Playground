@@ -9,6 +9,9 @@ bool Graphics::init(HWND hwnd, int width, int height)
 	if (!initShaders())
 		return false;
 
+	if (!initScene())
+		return false;
+
 	return true;
 }
 
@@ -17,6 +20,19 @@ void Graphics::renderFrame()
 	float bgColour[] = { 0,1,0,1 };
 
 	context->ClearRenderTargetView(renderTargetView.Get(), bgColour);
+
+	context->IASetInputLayout(vertexShader.getInputLayout());
+	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	context->VSSetShader(vertexShader.getShader(), NULL, 0);
+	context->PSSetShader(pixelShader.getShader(), NULL, 0);
+
+	UINT stride = sizeof(Vertex);
+	UINT offset = 0;
+
+	context->IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), &stride, &offset);
+
+	context->Draw(3, 0);
 
 	swapchain->Present(1, NULL);
 }
@@ -130,6 +146,35 @@ bool Graphics::initShaders()
 
 	if (!pixelShader.init(device, shaderfolder + L"pixelShader.cso"))
 		return false;
+
+	return true;
+}
+
+bool Graphics::initScene()
+{
+
+	Vertex v[] = { Vertex(-0.4f,0.0f), Vertex(0.0f,0.4f), Vertex(0.4f,0.0f) };
+
+	D3D11_BUFFER_DESC vertexBufferDesc;
+	ZeroMemory(&vertexBufferDesc, sizeof(vertexBufferDesc));
+
+	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	vertexBufferDesc.ByteWidth = sizeof(Vertex) * ARRAYSIZE(v);
+	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vertexBufferDesc.CPUAccessFlags = 0;
+	vertexBufferDesc.MiscFlags = 0;
+
+	D3D11_SUBRESOURCE_DATA vertexBufferData;
+	ZeroMemory(&vertexBufferData, sizeof(vertexBufferData));
+
+	vertexBufferData.pSysMem = v;
+
+	HRESULT hr = device->CreateBuffer(&vertexBufferDesc, &vertexBufferData, vertexBuffer.GetAddressOf());
+	if (FAILED(hr))
+	{
+		ErrorLogger::log(hr, "Failed to create vertex buffer");
+		return false;
+	}
 
 	return true;
 }
