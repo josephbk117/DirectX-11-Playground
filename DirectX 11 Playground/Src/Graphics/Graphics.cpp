@@ -20,9 +20,12 @@ void Graphics::renderFrame()
 	float bgColour[] = { 0.1f,0.1f,0.1f,1 };
 
 	context->ClearRenderTargetView(renderTargetView.Get(), bgColour);
+	context->ClearDepthStencilView(depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 	context->IASetInputLayout(vertexShader.getInputLayout());
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	context->RSSetState(rasterizerState.Get());
+	context->OMSetDepthStencilState(depthStencilState.Get(), 0);
 
 	context->VSSetShader(vertexShader.getShader(), NULL, 0);
 	context->PSSetShader(pixelShader.getShader(), NULL, 0);
@@ -95,7 +98,52 @@ bool Graphics::initDirectX(HWND hwnd, int width, int height)
 		ErrorLogger::log(hr, "Failed to create render target view");
 		return false;
 	}
-	context->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), NULL);
+
+	//Depth/Stencil buffer
+	D3D11_TEXTURE2D_DESC depthStencilDesc;
+	depthStencilDesc.Width = width;
+	depthStencilDesc.Height = height;
+	depthStencilDesc.MipLevels = 1;
+	depthStencilDesc.ArraySize = 1;
+	depthStencilDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depthStencilDesc.SampleDesc.Count = 1;
+	depthStencilDesc.SampleDesc.Quality = 0;
+	depthStencilDesc.Usage = D3D11_USAGE_DEFAULT;
+	depthStencilDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	depthStencilDesc.CPUAccessFlags = 0;
+	depthStencilDesc.MiscFlags = 0;
+
+	hr = device->CreateTexture2D(&depthStencilDesc, NULL, this->depthStencilBuffer.GetAddressOf());
+
+	if (FAILED(hr))
+	{
+		ErrorLogger::log(hr, "Error creating depth-stencil buffer");
+		return false;
+	}
+
+	hr = device->CreateDepthStencilView(this->depthStencilBuffer.Get(), NULL, this->depthStencilView.GetAddressOf());
+
+	if (FAILED(hr))
+	{
+		ErrorLogger::log(hr, "Error creating depth-stencil view");
+		return false;
+	}
+	context->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), this->depthStencilView.Get());
+
+	//Set depth-stencil state
+	D3D11_DEPTH_STENCIL_DESC depthstencildesc;
+	ZeroMemory(&depthstencildesc, sizeof(D3D11_DEPTH_STENCIL_DESC));
+
+	depthstencildesc.DepthEnable = true;
+	depthstencildesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK::D3D11_DEPTH_WRITE_MASK_ALL;
+	depthstencildesc.DepthFunc = D3D11_COMPARISON_FUNC::D3D11_COMPARISON_LESS_EQUAL;
+
+	hr = this->device->CreateDepthStencilState(&depthstencildesc, this->depthStencilState.GetAddressOf());
+	if (FAILED(hr))
+	{
+		ErrorLogger::log(hr, "Failed to create depth stencil state.");
+		return false;
+	}
 
 	//Create viewport
 	D3D11_VIEWPORT viewport;
@@ -103,11 +151,26 @@ bool Graphics::initDirectX(HWND hwnd, int width, int height)
 
 	viewport.TopLeftX = 0;
 	viewport.TopLeftY = 0;
-
 	viewport.Width = width;
 	viewport.Height = height;
+	viewport.MinDepth = 0.0f;
+	viewport.MaxDepth = 1.0f;
 	//Set the vieport
 	this->context->RSSetViewports(1, &viewport);
+
+	//Create rasterizer desc
+	D3D11_RASTERIZER_DESC rasterizerDesc;
+	ZeroMemory(&rasterizerDesc, sizeof(D3D11_RASTERIZER_DESC));
+
+	rasterizerDesc.FillMode = D3D11_FILL_MODE::D3D11_FILL_SOLID;
+	rasterizerDesc.CullMode = D3D11_CULL_MODE::D3D11_CULL_BACK;
+
+	hr = device->CreateRasterizerState(&rasterizerDesc, this->rasterizerState.GetAddressOf());
+	if (FAILED(hr))
+	{
+		ErrorLogger::log(hr, "Error creating rasterizer state");
+		return false;
+	}
 
 	return true;
 }
@@ -136,7 +199,7 @@ bool Graphics::initShaders()
 
 	D3D11_INPUT_ELEMENT_DESC layout[] =
 	{
-		{"POSITION", 0, DXGI_FORMAT::DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0  },
+		{"POSITION", 0, DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0  },
 		{"COLOR", 0, DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0  },
 	};
 
@@ -154,7 +217,7 @@ bool Graphics::initShaders()
 bool Graphics::initScene()
 {
 
-	Vertex v[] = { Vertex(-0.5f,-0.5f, 1,0,0), Vertex(0.0f,0.5f,0,1,0), Vertex(0.5f,-0.5f,0,0,1) };
+	Vertex v[] = { Vertex(-0.5f,-0.5f, 1.0f, 1,0,0), Vertex(0.0f,0.5f,1.0f,0,1,0), Vertex(0.5f,-0.5f,1.0f,0,0,1) };
 
 	D3D11_BUFFER_DESC vertexBufferDesc;
 	ZeroMemory(&vertexBufferDesc, sizeof(vertexBufferDesc));
