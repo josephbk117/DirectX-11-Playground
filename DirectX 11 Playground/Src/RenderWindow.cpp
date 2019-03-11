@@ -12,9 +12,19 @@ bool RenderWindow::init(WindowContainer* winContainer, HINSTANCE hInstance, cons
 	this->height = height;
 
 	this->registerWindowClass();
+
+	//Window rectangle
+	RECT wr;
+	wr.left = 50;
+	wr.top = 50;
+	wr.right = wr.left + width;
+	wr.bottom = wr.top + height;
+
+	AdjustWindowRect(&wr, WS_CAPTION | WS_MAXIMIZEBOX | WS_SYSMENU, false);
+
 	this->handle = CreateWindowEx(0, this->windowClassWide.c_str(), this->windowTitleWide.c_str(),
-		WS_CAPTION | WS_MAXIMIZEBOX | WS_SYSMENU, 0, 0,
-		this->width, this->height, NULL, NULL, this->hInstance, winContainer);
+		WS_CAPTION | WS_MAXIMIZEBOX | WS_SYSMENU, wr.left, wr.top,
+		wr.right - wr.left, wr.bottom - wr.top, NULL, NULL, this->hInstance, winContainer);
 
 	if (this->handle == NULL)
 	{
