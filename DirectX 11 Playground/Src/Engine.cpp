@@ -2,6 +2,7 @@
 
 bool Engine::init(HINSTANCE hInstance, const std::string & windowTitle, const std::string & windowClass, int width, int height)
 {
+	CoInitialize(NULL);
 	if (!renderWindow.init(this, hInstance, windowTitle, windowClass, width, height))
 		return false;
 	if (!gfx.init(renderWindow.GetHWND(), width, height))

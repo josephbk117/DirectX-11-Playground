@@ -26,16 +26,16 @@ void Graphics::renderFrame()
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	context->RSSetState(rasterizerState.Get());
 	context->OMSetDepthStencilState(depthStencilState.Get(), 0);
-
+	context->PSSetSamplers(0, 1, samplerState.GetAddressOf());
 	context->VSSetShader(vertexShader.getShader(), NULL, 0);
 	context->PSSetShader(pixelShader.getShader(), NULL, 0);
 
 	UINT stride = sizeof(Vertex);
 	UINT offset = 0;
 
+	context->PSSetShaderResources(0, 1, texture.GetAddressOf());
 	context->IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), &stride, &offset);
-
-	context->Draw(3, 0);
+	context->Draw(6, 0);
 
 	swapchain->Present(1, NULL);
 }
@@ -172,6 +172,26 @@ bool Graphics::initDirectX(HWND hwnd, int width, int height)
 		return false;
 	}
 
+	//Create sampler state
+	D3D11_SAMPLER_DESC samplerDesc;
+	ZeroMemory(&samplerDesc, sizeof(D3D11_SAMPLER_DESC));
+
+	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+	samplerDesc.MinLOD = 0;
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	hr = device->CreateSamplerState(&samplerDesc, samplerState.GetAddressOf());
+	if (FAILED(hr))
+	{
+		ErrorLogger::log(hr, "Error creating sampler state");
+		return false;
+	}
+
 	return true;
 }
 
@@ -200,7 +220,7 @@ bool Graphics::initShaders()
 	D3D11_INPUT_ELEMENT_DESC layout[] =
 	{
 		{"POSITION", 0, DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0  },
-		{"COLOR", 0, DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0  },
+		{"TEXCOORD", 0, DXGI_FORMAT::DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0  },
 	};
 
 	UINT numElements = ARRAYSIZE(layout);
@@ -217,7 +237,8 @@ bool Graphics::initShaders()
 bool Graphics::initScene()
 {
 
-	Vertex v[] = { Vertex(-0.5f,-0.5f, 1.0f, 1,0,0), Vertex(0.0f,0.5f,1.0f,0,1,0), Vertex(0.5f,-0.5f,1.0f,0,0,1) };
+	Vertex v[] = { Vertex(-0.5f,-0.5f, 1.0f, 0, 1), Vertex(-0.5f,0.5f,1.0f, 0.0f, 0.0f), Vertex(0.5f,-0.5f,1.0f,1,1),
+					Vertex(0.5f,-0.5f,1.0f,1,1) ,Vertex(-0.5f,0.5f,1.0f,0.0f, 0.0f), Vertex(0.5f,0.5f,1.0f,1.0f, 0.0f) };
 
 	D3D11_BUFFER_DESC vertexBufferDesc;
 	ZeroMemory(&vertexBufferDesc, sizeof(vertexBufferDesc));
@@ -230,13 +251,20 @@ bool Graphics::initScene()
 
 	D3D11_SUBRESOURCE_DATA vertexBufferData;
 	ZeroMemory(&vertexBufferData, sizeof(vertexBufferData));
-
 	vertexBufferData.pSysMem = v;
 
 	HRESULT hr = device->CreateBuffer(&vertexBufferDesc, &vertexBufferData, vertexBuffer.GetAddressOf());
 	if (FAILED(hr))
 	{
 		ErrorLogger::log(hr, "Failed to create vertex buffer");
+		return false;
+	}
+
+	hr = DirectX::CreateWICTextureFromFile(device.Get(), L"Resources\\Textures\\bitshiftProductions.png", nullptr, texture.GetAddressOf());
+
+	if (FAILED(hr))
+	{
+		ErrorLogger::log(hr, "Failed to create WIC texture from file");
 		return false;
 	}
 
