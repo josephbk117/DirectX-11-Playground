@@ -35,7 +35,9 @@ void Graphics::renderFrame()
 
 	context->PSSetShaderResources(0, 1, texture.GetAddressOf());
 	context->IASetVertexBuffers(0, 1, vertexBuffer.GetAddressOf(), &stride, &offset);
-	context->Draw(6, 0);
+	context->IASetIndexBuffer(indicesBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+	//context->Draw(6, 0);
+	context->DrawIndexed(6, 0, 0);
 
 	swapchain->Present(1, NULL);
 }
@@ -215,7 +217,7 @@ bool Graphics::initShaders()
 		shaderfolder = L"..\\Release\\";
 #endif
 #endif
-	}
+}
 
 	D3D11_INPUT_ELEMENT_DESC layout[] =
 	{
@@ -237,8 +239,16 @@ bool Graphics::initShaders()
 bool Graphics::initScene()
 {
 
-	Vertex v[] = { Vertex(-0.5f,-0.5f, 1.0f, 0, 1), Vertex(-0.5f,0.5f,1.0f, 0.0f, 0.0f), Vertex(0.5f,-0.5f,1.0f,1,1),
-					Vertex(0.5f,-0.5f,1.0f,1,1) ,Vertex(-0.5f,0.5f,1.0f,0.0f, 0.0f), Vertex(0.5f,0.5f,1.0f,1.0f, 0.0f) };
+	/*Vertex v[] = { Vertex(-0.5f,-0.5f, 1.0f, 0, 1), Vertex(-0.5f,0.5f,1.0f, 0.0f, 0.0f), Vertex(0.5f,-0.5f,1.0f,1,1),
+					Vertex(0.5f,-0.5f,1.0f,1,1) ,Vertex(-0.5f,0.5f,1.0f,0.0f, 0.0f), Vertex(0.5f,0.5f,1.0f,1.0f, 0.0f) };*/
+
+	Vertex v[] = { Vertex(-0.5f,-0.5f, 1.0f, 0, 1), Vertex(-0.5f,0.5f,1.0f, 0.0f, 0.0f), Vertex(0.5f,0.5f,1.0f,1.0f, 0.0f), Vertex(0.5f, -0.5f,1.0f,1.0f, 1.0f) };
+
+	DWORD indices[] =
+	{
+		0,1,2,
+		0,2,3
+	};
 
 	D3D11_BUFFER_DESC vertexBufferDesc;
 	ZeroMemory(&vertexBufferDesc, sizeof(vertexBufferDesc));
@@ -257,6 +267,27 @@ bool Graphics::initScene()
 	if (FAILED(hr))
 	{
 		ErrorLogger::log(hr, "Failed to create vertex buffer");
+		return false;
+	}
+
+
+	D3D11_BUFFER_DESC indicesBufferDesc;
+	ZeroMemory(&indicesBufferDesc, sizeof(indicesBufferDesc));
+
+	indicesBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	indicesBufferDesc.ByteWidth = sizeof(DWORD) * ARRAYSIZE(indices);
+	indicesBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	indicesBufferDesc.CPUAccessFlags = 0;
+	indicesBufferDesc.MiscFlags = 0;
+
+	D3D11_SUBRESOURCE_DATA indicesBufferData;
+	ZeroMemory(&indicesBufferData, sizeof(indicesBufferData));
+	indicesBufferData.pSysMem = indices;
+
+	hr = device->CreateBuffer(&indicesBufferDesc, &indicesBufferData, indicesBuffer.GetAddressOf());
+	if (FAILED(hr))
+	{
+		ErrorLogger::log(hr, "Failed to create index buffer");
 		return false;
 	}
 
