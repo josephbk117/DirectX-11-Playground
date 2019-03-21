@@ -3,10 +3,11 @@
 #include <wrl\client.h>
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "DirectXTK.lib")
+#include <WICTextureLoader.h>
 #include "AdapterReader.h"
 #include "Shader.h"
 #include "Vertex.h"
-#include <WICTextureLoader.h>
+#include "VertexBuffer.h"
 
 class Graphics
 {
@@ -25,7 +26,7 @@ private:
 	VertexShader vertexShader;
 	PixelShader pixelShader;
 
-	Microsoft::WRL::ComPtr<ID3D11Buffer> vertexBuffer;
+	VertexBuffer<Vertex> vertexBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> indicesBuffer;
 
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> depthStencilView;

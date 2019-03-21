@@ -173,6 +173,7 @@
     <ClInclude Include="Src\StringConverter.h" />
     <ClInclude Include="Src\WindowContainer.h" />
     <ClInclude Include="Src\Graphics\Vertex.h" />
+    <ClInclude Include="Src\Graphics\VertexBuffer.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="pixelShader.hlsl">
