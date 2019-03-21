@@ -35,7 +35,7 @@ void Graphics::renderFrame()
 
 	context->PSSetShaderResources(0, 1, texture.GetAddressOf());
 	context->IASetVertexBuffers(0, 1, vertexBuffer.getAddressOf(), vertexBuffer.getStridePtr(), &offset);
-	context->IASetIndexBuffer(indicesBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+	context->IASetIndexBuffer(indicesBuffer.get(), DXGI_FORMAT_R32_UINT, 0);
 	//context->Draw(6, 0);
 	context->DrawIndexed(6, 0, 0);
 
@@ -250,7 +250,6 @@ bool Graphics::initScene()
 		0,2,3
 	};
 
-
 	HRESULT hr = vertexBuffer.init(device.Get(), v, ARRAYSIZE(v));
 	if (FAILED(hr))
 	{
@@ -258,21 +257,7 @@ bool Graphics::initScene()
 		return false;
 	}
 
-
-	D3D11_BUFFER_DESC indicesBufferDesc;
-	ZeroMemory(&indicesBufferDesc, sizeof(indicesBufferDesc));
-
-	indicesBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	indicesBufferDesc.ByteWidth = sizeof(DWORD) * ARRAYSIZE(indices);
-	indicesBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	indicesBufferDesc.CPUAccessFlags = 0;
-	indicesBufferDesc.MiscFlags = 0;
-
-	D3D11_SUBRESOURCE_DATA indicesBufferData;
-	ZeroMemory(&indicesBufferData, sizeof(indicesBufferData));
-	indicesBufferData.pSysMem = indices;
-
-	hr = device->CreateBuffer(&indicesBufferDesc, &indicesBufferData, indicesBuffer.GetAddressOf());
+	hr = indicesBuffer.init(device.Get(), indices, ARRAYSIZE(indices));
 	if (FAILED(hr))
 	{
 		ErrorLogger::log(hr, "Failed to create index buffer");
