@@ -30,14 +30,20 @@ void Graphics::renderFrame()
 	context->VSSetShader(vertexShader.getShader(), NULL, 0);
 	context->PSSetShader(pixelShader.getShader(), NULL, 0);
 
-	UINT stride = sizeof(Vertex);
-	UINT offset = 0;
+	//Update constant buffers
+	constantBuffer.data.xOffset = 0.5f;
+	constantBuffer.data.yOffset = 0.5f;
+	if (!constantBuffer.applyChanges())
+		return;
 
+	context->VSSetConstantBuffers(0, 1, constantBuffer.getAddressOf());
+
+	UINT offset = 0;
 	context->PSSetShaderResources(0, 1, texture.GetAddressOf());
 	context->IASetVertexBuffers(0, 1, vertexBuffer.getAddressOf(), vertexBuffer.getStridePtr(), &offset);
 	context->IASetIndexBuffer(indicesBuffer.get(), DXGI_FORMAT_R32_UINT, 0);
 	//context->Draw(6, 0);
-	context->DrawIndexed(6, 0, 0);
+	context->DrawIndexed(indicesBuffer.getBufferSize(), 0, 0);
 
 	swapchain->Present(1, NULL);
 }
@@ -269,6 +275,14 @@ bool Graphics::initScene()
 	if (FAILED(hr))
 	{
 		ErrorLogger::log(hr, "Failed to create WIC texture from file");
+		return false;
+	}
+
+	hr = constantBuffer.init(device.Get(), context.Get());
+
+	if (FAILED(hr))
+	{
+		ErrorLogger::log(hr, "Failed to create constant buffer");
 		return false;
 	}
 

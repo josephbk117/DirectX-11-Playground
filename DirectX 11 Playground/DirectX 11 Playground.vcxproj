@@ -160,6 +160,8 @@
     <ClCompile Include="Src\WindowContainer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Graphics\ConstantBuffer.h" />
+    <ClInclude Include="Src\Graphics\ConstantBufferTypes.h" />
     <ClInclude Include="Src\Graphics\IndexBuffer.h" />
     <ClInclude Include="Src\Graphics\Shader.h" />
     <ClInclude Include="Src\Graphics\AdapterReader.h" />
