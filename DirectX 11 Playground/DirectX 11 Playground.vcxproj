@@ -147,6 +147,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Graphics\Camera.cpp" />
     <ClCompile Include="Src\Graphics\Shader.cpp" />
     <ClCompile Include="Src\Graphics\AdapterReader.cpp" />
     <ClCompile Include="Src\Graphics\Graphics.cpp" />
@@ -160,6 +161,7 @@
     <ClCompile Include="Src\WindowContainer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Graphics\Camera.h" />
     <ClInclude Include="Src\Graphics\ConstantBuffer.h" />
     <ClInclude Include="Src\Graphics\ConstantBufferTypes.h" />
     <ClInclude Include="Src\Graphics\IndexBuffer.h" />

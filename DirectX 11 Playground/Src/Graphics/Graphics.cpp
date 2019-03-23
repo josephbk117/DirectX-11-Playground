@@ -31,8 +31,11 @@ void Graphics::renderFrame()
 	context->PSSetShader(pixelShader.getShader(), NULL, 0);
 
 	//Update constant buffers
-	constantBuffer.data.xOffset = 0.5f;
-	constantBuffer.data.yOffset = 0.5f;
+	static float updater = 0;
+	updater += 0.1f;
+	camera.AdjustPosition(sin(updater)*0.1f, 0, 0);
+	constantBuffer.data.mat = DirectX::XMMatrixIdentity() * camera.GetViewMatrix() * camera.GetProjectionMatrix();
+	constantBuffer.data.mat = DirectX::XMMatrixTranspose(constantBuffer.data.mat);
 	if (!constantBuffer.applyChanges())
 		return;
 
@@ -223,7 +226,7 @@ bool Graphics::initShaders()
 		shaderfolder = L"..\\Release\\";
 #endif
 #endif
-	}
+}
 
 	D3D11_INPUT_ELEMENT_DESC layout[] =
 	{
@@ -285,6 +288,9 @@ bool Graphics::initScene()
 		ErrorLogger::log(hr, "Failed to create constant buffer");
 		return false;
 	}
+
+	camera.SetPosition(0.0f, 0.0f, -2.0f);
+	camera.SetProjectionValues(60.0f, 1.0f, 0.1f, 10.0f);
 
 	return true;
 }
