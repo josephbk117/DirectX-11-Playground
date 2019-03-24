@@ -17,6 +17,8 @@ class Graphics
 public:
 	bool init(HWND hwnd, int width, int height);
 	void renderFrame();
+	Camera camera;
+
 private:
 	bool initDirectX(HWND hwnd, int width, int height);
 	bool initShaders();
@@ -38,7 +40,5 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11RasterizerState> rasterizerState;
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerState;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture;
-
-	Camera camera;
 };
 

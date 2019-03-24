@@ -20,29 +20,53 @@ void Engine::update()
 	while (!keyboard.CharBufferIsEmpty())
 	{
 		unsigned char ch = keyboard.ReadChar();
-
-		std::string debugStr = "Char : ";
-		debugStr += ch;
-		debugStr += '\n';
-		OutputDebugStringA(debugStr.c_str());
 	}
+
 	while (!keyboard.KeyBufferIsEmpty())
 	{
-		unsigned char ch = keyboard.ReadKey().GetKeyCode();
-		std::string debugStr = "Keycode : ";
-		debugStr += ch;
-		debugStr += '\n';
-		OutputDebugStringA(debugStr.c_str());
+		KeyboardEvent kbe = keyboard.ReadKey();
+		unsigned char keycode = kbe.GetKeyCode();
 	}
+
 	while (!mouse.EventBufferIsEmpty())
 	{
-		MouseEvent e = mouse.ReadEvent();
-		std::string debugStr = "\nX :";
-		debugStr += std::to_string(e.GetPosX());
-		debugStr += ", ";
-		debugStr += std::to_string(e.GetPosY());
-		OutputDebugStringA(debugStr.c_str());
+		MouseEvent me = mouse.ReadEvent();
+		if (mouse.IsRightDown())
+		{
+			if (me.GetType() == MouseEvent::EventType::RAW_MOVE)
+			{
+				this->gfx.camera.AdjustRotation((float)me.GetPosY() * 0.0001f, (float)me.GetPosX() * 0.0001f, 0);
+			}
+		}
 	}
+
+	const float cameraSpeed = 0.02f;
+
+	if (keyboard.KeyIsPressed('W'))
+	{
+		this->gfx.camera.AdjustPosition(this->gfx.camera.GetForwardVector() * cameraSpeed);
+	}
+	if (keyboard.KeyIsPressed('S'))
+	{
+		this->gfx.camera.AdjustPosition(this->gfx.camera.GetBackwardVector() * cameraSpeed);
+	}
+	if (keyboard.KeyIsPressed('A'))
+	{
+		this->gfx.camera.AdjustPosition(this->gfx.camera.GetLeftVector() * cameraSpeed);
+	}
+	if (keyboard.KeyIsPressed('D'))
+	{
+		this->gfx.camera.AdjustPosition(this->gfx.camera.GetRightVector() * cameraSpeed);
+	}
+	if (keyboard.KeyIsPressed(VK_SPACE))
+	{
+		this->gfx.camera.AdjustPosition(0.0f, cameraSpeed, 0.0f);
+	}
+	if (keyboard.KeyIsPressed('Z'))
+	{
+		this->gfx.camera.AdjustPosition(0.0f, -cameraSpeed, 0.0f);
+	}
+
 }
 
 void Engine::renderFrame()

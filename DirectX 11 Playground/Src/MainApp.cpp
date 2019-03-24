@@ -8,8 +8,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 	while (engine.processMessages() == true)
 	{
 		engine.update();
-		engine.renderFrame();
-		//Sleep(1);
+		engine.renderFrame();		
 	}
 	return 0;
 }

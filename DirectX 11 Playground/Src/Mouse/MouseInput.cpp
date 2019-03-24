@@ -54,6 +54,11 @@ void MouseInput::OnMouseMove(int x, int y)
 	this->eventBuffer.push(MouseEvent(MouseEvent::EventType::Move, x, y));
 }
 
+void MouseInput::OnMouseMoveRaw(int x, int y)
+{
+	this->eventBuffer.push(MouseEvent(MouseEvent::EventType::RAW_MOVE, x, y));
+}
+
 bool MouseInput::IsLeftDown()
 {
 	return this->leftIsDown;

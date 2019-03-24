@@ -31,9 +31,9 @@ void Graphics::renderFrame()
 	context->PSSetShader(pixelShader.getShader(), NULL, 0);
 
 	//Update constant buffers
-	static float updater = 0;
+	/*static float updater = 0;
 	updater += 0.1f;
-	camera.AdjustPosition(sin(updater)*0.1f, 0, 0);
+	camera.AdjustPosition(sin(updater)*0.1f, 0, 0);*/
 	constantBuffer.data.mat = DirectX::XMMatrixIdentity() * camera.GetViewMatrix() * camera.GetProjectionMatrix();
 	constantBuffer.data.mat = DirectX::XMMatrixTranspose(constantBuffer.data.mat);
 	if (!constantBuffer.applyChanges())
