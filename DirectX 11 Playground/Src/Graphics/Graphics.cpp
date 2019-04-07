@@ -12,6 +12,14 @@ bool Graphics::init(HWND hwnd, int width, int height)
 	if (!initScene())
 		return false;
 
+	//Set up ImGui
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO();
+	ImGui_ImplWin32_Init(hwnd);
+	ImGui_ImplDX11_Init(device.Get(), context.Get());
+	ImGui::StyleColorsDark();
+
 	return true;
 }
 
@@ -48,7 +56,19 @@ void Graphics::renderFrame()
 	//context->Draw(6, 0);
 	context->DrawIndexed(indicesBuffer.getBufferSize(), 0, 0);
 
-	swapchain->Present(1, NULL);
+	//Start ImGui Frame
+	ImGui_ImplDX11_NewFrame();
+	ImGui_ImplWin32_NewFrame();
+	ImGui::NewFrame();
+
+	ImGui::Begin("test");
+	ImGui::Text("Frame rate ", 45);
+	ImGui::End();
+
+	ImGui::Render();
+	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+
+	swapchain->Present(0, NULL);
 }
 
 bool Graphics::initDirectX(HWND hwnd, int width, int height)

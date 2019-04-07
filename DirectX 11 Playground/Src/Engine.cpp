@@ -2,6 +2,7 @@
 
 bool Engine::init(HINSTANCE hInstance, const std::string & windowTitle, const std::string & windowClass, int width, int height)
 {
+	timer.start();
 	CoInitialize(NULL);
 	if (!renderWindow.init(this, hInstance, windowTitle, windowClass, width, height))
 		return false;
@@ -17,6 +18,9 @@ bool Engine::processMessages()
 
 void Engine::update()
 {
+	float deltaTime = timer.getMillisecondsElapsed();
+	timer.restart();
+
 	while (!keyboard.CharBufferIsEmpty())
 	{
 		unsigned char ch = keyboard.ReadChar();
@@ -33,14 +37,18 @@ void Engine::update()
 		MouseEvent me = mouse.ReadEvent();
 		if (mouse.IsRightDown())
 		{
-			if (me.GetType() == MouseEvent::EventType::RAW_MOVE)
+			if (me.GetType() == MouseEvent::EventType::Move)
 			{
-				this->gfx.camera.AdjustRotation((float)me.GetPosY() * 0.0001f, (float)me.GetPosX() * 0.0001f, 0);
+				this->gfx.camera.AdjustRotation(0, (((float)me.GetPosX() / 500.0f) *2.0f -1.0f) * 0.01f, 0);
 			}
 		}
 	}
+	const float cameraSpeed = 0.002f * deltaTime;
 
-	const float cameraSpeed = 0.02f;
+	if (keyboard.KeyIsPressed('X'))
+		this->gfx.camera.AdjustRotation(0, cameraSpeed, 0);
+	if (keyboard.KeyIsPressed('C'))
+		this->gfx.camera.AdjustRotation(0, -cameraSpeed, 0);
 
 	if (keyboard.KeyIsPressed('W'))
 	{
@@ -66,6 +74,7 @@ void Engine::update()
 	{
 		this->gfx.camera.AdjustPosition(0.0f, -cameraSpeed, 0.0f);
 	}
+	
 
 }
 

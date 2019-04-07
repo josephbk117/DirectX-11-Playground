@@ -148,6 +148,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Src\Graphics\Camera.cpp" />
+    <ClCompile Include="Src\Graphics\ImGui\imgui.cpp" />
+    <ClCompile Include="Src\Graphics\ImGui\imgui_draw.cpp" />
+    <ClCompile Include="Src\Graphics\ImGui\imgui_impl_dx11.cpp" />
+    <ClCompile Include="Src\Graphics\ImGui\imgui_impl_win32.cpp" />
+    <ClCompile Include="Src\Graphics\ImGui\imgui_widgets.cpp" />
     <ClCompile Include="Src\Graphics\Shader.cpp" />
     <ClCompile Include="Src\Graphics\AdapterReader.cpp" />
     <ClCompile Include="Src\Graphics\Graphics.cpp" />
@@ -159,11 +164,20 @@
     <ClCompile Include="Src\RenderWindow.cpp" />
     <ClCompile Include="Src\MainApp.cpp" />
     <ClCompile Include="Src\WindowContainer.cpp" />
+    <ClCompile Include="Src\Timer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Graphics\Camera.h" />
     <ClInclude Include="Src\Graphics\ConstantBuffer.h" />
     <ClInclude Include="Src\Graphics\ConstantBufferTypes.h" />
+    <ClInclude Include="Src\Graphics\ImGui\imconfig.h" />
+    <ClInclude Include="Src\Graphics\ImGui\imgui.h" />
+    <ClInclude Include="Src\Graphics\ImGui\imgui_impl_dx11.h" />
+    <ClInclude Include="Src\Graphics\ImGui\imgui_impl_win32.h" />
+    <ClInclude Include="Src\Graphics\ImGui\imgui_internal.h" />
+    <ClInclude Include="Src\Graphics\ImGui\imstb_rectpack.h" />
+    <ClInclude Include="Src\Graphics\ImGui\imstb_textedit.h" />
+    <ClInclude Include="Src\Graphics\ImGui\imstb_truetype.h" />
     <ClInclude Include="Src\Graphics\IndexBuffer.h" />
     <ClInclude Include="Src\Graphics\Shader.h" />
     <ClInclude Include="Src\Graphics\AdapterReader.h" />
@@ -179,6 +193,7 @@
     <ClInclude Include="Src\WindowContainer.h" />
     <ClInclude Include="Src\Graphics\Vertex.h" />
     <ClInclude Include="Src\Graphics\VertexBuffer.h" />
+    <ClInclude Include="Src\Timer.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="pixelShader.hlsl">

@@ -7,6 +7,7 @@
 class WindowContainer
 {
 public:
+	WindowContainer();
 	LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 protected:
 	RenderWindow renderWindow;
