@@ -1,6 +1,7 @@
 #pragma once
 #include <Windows.h>
 #include <comdef.h>
+#include "COMException.h"
 #include "StringConverter.h"
 class ErrorLogger
 {
@@ -20,6 +21,12 @@ public:
 	{
 		_com_error comError(hr);
 		std::wstring errorMsg = L"Error :" + message + L"\n" + comError.ErrorMessage();
+		MessageBoxW(NULL, errorMsg.c_str(), L"Error", MB_ICONERROR);
+	}
+
+	static void log(const COMException& e)
+	{
+		std::wstring errorMsg = e.what();
 		MessageBoxW(NULL, errorMsg.c_str(), L"Error", MB_ICONERROR);
 	}
 };
