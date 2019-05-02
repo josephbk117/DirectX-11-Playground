@@ -40,24 +40,14 @@ void Graphics::renderFrame()
 	context->VSSetShader(vertexShader.getShader(), NULL, 0);
 	context->PSSetShader(pixelShader.getShader(), NULL, 0);
 
-	//Update constant buffers
-	/*static float updater = 0;
-	updater += 0.1f;
-	camera.AdjustPosition(sin(updater)*0.1f, 0, 0);*/
-	camera.SetLookAtPos(XMFLOAT3{ 0,0,1 });
+	camera.SetLookAtPos(XMFLOAT3{ 0,0,0 });
 	constantBuffer.data.mat = DirectX::XMMatrixIdentity() * camera.GetViewMatrix() * camera.GetProjectionMatrix();
 	constantBuffer.data.mat = DirectX::XMMatrixTranspose(constantBuffer.data.mat);
 	if (!constantBuffer.applyChanges())
 		return;
 
 	context->VSSetConstantBuffers(0, 1, constantBuffer.getAddressOf());
-
-	UINT offset = 0;
-	context->PSSetShaderResources(0, 1, texture.GetAddressOf());
-	context->IASetVertexBuffers(0, 1, vertexBuffer.getAddressOf(), vertexBuffer.getStridePtr(), &offset);
-	context->IASetIndexBuffer(indicesBuffer.get(), DXGI_FORMAT_R32_UINT, 0);
-	//context->Draw(6, 0);
-	context->DrawIndexed(indicesBuffer.getBufferSize(), 0, 0);
+	model.draw(camera.GetViewMatrix() * camera.GetProjectionMatrix());
 
 	//Start ImGui Frame
 	ImGui_ImplDX11_NewFrame();
@@ -253,25 +243,15 @@ bool Graphics::initScene()
 {
 	try
 	{
-		Vertex v[] = { Vertex(-0.5f,-0.5f, 1.0f, 0, 1), Vertex(-0.5f,0.5f,1.0f, 0.0f, 0.0f), Vertex(0.5f,0.5f,1.0f,1.0f, 0.0f), Vertex(0.5f, -0.5f,1.0f,1.0f, 1.0f) };
-
-		DWORD indices[] =
-		{
-			0,1,2,
-			0,2,3
-		};
-
-		HRESULT hr = vertexBuffer.init(device.Get(), v, ARRAYSIZE(v));
-		COM_ERROR_IF_FAILED(hr, "Failed to create vertex buffer");
-
-		hr = indicesBuffer.init(device.Get(), indices, ARRAYSIZE(indices));
-		COM_ERROR_IF_FAILED(hr, "Failed to create index buffer");
-
-		hr = DirectX::CreateWICTextureFromFile(device.Get(), L"Resources\\Textures\\bitshiftProductions.png", nullptr, texture.GetAddressOf());
+		HRESULT hr = DirectX::CreateWICTextureFromFile(device.Get(), L"Resources\\Textures\\bitshiftProductions.png", nullptr, texture.GetAddressOf());
 		COM_ERROR_IF_FAILED(hr, "Failed to create WIC texture from file");
 
 		hr = constantBuffer.init(device.Get(), context.Get());
 		COM_ERROR_IF_FAILED(hr, "Failed to create constant buffer");
+
+
+		if (!model.init(device.Get(), context.Get(), texture.Get(), constantBuffer))
+			return false;
 
 		camera.SetPosition(0.0f, 0.0f, -2.0f);
 		camera.SetProjectionValues(60.0f, 1.0f, 0.1f, 10.0f);

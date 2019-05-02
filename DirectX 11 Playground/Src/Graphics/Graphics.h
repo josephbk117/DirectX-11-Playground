@@ -6,11 +6,8 @@
 #include <WICTextureLoader.h>
 #include "AdapterReader.h"
 #include "Shader.h"
-#include "Vertex.h"
-#include "VertexBuffer.h"
-#include "IndexBuffer.h"
-#include "ConstantBuffer.h"
 #include "Camera.h"
+#include "Model.h"
 #include "..\\Timer.h"
 #include "ImGui\imgui.h"
 #include "ImGui\imgui_impl_win32.h"
@@ -35,8 +32,8 @@ private:
 	VertexShader vertexShader;
 	PixelShader pixelShader;
 	ConstantBuffer<CB_VS_VertexShader> constantBuffer;
-	VertexBuffer<Vertex> vertexBuffer;
-	IndexBuffer indicesBuffer;
+	
+	Model model;
 
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> depthStencilView;
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> depthStencilBuffer;

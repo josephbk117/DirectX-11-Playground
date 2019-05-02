@@ -147,6 +147,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Graphics\Model.cpp" />
     <ClCompile Include="Src\Graphics\Camera.cpp" />
     <ClCompile Include="Src\Graphics\ImGui\imgui.cpp" />
     <ClCompile Include="Src\Graphics\ImGui\imgui_draw.cpp" />
@@ -167,6 +168,7 @@
     <ClCompile Include="Src\Timer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Graphics\Model.h" />
     <ClInclude Include="Src\COMException.h" />
     <ClInclude Include="Src\Graphics\Camera.h" />
     <ClInclude Include="Src\Graphics\ConstantBuffer.h" />
