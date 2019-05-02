@@ -11,6 +11,6 @@ public:
 	double getMillisecondsElapsed();
 	void restart();
 	bool stop();
-	bool start();	
+	bool start();
 };
 

@@ -3,6 +3,8 @@
 
 bool Graphics::init(HWND hwnd, int width, int height)
 {
+	timer.start();
+
 	if (!initDirectX(hwnd, width, height))
 		return false;
 
@@ -42,6 +44,7 @@ void Graphics::renderFrame()
 	/*static float updater = 0;
 	updater += 0.1f;
 	camera.AdjustPosition(sin(updater)*0.1f, 0, 0);*/
+	camera.SetLookAtPos(XMFLOAT3{ 0,0,1 });
 	constantBuffer.data.mat = DirectX::XMMatrixIdentity() * camera.GetViewMatrix() * camera.GetProjectionMatrix();
 	constantBuffer.data.mat = DirectX::XMMatrixTranspose(constantBuffer.data.mat);
 	if (!constantBuffer.applyChanges())
@@ -62,7 +65,20 @@ void Graphics::renderFrame()
 	ImGui::NewFrame();
 
 	ImGui::Begin("test");
-	ImGui::Text("Frame rate ", 45);
+
+	//Fps counter
+	static int fpsCounter = 0;
+	static std::string fpsString = "Frame rate";
+	fpsCounter++;
+
+	if (timer.getMillisecondsElapsed() > 1000.0)
+	{
+		fpsString = "Frame rate = " + std::to_string(fpsCounter);
+		fpsCounter = 0;
+		timer.restart();
+	}
+
+	ImGui::Text(fpsString.c_str());
 	ImGui::End();
 
 	ImGui::Render();
