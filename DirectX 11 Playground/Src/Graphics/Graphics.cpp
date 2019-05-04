@@ -250,7 +250,7 @@ bool Graphics::initScene()
 		COM_ERROR_IF_FAILED(hr, "Failed to create constant buffer");
 
 
-		if (!model.init(device.Get(), context.Get(), texture.Get(), constantBuffer))
+		if (!model.init("Resources\\Models\\stairsLong.obj", device.Get(), context.Get(), texture.Get(), constantBuffer))
 			return false;
 
 		camera.SetPosition(0.0f, 0.0f, -2.0f);
