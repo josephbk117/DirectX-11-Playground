@@ -21,5 +21,5 @@ void Mesh::draw()
 	UINT offset = 0;
 	deviceContext->IASetIndexBuffer(indexBuffer.get(), DXGI_FORMAT::DXGI_FORMAT_R32_UINT, 0);
 	deviceContext->IASetVertexBuffers(0, 1, vertexBuffer.getAddressOf(), vertexBuffer.getStridePtr(), &offset);
-	deviceContext->DrawIndexed(indexBuffer.getBufferSize(), 0, 0);
+	deviceContext->DrawIndexed(indexBuffer.getIndexCount(), 0, 0);
 }

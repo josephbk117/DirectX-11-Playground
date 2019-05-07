@@ -20,4 +20,3 @@ private:
 	IndexBuffer indexBuffer;
 	ID3D11DeviceContext * deviceContext;
 };
-

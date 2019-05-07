@@ -31,8 +31,8 @@ void Model::setTexture(ID3D11ShaderResourceView * texture)
 
 void Model::draw(const XMMATRIX & viewProjectionMatrix)
 {
-	cb_vs_vertexShader->data.mat = worldMatrix * viewProjectionMatrix;
-	cb_vs_vertexShader->data.mat = XMMatrixTranspose(cb_vs_vertexShader->data.mat);
+	cb_vs_vertexShader->data.mvpMatrix = worldMatrix * viewProjectionMatrix;
+	cb_vs_vertexShader->data.worldMatrix = worldMatrix;
 	cb_vs_vertexShader->applyChanges();
 
 	context->VSSetConstantBuffers(0, 1, cb_vs_vertexShader->getAddressOf());
@@ -86,6 +86,10 @@ Mesh Model::processMesh(aiMesh * mesh, const aiScene * scene)
 		vertex.pos.x = mesh->mVertices[i].x;
 		vertex.pos.y = mesh->mVertices[i].y;
 		vertex.pos.z = mesh->mVertices[i].z;
+
+		vertex.normal.x = mesh->mNormals[i].x;
+		vertex.normal.y = mesh->mNormals[i].y;
+		vertex.normal.z = mesh->mNormals[i].z;
 
 		if (mesh->mTextureCoords[0])
 		{

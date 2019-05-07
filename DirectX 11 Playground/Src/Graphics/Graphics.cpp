@@ -41,8 +41,8 @@ void Graphics::renderFrame()
 	context->PSSetShader(pixelShader.getShader(), NULL, 0);
 
 	camera.SetLookAtPos(XMFLOAT3{ 0,0,0 });
-	constantBuffer.data.mat = DirectX::XMMatrixIdentity() * camera.GetViewMatrix() * camera.GetProjectionMatrix();
-	constantBuffer.data.mat = DirectX::XMMatrixTranspose(constantBuffer.data.mat);
+	constantBuffer.data.mvpMatrix = DirectX::XMMatrixIdentity() * camera.GetViewMatrix() * camera.GetProjectionMatrix();
+	constantBuffer.data.mvpMatrix = DirectX::XMMatrixTranspose(constantBuffer.data.mvpMatrix);
 	if (!constantBuffer.applyChanges())
 		return;
 
@@ -226,6 +226,7 @@ bool Graphics::initShaders()
 	{
 		{"POSITION", 0, DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0  },
 		{"TEXCOORD", 0, DXGI_FORMAT::DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0  },
+		{"NORMAL", 0 , DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0}
 	};
 
 	UINT numElements = ARRAYSIZE(layout);
@@ -243,7 +244,7 @@ bool Graphics::initScene()
 {
 	try
 	{
-		HRESULT hr = DirectX::CreateWICTextureFromFile(device.Get(), L"Resources\\Textures\\bitshiftProductions.png", nullptr, texture.GetAddressOf());
+		HRESULT hr = DirectX::CreateWICTextureFromFile(device.Get(), L"Resources\\Textures\\crate.jpg", nullptr, texture.GetAddressOf());
 		COM_ERROR_IF_FAILED(hr, "Failed to create WIC texture from file");
 
 		hr = constantBuffer.init(device.Get(), context.Get());

@@ -210,5 +210,8 @@
     <Image Include="Resources\Textures\bitshiftProductions.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="Resources\Textures\crate.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>
