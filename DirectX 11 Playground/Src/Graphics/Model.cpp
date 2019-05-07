@@ -83,9 +83,9 @@ Mesh Model::processMesh(aiMesh * mesh, const aiScene * scene)
 	{
 		Vertex vertex;
 
-		vertex.pos.x = mesh->mVertices[i].x;
-		vertex.pos.y = mesh->mVertices[i].y;
-		vertex.pos.z = mesh->mVertices[i].z;
+		vertex.pos.x = mesh->mVertices[i].x * 0.1f;
+		vertex.pos.y = mesh->mVertices[i].y * 0.1f;
+		vertex.pos.z = mesh->mVertices[i].z * 0.1f;
 
 		vertex.normal.x = mesh->mNormals[i].x;
 		vertex.normal.y = mesh->mNormals[i].y;

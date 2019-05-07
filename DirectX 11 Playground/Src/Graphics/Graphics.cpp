@@ -244,14 +244,14 @@ bool Graphics::initScene()
 {
 	try
 	{
-		HRESULT hr = DirectX::CreateWICTextureFromFile(device.Get(), L"Resources\\Textures\\crate.jpg", nullptr, texture.GetAddressOf());
+		HRESULT hr = DirectX::CreateWICTextureFromFile(device.Get(), L"Resources\\Textures\\cottage_diffuse.png", nullptr, texture.GetAddressOf());
 		COM_ERROR_IF_FAILED(hr, "Failed to create WIC texture from file");
 
 		hr = constantBuffer.init(device.Get(), context.Get());
 		COM_ERROR_IF_FAILED(hr, "Failed to create constant buffer");
 
 
-		if (!model.init("Resources\\Models\\stairsLong.obj", device.Get(), context.Get(), texture.Get(), constantBuffer))
+		if (!model.init("Resources\\Models\\cottage_obj.obj", device.Get(), context.Get(), texture.Get(), constantBuffer))
 			return false;
 
 		camera.SetPosition(0.0f, 0.0f, -2.0f);
