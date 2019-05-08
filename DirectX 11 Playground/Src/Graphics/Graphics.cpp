@@ -1,5 +1,5 @@
 #include "Graphics.h"
-
+#include "RenderTexture.h"
 
 bool Graphics::init(HWND hwnd, int width, int height)
 {
@@ -47,7 +47,12 @@ void Graphics::renderFrame()
 		return;
 
 	context->VSSetConstantBuffers(0, 1, constantBuffer.getAddressOf());
+	//model.setTexture(renderTexture.GetShaderResourceView());
 	model.draw(camera.GetViewMatrix() * camera.GetProjectionMatrix());
+
+	//renderTexture.SetRenderTarget(context.Get(), depthStencilView.Get());
+	//renderTexture.ClearRenderTarget(context.Get(), depthStencilView.Get(), 1, 0, 1, 1);
+
 
 	//Start ImGui Frame
 	ImGui_ImplDX11_NewFrame();
@@ -73,6 +78,8 @@ void Graphics::renderFrame()
 
 	ImGui::Render();
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+
+	context->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), depthStencilView.Get());
 
 	swapchain->Present(0, NULL);
 }
@@ -190,6 +197,9 @@ bool Graphics::initDirectX(HWND hwnd, int width, int height)
 
 		hr = device->CreateSamplerState(&samplerDesc, samplerState.GetAddressOf());
 		COM_ERROR_IF_FAILED(hr, "Error creating sampler state");
+
+		//Initialize an additional Rendertexture
+		renderTexture.Initialize(device.Get(), width, height);
 	}
 	catch (COMException & e)
 	{
@@ -255,7 +265,7 @@ bool Graphics::initScene()
 			return false;
 
 		camera.SetPosition(0.0f, 0.0f, -2.0f);
-		camera.SetProjectionValues(60.0f, 1.0f, 0.1f, 10.0f);
+		camera.SetProjectionValues(60.0f, 1.0f, 0.1f, 100.0f);
 	}
 	catch (COMException & e)
 	{

@@ -151,6 +151,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Graphics\RenderTexture.cpp" />
     <ClCompile Include="Src\Graphics\Mesh.cpp" />
     <ClCompile Include="Src\Graphics\Model.cpp" />
     <ClCompile Include="Src\Graphics\Camera.cpp" />
@@ -173,6 +174,7 @@
     <ClCompile Include="Src\Timer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Graphics\RenderTexture.h" />
     <ClInclude Include="Src\Graphics\Mesh.h" />
     <ClInclude Include="Src\Graphics\Model.h" />
     <ClInclude Include="Src\COMException.h" />

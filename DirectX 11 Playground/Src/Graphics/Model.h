@@ -7,6 +7,7 @@ class Model
 {
 public:
 	bool init(const std::string& filePath, ID3D11Device * device, ID3D11DeviceContext* context, ID3D11ShaderResourceView* texture, ConstantBuffer<CB_VS_VertexShader>& cb_vs_vertexShader);
+	bool init( std::vector<Vertex> vertices, std::vector<DWORD> indices, ID3D11Device * device, ID3D11DeviceContext* context, ID3D11ShaderResourceView* texture, ConstantBuffer<CB_VS_VertexShader>& cb_vs_vertexShader);
 	void setTexture(ID3D11ShaderResourceView* texture);
 	void draw(const XMMATRIX& viewProjectionMatrix);
 

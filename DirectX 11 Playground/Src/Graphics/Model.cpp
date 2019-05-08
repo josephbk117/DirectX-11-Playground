@@ -24,6 +24,22 @@ bool Model::init(const std::string& filePath, ID3D11Device * device, ID3D11Devic
 	return true;
 }
 
+bool Model::init( std::vector<Vertex> vertices, std::vector<DWORD> indices, ID3D11Device * device, ID3D11DeviceContext* context, 
+	ID3D11ShaderResourceView* texture, ConstantBuffer<CB_VS_VertexShader>& cb_vs_vertexShader)
+{
+	this->device = device;
+	this->context = context;
+	this->texture = texture;
+	this->cb_vs_vertexShader = &cb_vs_vertexShader;
+
+	meshes.push_back(Mesh(this->device, this->context, vertices, indices));
+
+	this->setPosition(0.0f, 0.0f, 0.0f);
+	this->setRotation(0.0f, 0.0f, 0.0f);
+	this->updateWorldMatrix();
+	return true;
+}
+
 void Model::setTexture(ID3D11ShaderResourceView * texture)
 {
 	this->texture = texture;
@@ -38,7 +54,6 @@ void Model::draw(const XMMATRIX & viewProjectionMatrix)
 	context->VSSetConstantBuffers(0, 1, cb_vs_vertexShader->getAddressOf());
 	context->PSSetShaderResources(0, 1, &texture);
 
-	this->context->PSSetShaderResources(0, 1, &this->texture);
 	for (int i = 0; i < meshes.size(); i++)
 		meshes[i].draw();
 }

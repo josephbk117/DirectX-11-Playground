@@ -6,6 +6,7 @@
 #include "Shader.h"
 #include "Camera.h"
 #include "Model.h"
+#include "RenderTexture.h"
 #include "..\\Timer.h"
 #include "ImGui\imgui.h"
 #include "ImGui\imgui_impl_win32.h"
@@ -30,7 +31,7 @@ private:
 	VertexShader vertexShader;
 	PixelShader pixelShader;
 	ConstantBuffer<CB_VS_VertexShader> constantBuffer;
-	
+	RenderTexture renderTexture;
 	Model model;
 
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> depthStencilView;

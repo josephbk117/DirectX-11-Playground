@@ -43,6 +43,12 @@
     <Filter Include="Source Files\Graphics\ImGui">
       <UniqueIdentifier>{4bf2ee1a-955f-4972-903d-f0dd147098ae}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\Shaders">
+      <UniqueIdentifier>{78ad9a2f-8016-4e4b-8d78-134ef7f6b1a1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Images">
+      <UniqueIdentifier>{2e0ca410-6689-46ec-84d8-b06183650842}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\MainApp.cpp">
@@ -103,6 +109,9 @@
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="Src\Graphics\Mesh.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Graphics\RenderTexture.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
   </ItemGroup>
@@ -197,24 +206,27 @@
     <ClInclude Include="Src\Graphics\Mesh.h">
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Graphics\RenderTexture.h">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Resources\Shaders\pixelShader.hlsl">
-      <Filter>Resource Files</Filter>
-    </FxCompile>
     <FxCompile Include="Resources\Shaders\vertexShader.hlsl">
-      <Filter>Resource Files</Filter>
+      <Filter>Resource Files\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\pixelShader.hlsl">
+      <Filter>Resource Files\Shaders</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Resources\Textures\bitshiftProductions.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Resources\Textures\crate.jpg">
-      <Filter>Resource Files</Filter>
+      <Filter>Resource Files\Images</Filter>
     </Image>
     <Image Include="Resources\Textures\cottage_diffuse.png">
-      <Filter>Resource Files</Filter>
+      <Filter>Resource Files\Images</Filter>
+    </Image>
+    <Image Include="Resources\Textures\crate.jpg">
+      <Filter>Resource Files\Images</Filter>
     </Image>
   </ItemGroup>
 </Project>
