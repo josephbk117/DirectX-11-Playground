@@ -1,5 +1,6 @@
 #include "Graphics.h"
 #include "RenderTexture.h"
+#include "Primitive3DModels.h"
 
 bool Graphics::init(HWND hwnd, int width, int height)
 {
@@ -47,11 +48,15 @@ void Graphics::renderFrame()
 		return;
 
 	context->VSSetConstantBuffers(0, 1, constantBuffer.getAddressOf());
-	//model.setTexture(renderTexture.GetShaderResourceView());
-	model.draw(camera.GetViewMatrix() * camera.GetProjectionMatrix());
 
-	//renderTexture.SetRenderTarget(context.Get(), depthStencilView.Get());
-	//renderTexture.ClearRenderTarget(context.Get(), depthStencilView.Get(), 1, 0, 1, 1);
+	models[0].setTexture(texture.Get());
+	models[0].draw(DirectX::XMMatrixTranslation(0, 0, 1)* camera.GetViewMatrix() * camera.GetProjectionMatrix());
+
+	models[1].setTexture(renderTexture.GetShaderResourceView());
+	models[1].draw(camera.GetViewMatrix() * camera.GetProjectionMatrix());
+
+	renderTexture.SetRenderTarget(context.Get(), depthStencilView.Get());
+	renderTexture.ClearRenderTarget(context.Get(), depthStencilView.Get(), 1, 0, 1, 1);
 
 
 	//Start ImGui Frame
@@ -260,9 +265,15 @@ bool Graphics::initScene()
 		hr = constantBuffer.init(device.Get(), context.Get());
 		COM_ERROR_IF_FAILED(hr, "Failed to create constant buffer");
 
-
-		if (!model.init("Resources\\Models\\cottage_obj.obj", device.Get(), context.Get(), texture.Get(), constantBuffer))
+		Model model1;
+		if (!model1.init("Resources\\Models\\cottage_obj.obj", device.Get(), context.Get(), texture.Get(), constantBuffer))
 			return false;
+		models.push_back(model1);
+
+		Model model2;
+		if (!model2.init(Primitive3DModels::QUAD.vertices, Primitive3DModels::QUAD.indices, device.Get(), context.Get(), texture.Get(), constantBuffer))
+			return false;
+		models.push_back(model2);
 
 		camera.SetPosition(0.0f, 0.0f, -2.0f);
 		camera.SetProjectionValues(60.0f, 1.0f, 0.1f, 100.0f);

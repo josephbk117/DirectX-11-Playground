@@ -54,8 +54,8 @@ void Model::draw(const XMMATRIX & viewProjectionMatrix)
 	context->VSSetConstantBuffers(0, 1, cb_vs_vertexShader->getAddressOf());
 	context->PSSetShaderResources(0, 1, &texture);
 
-	for (int i = 0; i < meshes.size(); i++)
-		meshes[i].draw();
+	for (Mesh mesh : meshes)
+		mesh.draw();
 }
 
 bool Model::loadModel(const std::string & filePath)

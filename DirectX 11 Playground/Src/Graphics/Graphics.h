@@ -32,7 +32,7 @@ private:
 	PixelShader pixelShader;
 	ConstantBuffer<CB_VS_VertexShader> constantBuffer;
 	RenderTexture renderTexture;
-	Model model;
+	std::vector<Model> models;
 
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> depthStencilView;
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> depthStencilBuffer;

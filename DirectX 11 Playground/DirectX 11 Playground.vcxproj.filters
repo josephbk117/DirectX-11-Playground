@@ -209,6 +209,9 @@
     <ClInclude Include="Src\Graphics\RenderTexture.h">
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Graphics\Primitive3DModels.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\Shaders\vertexShader.hlsl">
