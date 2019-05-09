@@ -41,7 +41,6 @@ void Graphics::renderFrame()
 	context->VSSetShader(vertexShader.getShader(), NULL, 0);
 	context->PSSetShader(pixelShader.getShader(), NULL, 0);
 
-	camera.SetLookAtPos(XMFLOAT3{ 0,0,0 });
 	constantBuffer.data.mvpMatrix = DirectX::XMMatrixIdentity() * camera.GetViewMatrix() * camera.GetProjectionMatrix();
 	constantBuffer.data.mvpMatrix = DirectX::XMMatrixTranspose(constantBuffer.data.mvpMatrix);
 	if (!constantBuffer.applyChanges())

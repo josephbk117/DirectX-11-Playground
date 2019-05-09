@@ -39,16 +39,20 @@ void Engine::update()
 		{
 			if (me.GetType() == MouseEvent::EventType::Move)
 			{
-				this->gfx.camera.AdjustRotation(0, (((float)me.GetPosX() / 500.0f) *2.0f -1.0f) * 0.01f, 0);
+				static int prevMouseXpos = me.GetPosX();
+				static int prevMouseYpos = me.GetPosY();
+
+				float deltaX = static_cast<float>(me.GetPosX() - prevMouseXpos) * 0.0025f;
+				float deltaY = static_cast<float>(me.GetPosY() - prevMouseYpos) * 0.0025f;
+
+				prevMouseXpos = me.GetPosX();
+				prevMouseYpos = me.GetPosY();
+				this->gfx.camera.AdjustRotation(0, deltaX, 0);
+				this->gfx.camera.AdjustRotation(deltaY, 0, 0);
 			}
 		}
 	}
 	const float cameraSpeed = 0.002f * deltaTime;
-
-	if (keyboard.KeyIsPressed('X'))
-		this->gfx.camera.AdjustRotation(0, cameraSpeed, 0);
-	if (keyboard.KeyIsPressed('C'))
-		this->gfx.camera.AdjustRotation(0, -cameraSpeed, 0);
 
 	if (keyboard.KeyIsPressed('W'))
 	{
