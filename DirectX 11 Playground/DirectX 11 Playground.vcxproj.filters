@@ -220,6 +220,9 @@
     <FxCompile Include="Resources\Shaders\pixelShader.hlsl">
       <Filter>Resource Files\Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="Resources\Shaders\unlitBasic.hlsl">
+      <Filter>Resource Files\Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Resources\Textures\bitshiftProductions.png">

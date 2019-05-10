@@ -25,7 +25,7 @@ bool Graphics::init(HWND hwnd, int width, int height)
 
 	return true;
 }
-
+float ambientLightIntensity = 0.1f;
 void Graphics::renderFrame()
 {
 	float bgColour[] = { 0.1f,0.1f,0.1f,1 };
@@ -41,22 +41,35 @@ void Graphics::renderFrame()
 	context->VSSetShader(vertexShader.getShader(), NULL, 0);
 	context->PSSetShader(pixelShader.getShader(), NULL, 0);
 
-	constantBuffer.data.mvpMatrix = DirectX::XMMatrixIdentity() * camera.GetViewMatrix() * camera.GetProjectionMatrix();
-	constantBuffer.data.mvpMatrix = DirectX::XMMatrixTranspose(constantBuffer.data.mvpMatrix);
-	if (!constantBuffer.applyChanges())
+	vertexInfoConstantBuffer.data.mvpMatrix = DirectX::XMMatrixIdentity() * camera.GetViewMatrix() * camera.GetProjectionMatrix();
+	vertexInfoConstantBuffer.data.mvpMatrix = DirectX::XMMatrixTranspose(vertexInfoConstantBuffer.data.mvpMatrix);
+	if (!vertexInfoConstantBuffer.applyChanges())
 		return;
 
-	context->VSSetConstantBuffers(0, 1, constantBuffer.getAddressOf());
+	pixelInfoLightingBuffer.data.ambientLightIntensity = ambientLightIntensity;
+	pixelInfoLightingBuffer.data.ambientLightColour = DirectX::XMFLOAT3(1, 1, 0);
+	if (!pixelInfoLightingBuffer.applyChanges())
+		return;
+
+	context->VSSetConstantBuffers(0, 1, vertexInfoConstantBuffer.getAddressOf());
+	context->PSSetConstantBuffers(0, 1, pixelInfoLightingBuffer.getAddressOf());
 
 	models[0].setTexture(texture.Get());
-	models[0].draw(DirectX::XMMatrixTranslation(0, 0, 1)* camera.GetViewMatrix() * camera.GetProjectionMatrix());
+	models[0].draw(camera.GetViewMatrix() * camera.GetProjectionMatrix());
+
+	context->PSSetShader(unlitBasicPixelShader.getShader(), NULL, 0);
 
 	models[1].setTexture(renderTexture.GetShaderResourceView());
-	models[1].draw(camera.GetViewMatrix() * camera.GetProjectionMatrix());
+	models[1].draw(DirectX::XMMatrixTranslation(0, 4, 4) * camera.GetViewMatrix() * camera.GetProjectionMatrix());
 
 	renderTexture.SetRenderTarget(context.Get(), depthStencilView.Get());
 	renderTexture.ClearRenderTarget(context.Get(), depthStencilView.Get(), 1, 0, 1, 1);
 
+	context->PSSetShader(pixelShader.getShader(), NULL, 0);
+	models[0].setTexture(texture.Get());
+	models[0].draw(DirectX::XMMatrixTranslation(0, 0, 1)* camera.GetViewMatrix() * camera.GetProjectionMatrix());
+
+	context->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), depthStencilView.Get());
 
 	//Start ImGui Frame
 	ImGui_ImplDX11_NewFrame();
@@ -78,6 +91,7 @@ void Graphics::renderFrame()
 	}
 
 	ImGui::Text(fpsString.c_str());
+	ImGui::SliderFloat("Ambient light intensity", &ambientLightIntensity, 0, 1, "%.2f");
 	ImGui::End();
 
 	ImGui::Render();
@@ -234,7 +248,7 @@ bool Graphics::initShaders()
 		shaderfolder = L"..\\Release\\";
 #endif
 #endif
-	}
+}
 
 	D3D11_INPUT_ELEMENT_DESC layout[] =
 	{
@@ -251,6 +265,9 @@ bool Graphics::initShaders()
 	if (!pixelShader.init(device, shaderfolder + L"pixelShader.cso"))
 		return false;
 
+	if (!unlitBasicPixelShader.init(device, shaderfolder + L"unlitBasic.cso"))
+		return false;
+
 	return true;
 }
 
@@ -261,16 +278,19 @@ bool Graphics::initScene()
 		HRESULT hr = DirectX::CreateWICTextureFromFile(device.Get(), L"Resources\\Textures\\cottage_diffuse.png", nullptr, texture.GetAddressOf());
 		COM_ERROR_IF_FAILED(hr, "Failed to create WIC texture from file");
 
-		hr = constantBuffer.init(device.Get(), context.Get());
+		hr = vertexInfoConstantBuffer.init(device.Get(), context.Get());
+		COM_ERROR_IF_FAILED(hr, "Failed to create constant buffer");
+
+		hr = pixelInfoLightingBuffer.init(device.Get(), context.Get());
 		COM_ERROR_IF_FAILED(hr, "Failed to create constant buffer");
 
 		Model model1;
-		if (!model1.init("Resources\\Models\\cottage_obj.obj", device.Get(), context.Get(), texture.Get(), constantBuffer))
+		if (!model1.init("Resources\\Models\\cottage_obj.obj", device.Get(), context.Get(), texture.Get(), vertexInfoConstantBuffer))
 			return false;
 		models.push_back(model1);
 
 		Model model2;
-		if (!model2.init(Primitive3DModels::QUAD.vertices, Primitive3DModels::QUAD.indices, device.Get(), context.Get(), texture.Get(), constantBuffer))
+		if (!model2.init(Primitive3DModels::QUAD.vertices, Primitive3DModels::QUAD.indices, device.Get(), context.Get(), texture.Get(), vertexInfoConstantBuffer))
 			return false;
 		models.push_back(model2);
 

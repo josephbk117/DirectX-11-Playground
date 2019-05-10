@@ -30,7 +30,9 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> renderTargetView;
 	VertexShader vertexShader;
 	PixelShader pixelShader;
-	ConstantBuffer<CB_VS_VertexShader> constantBuffer;
+	PixelShader unlitBasicPixelShader;
+	ConstantBuffer<CB_VS_VertexShader> vertexInfoConstantBuffer;
+	ConstantBuffer<CB_PS_LightBuffer> pixelInfoLightingBuffer;
 	RenderTexture renderTexture;
 	std::vector<Model> models;
 
