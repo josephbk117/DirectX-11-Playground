@@ -224,6 +224,9 @@
     <ClInclude Include="Src\Graphics\SkinnedMesh.h">
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Graphics\ModelInterface.h">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\Shaders\vertexShader.hlsl">

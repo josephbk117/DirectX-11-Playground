@@ -1,5 +1,6 @@
 #pragma once
 #include "Model.h"
+#include "SkinnedMesh.h"
 #include <DirectXMath.h>
 #include <string>
 #include <vector>
@@ -84,12 +85,18 @@ public:
 };
 
 
-class SkinnedModel : public Model
+class SkinnedModel : public ModelInterface<SkinnedVertex, CB_VS_Skinned_VertexShader>
 {
-private:
-	Joint root;
-	unsigned int jointCount = 0;
 public:
+	bool init(const std::string& filePath, ID3D11Device * device, ID3D11DeviceContext* context, ID3D11ShaderResourceView* texture, ConstantBuffer<CB_VS_Skinned_VertexShader>& cb_vs_vertexShader)override;
+	bool init(std::vector<SkinnedVertex> vertices, std::vector<DWORD> indices, ID3D11Device * device, ID3D11DeviceContext* context, ID3D11ShaderResourceView* texture, ConstantBuffer<CB_VS_Skinned_VertexShader>& cb_vs_vertexShader)override;
+	void setTexture(ID3D11ShaderResourceView* texture)override;
+	void draw(const XMMATRIX& viewProjectionMatrix)override;
 
+private:
+	std::vector<SkinnedMesh> meshes;
+	bool loadModel(const std::string & filePath);
+	void processNode(aiNode * node, const aiScene * scene);
+	SkinnedMesh processMesh(aiMesh * mesh, const aiScene * scene);
 };
 

@@ -176,6 +176,7 @@
     <ClCompile Include="Src\Timer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Graphics\ModelInterface.h" />
     <ClInclude Include="Src\Graphics\SkinnedMesh.h" />
     <ClInclude Include="Src\Graphics\SkinnedModel.h" />
     <ClInclude Include="Src\Graphics\Primitive3DModels.h" />
