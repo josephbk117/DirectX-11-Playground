@@ -9,6 +9,7 @@ private:
 public:
 	Timer();
 	double getMillisecondsElapsed();
+	/*Set clock state back tp default*/
 	void restart();
 	bool stop();
 	bool start();

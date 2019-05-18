@@ -11,5 +11,5 @@ SamplerState objSamplerState : SAMPLER : register(s0);
 float4 main(PS_IN input) : SV_TARGET
 {
 	float3 col = objTexture.Sample(objSamplerState, input.tex);
-	return float4(col,1);
+	return float4(1.0 - col,1);
 }
