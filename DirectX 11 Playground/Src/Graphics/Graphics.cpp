@@ -33,13 +33,34 @@ void Graphics::renderFrame()
 	context->ClearRenderTargetView(renderTargetView.Get(), bgColour);
 	context->ClearDepthStencilView(depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
+
+	context->IASetInputLayout(skinnedVertexShader.getInputLayout());
+	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	context->RSSetState(rasterizerState.Get());
+	context->OMSetDepthStencilState(depthStencilState.Get(), 0);
+	context->PSSetSamplers(0, 1, samplerState.GetAddressOf());
+	context->VSSetShader(skinnedVertexShader.getShader(), NULL, 0);
+	context->PSSetShader(pixelShader.getShader(), NULL, 0);	
+
+	context->VSSetConstantBuffers(0, 1, vertexSkinnedInfoConstantBuffer.getAddressOf());
+	static float t_time = 0;
+	t_time += 0.01f;
+	vertexSkinnedInfoConstantBuffer.data.mvpMatrix = vertexInfoConstantBuffer.data.mvpMatrix;
+	vertexSkinnedInfoConstantBuffer.data.jointMatrices[0] = { DirectX::XMMatrixIdentity() * DirectX::XMMatrixRotationX(t_time) };
+	vertexSkinnedInfoConstantBuffer.data.jointMatrices[1] = { DirectX::XMMatrixIdentity() * DirectX::XMMatrixRotationX(0.0f) };
+	vertexSkinnedInfoConstantBuffer.data.jointMatrices[2] = { DirectX::XMMatrixIdentity() * DirectX::XMMatrixRotationY(t_time) };
+	if (!vertexSkinnedInfoConstantBuffer.applyChanges())
+		return;
+
+	skinnedModel.draw(DirectX::XMMatrixTranslation(0, 1, 4) * camera.GetViewMatrix() * camera.GetProjectionMatrix());
+
 	context->IASetInputLayout(vertexShader.getInputLayout());
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	context->RSSetState(rasterizerState.Get());
 	context->OMSetDepthStencilState(depthStencilState.Get(), 0);
 	context->PSSetSamplers(0, 1, samplerState.GetAddressOf());
 	context->VSSetShader(vertexShader.getShader(), NULL, 0);
-	context->PSSetShader(pixelShader.getShader(), NULL, 0);
+	context->PSSetShader(pixelShader.getShader(), NULL, 0);	
 
 	vertexInfoConstantBuffer.data.mvpMatrix = DirectX::XMMatrixIdentity() * camera.GetViewMatrix() * camera.GetProjectionMatrix();
 	vertexInfoConstantBuffer.data.mvpMatrix = DirectX::XMMatrixTranspose(vertexInfoConstantBuffer.data.mvpMatrix);
@@ -259,7 +280,22 @@ bool Graphics::initShaders()
 
 	UINT numElements = ARRAYSIZE(layout);
 
+
+	D3D11_INPUT_ELEMENT_DESC skinnedLayout[] =
+	{
+		{"POSITION", 0, DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0  },
+		{"TEXCOORD", 0, DXGI_FORMAT::DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0  },
+		{"NORMAL", 0 , DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{"JOINT_IDS", 0 , DXGI_FORMAT::DXGI_FORMAT_R32G32B32_UINT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{"WEIGHTS", 0 , DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA, 0 }
+	};
+
+	UINT skinnedNumElements = ARRAYSIZE(skinnedLayout);
+
 	if (!vertexShader.init(device, shaderfolder + L"vertexShader.cso", layout, numElements))
+		return false;
+
+	if (!skinnedVertexShader.init(device, shaderfolder + L"skinnedVertexShader.cso", skinnedLayout, skinnedNumElements))
 		return false;
 
 	if (!pixelShader.init(device, shaderfolder + L"pixelShader.cso"))
@@ -281,6 +317,9 @@ bool Graphics::initScene()
 		hr = vertexInfoConstantBuffer.init(device.Get(), context.Get());
 		COM_ERROR_IF_FAILED(hr, "Failed to create constant buffer");
 
+		hr = vertexSkinnedInfoConstantBuffer.init(device.Get(), context.Get());
+		COM_ERROR_IF_FAILED(hr, "Failed to create constant buffer");
+
 		hr = pixelInfoLightingBuffer.init(device.Get(), context.Get());
 		COM_ERROR_IF_FAILED(hr, "Failed to create constant buffer");
 
@@ -293,6 +332,9 @@ bool Graphics::initScene()
 		if (!model2.init(Primitive3DModels::QUAD.vertices, Primitive3DModels::QUAD.indices, device.Get(), context.Get(), texture.Get(), vertexInfoConstantBuffer))
 			return false;
 		models.push_back(model2);
+
+		if (!skinnedModel.init("Resources\\Models\\animCylinder.fbx", device.Get(), context.Get(), texture.Get(), vertexSkinnedInfoConstantBuffer))
+			return false;
 
 		camera.SetPosition(0.0f, 0.0f, -2.0f);
 		camera.SetProjectionValues(60.0f, 1.0f, 0.1f, 100.0f);
