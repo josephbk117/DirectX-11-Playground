@@ -57,16 +57,20 @@ void SkinnedModel::draw(const XMMATRIX & viewProjectionMatrix)
 		mesh.draw();
 }
 
+XMMATRIX SkinnedModel::animate(float time)
+{
+	JointTransform A = tempBoneTransforms[2];
+	JointTransform B = tempBoneTransforms[4];
+	return JointTransform::interpolate(A, B, time).getLocalTransform();
+}
+
 bool SkinnedModel::loadModel(const std::string & filePath)
 {
 	Assimp::Importer importer;
-
 	const aiScene* pScene = importer.ReadFile(filePath,
 		aiProcess_Triangulate | aiProcess_ConvertToLeftHanded);
-
 	if (pScene == nullptr)
 		return false;
-
 	this->processNode(pScene->mRootNode, pScene);
 	return true;
 }
@@ -78,7 +82,6 @@ void SkinnedModel::processNode(aiNode * node, const aiScene * scene)
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
 		meshes.push_back(this->processMesh(mesh, scene));
 	}
-
 	for (UINT i = 0; i < node->mNumChildren; i++)
 		this->processNode(node->mChildren[i], scene);
 }
@@ -91,6 +94,27 @@ struct VertexSkinInfo
 
 SkinnedMesh SkinnedModel::processMesh(aiMesh * mesh, const aiScene * scene)
 {
+	if (scene->HasAnimations())
+	{
+		unsigned int numberOfKeys = scene->mAnimations[0]->mChannels[0]->mNumPositionKeys;
+		for (unsigned int i = 0; i < numberOfKeys; i++)
+		{
+			DirectX::XMFLOAT3 pos;
+			aiVector3D vec3 = scene->mAnimations[0]->mChannels[0]->mPositionKeys[i].mValue;
+			pos.x = vec3.x;
+			pos.y = vec3.y;
+			pos.z = vec3.z;
+			DirectX::XMVECTOR quat;
+			aiQuaternion vec4 = scene->mAnimations[0]->mChannels[0]->mRotationKeys[i].mValue;
+			quat.m128_f32[0] = vec4.x;
+			quat.m128_f32[1] = vec4.y;
+			quat.m128_f32[2] = vec4.z;
+			quat.m128_f32[3] = vec4.w;
+			JointTransform jT(pos, quat);
+			tempBoneTransforms.push_back(jT);
+		}
+	}
+
 	// Data to fill
 	std::vector<SkinnedVertex> vertices;
 	std::vector<DWORD> indices;
@@ -99,27 +123,16 @@ SkinnedMesh SkinnedModel::processMesh(aiMesh * mesh, const aiScene * scene)
 
 	if (mesh->HasBones())
 	{
-		std::cout << "\nHas bones";
 		for (UINT i = 0; i < mesh->mNumBones; i++)
 		{
-			std::cout << "\nBones at " << i;
-			std::cout << "\n..." << mesh->mBones[i]->mName.C_Str();
-		}
-		std::cout << "\nNum of weights";
-		for (UINT i = 0; i < mesh->mNumBones; i++)
-		{
-			std::cout << "\nNumber of vertices affected by bone " << mesh->mBones[i]->mNumWeights;
 			for (UINT j = 0; j < mesh->mBones[i]->mNumWeights; j++)
 			{
-				std::cout << ">> Vertex Id " << mesh->mBones[i]->mWeights[j].mVertexId;
-				std::cout << ">> Weight " << mesh->mBones[i]->mWeights[j].mWeight;
-
 				vertexIndexInfoMap.insert(std::pair<unsigned int, VertexSkinInfo>
 					(mesh->mBones[i]->mWeights[j].mVertexId, VertexSkinInfo{ i, mesh->mBones[i]->mWeights[j].mWeight }));
 			}
 		}
 	}
-	
+
 	//Get vertices
 	for (UINT i = 0; i < mesh->mNumVertices; i++)
 	{
@@ -142,11 +155,9 @@ SkinnedMesh SkinnedModel::processMesh(aiMesh * mesh, const aiScene * scene)
 		auto itr1 = vertexIndexInfoMap.lower_bound(i);
 		auto itr2 = vertexIndexInfoMap.upper_bound(i);
 
-		std::cout << "\nVertex at index " << i;
 		int count = 0;
 		while (itr1 != itr2)
 		{
-			std::cout << "\n   Bone index : " << (*itr1).second.id << " weight :" << (*itr1).second.weights;
 			if (count == 0)
 			{
 				vertex.jointIds.x = (*itr1).second.id;
@@ -165,7 +176,6 @@ SkinnedMesh SkinnedModel::processMesh(aiMesh * mesh, const aiScene * scene)
 			count++;
 			itr1++;
 		}
-
 		vertices.push_back(vertex);
 	}
 

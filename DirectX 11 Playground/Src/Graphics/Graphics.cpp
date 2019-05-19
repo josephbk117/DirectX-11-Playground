@@ -40,19 +40,21 @@ void Graphics::renderFrame()
 	context->OMSetDepthStencilState(depthStencilState.Get(), 0);
 	context->PSSetSamplers(0, 1, samplerState.GetAddressOf());
 	context->VSSetShader(skinnedVertexShader.getShader(), NULL, 0);
-	context->PSSetShader(pixelShader.getShader(), NULL, 0);	
+	context->PSSetShader(pixelShader.getShader(), NULL, 0);
 
 	context->VSSetConstantBuffers(0, 1, vertexSkinnedInfoConstantBuffer.getAddressOf());
 	static float t_time = 0;
 	t_time += 0.01f;
 	vertexSkinnedInfoConstantBuffer.data.mvpMatrix = vertexInfoConstantBuffer.data.mvpMatrix;
-	vertexSkinnedInfoConstantBuffer.data.jointMatrices[0] = { DirectX::XMMatrixIdentity() * DirectX::XMMatrixRotationX(t_time) };
-	vertexSkinnedInfoConstantBuffer.data.jointMatrices[1] = { DirectX::XMMatrixIdentity() * DirectX::XMMatrixRotationX(0.0f) };
-	vertexSkinnedInfoConstantBuffer.data.jointMatrices[2] = { DirectX::XMMatrixIdentity() * DirectX::XMMatrixRotationY(t_time) };
+	vertexSkinnedInfoConstantBuffer.data.jointMatrices[0] = DirectX::XMMatrixIdentity() * DirectX::XMMatrixRotationX(0);
+	vertexSkinnedInfoConstantBuffer.data.jointMatrices[1] = skinnedModel.animate(t_time) * vertexSkinnedInfoConstantBuffer.data.jointMatrices[0];
+	vertexSkinnedInfoConstantBuffer.data.jointMatrices[2] = DirectX::XMMatrixRotationY(0) * vertexSkinnedInfoConstantBuffer.data.jointMatrices[1];
 	if (!vertexSkinnedInfoConstantBuffer.applyChanges())
 		return;
 
 	skinnedModel.draw(DirectX::XMMatrixTranslation(0, 1, 4) * camera.GetViewMatrix() * camera.GetProjectionMatrix());
+	skinnedModel.draw(DirectX::XMMatrixTranslation(1, 1, 4) * camera.GetViewMatrix() * camera.GetProjectionMatrix());
+	skinnedModel.draw(DirectX::XMMatrixTranslation(-1, 1, 4) * camera.GetViewMatrix() * camera.GetProjectionMatrix());
 
 	context->IASetInputLayout(vertexShader.getInputLayout());
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -60,7 +62,7 @@ void Graphics::renderFrame()
 	context->OMSetDepthStencilState(depthStencilState.Get(), 0);
 	context->PSSetSamplers(0, 1, samplerState.GetAddressOf());
 	context->VSSetShader(vertexShader.getShader(), NULL, 0);
-	context->PSSetShader(pixelShader.getShader(), NULL, 0);	
+	context->PSSetShader(pixelShader.getShader(), NULL, 0);
 
 	vertexInfoConstantBuffer.data.mvpMatrix = DirectX::XMMatrixIdentity() * camera.GetViewMatrix() * camera.GetProjectionMatrix();
 	vertexInfoConstantBuffer.data.mvpMatrix = DirectX::XMMatrixTranspose(vertexInfoConstantBuffer.data.mvpMatrix);
@@ -269,7 +271,7 @@ bool Graphics::initShaders()
 		shaderfolder = L"..\\Release\\";
 #endif
 #endif
-}
+	}
 
 	D3D11_INPUT_ELEMENT_DESC layout[] =
 	{

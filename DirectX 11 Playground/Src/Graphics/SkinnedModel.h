@@ -47,7 +47,7 @@ public:
 	XMMATRIX getLocalTransform() const
 	{
 		XMMATRIX mat = DirectX::XMMatrixIdentity();
-		mat = mat * DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z);
+		//mat = mat * DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z);
 		mat = mat * DirectX::XMMatrixRotationQuaternion(rotation);
 		return mat;
 	}
@@ -72,13 +72,11 @@ public:
 		this->timeStamp = timeStamp;
 		pose = jointKeyFrames;
 	}
-
 	float getTimeStamp()
 	{
 		return timeStamp;
 	}
-
-	std::map < std::string, JointTransform> getJointKeyFrames()
+	std::map <std::string, JointTransform> getJointKeyFrames()
 	{
 		return pose;
 	}
@@ -92,11 +90,11 @@ public:
 	bool init(std::vector<SkinnedVertex> vertices, std::vector<DWORD> indices, ID3D11Device * device, ID3D11DeviceContext* context, ID3D11ShaderResourceView* texture, ConstantBuffer<CB_VS_Skinned_VertexShader>& cb_vs_vertexShader)override;
 	void setTexture(ID3D11ShaderResourceView* texture)override;
 	void draw(const XMMATRIX& viewProjectionMatrix)override;
-
+	XMMATRIX animate(float time);
 private:
 	std::vector<SkinnedMesh> meshes;
+	std::vector<JointTransform> tempBoneTransforms;
 	bool loadModel(const std::string & filePath);
 	void processNode(aiNode * node, const aiScene * scene);
 	SkinnedMesh processMesh(aiMesh * mesh, const aiScene * scene);
 };
-
