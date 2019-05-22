@@ -57,11 +57,18 @@ void SkinnedModel::draw(const XMMATRIX & viewProjectionMatrix)
 		mesh.draw();
 }
 
-XMMATRIX SkinnedModel::animate(float time)
+void SkinnedModel::animate(float time, XMMATRIX* jointMatrices)const
 {
-	JointTransform A = tempBoneTransforms[2];
-	JointTransform B = tempBoneTransforms[4];
-	return JointTransform::interpolate(A, B, time).getLocalTransform();
+	for (unsigned int boneIndex = 0; boneIndex < tempBoneTransformCollection.size(); boneIndex++)
+	{
+		unsigned int indexA, indexB;
+		indexA = DirectX::XMMin(static_cast<size_t>(time), tempBoneTransformCollection.at(boneIndex).size() - 1);
+		indexB = DirectX::XMMin(static_cast<size_t>(time + 1), tempBoneTransformCollection.at(boneIndex).size() - 1);
+		JointTransform A = tempBoneTransformCollection[boneIndex].at(indexA);
+		JointTransform B = tempBoneTransformCollection[boneIndex].at(indexB);
+
+		jointMatrices[boneIndex] = JointTransform::interpolate(A, B, time - indexA).getLocalTransform();
+	}
 }
 
 bool SkinnedModel::loadModel(const std::string & filePath)
@@ -96,22 +103,38 @@ SkinnedMesh SkinnedModel::processMesh(aiMesh * mesh, const aiScene * scene)
 {
 	if (scene->HasAnimations())
 	{
-		unsigned int numberOfKeys = scene->mAnimations[0]->mChannels[0]->mNumPositionKeys;
-		for (unsigned int i = 0; i < numberOfKeys; i++)
+		unsigned int numberOfChannels = scene->mAnimations[0]->mNumChannels;
+		tempBoneTransformCollection.reserve(numberOfChannels);
+
+		for (unsigned int channelIndex = 0; channelIndex < numberOfChannels; channelIndex++)
 		{
-			DirectX::XMFLOAT3 pos;
-			aiVector3D vec3 = scene->mAnimations[0]->mChannels[0]->mPositionKeys[i].mValue;
-			pos.x = vec3.x;
-			pos.y = vec3.y;
-			pos.z = vec3.z;
-			DirectX::XMVECTOR quat;
-			aiQuaternion vec4 = scene->mAnimations[0]->mChannels[0]->mRotationKeys[i].mValue;
-			quat.m128_f32[0] = vec4.x;
-			quat.m128_f32[1] = vec4.y;
-			quat.m128_f32[2] = vec4.z;
-			quat.m128_f32[3] = vec4.w;
-			JointTransform jT(pos, quat);
-			tempBoneTransforms.push_back(jT);
+			aiNodeAnim* nodeAnim = scene->mAnimations[0]->mChannels[channelIndex];
+			unsigned int numberOfKeys = nodeAnim->mNumPositionKeys;
+			std::vector<JointTransform> jT(numberOfKeys);
+			tempBoneTransformCollection.push_back(jT);
+			nodeAnim->mNodeName;
+
+			aiVectorKey* positionKeys = nodeAnim->mPositionKeys;
+			aiQuatKey* quatKeys = nodeAnim->mRotationKeys;
+
+			for (unsigned int i = 0; i < numberOfKeys; i++)
+			{
+
+				DirectX::XMFLOAT3 pos;
+				aiVector3D vec3 = positionKeys[i].mValue;
+
+				pos.x = vec3.x;
+				pos.y = vec3.y;
+				pos.z = vec3.z;
+				DirectX::XMVECTOR quat;
+				aiQuaternion vec4 = quatKeys[i].mValue;
+				quat.m128_f32[0] = vec4.x;
+				quat.m128_f32[1] = vec4.y;
+				quat.m128_f32[2] = vec4.z;
+				quat.m128_f32[3] = vec4.w;
+				JointTransform jT(pos, quat);
+				tempBoneTransformCollection[channelIndex].push_back(jT);
+			}
 		}
 	}
 

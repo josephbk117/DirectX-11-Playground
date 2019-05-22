@@ -44,11 +44,13 @@ void Graphics::renderFrame()
 
 	context->VSSetConstantBuffers(0, 1, vertexSkinnedInfoConstantBuffer.getAddressOf());
 	static float t_time = 0;
-	t_time += 0.01f;
 	vertexSkinnedInfoConstantBuffer.data.mvpMatrix = vertexInfoConstantBuffer.data.mvpMatrix;
-	vertexSkinnedInfoConstantBuffer.data.jointMatrices[0] = DirectX::XMMatrixIdentity() * DirectX::XMMatrixRotationX(0);
-	vertexSkinnedInfoConstantBuffer.data.jointMatrices[1] = skinnedModel.animate(t_time) * vertexSkinnedInfoConstantBuffer.data.jointMatrices[0];
-	vertexSkinnedInfoConstantBuffer.data.jointMatrices[2] = DirectX::XMMatrixRotationY(0) * vertexSkinnedInfoConstantBuffer.data.jointMatrices[1];
+
+	skinnedModel.animate(t_time, &vertexSkinnedInfoConstantBuffer.data.jointMatrices[0]);
+
+	vertexSkinnedInfoConstantBuffer.data.jointMatrices[0] = vertexSkinnedInfoConstantBuffer.data.jointMatrices[0] * vertexSkinnedInfoConstantBuffer.data.jointMatrices[0];
+	vertexSkinnedInfoConstantBuffer.data.jointMatrices[1] = vertexSkinnedInfoConstantBuffer.data.jointMatrices[1] * vertexSkinnedInfoConstantBuffer.data.jointMatrices[1];
+	vertexSkinnedInfoConstantBuffer.data.jointMatrices[2] = vertexSkinnedInfoConstantBuffer.data.jointMatrices[2] * vertexSkinnedInfoConstantBuffer.data.jointMatrices[2];
 	if (!vertexSkinnedInfoConstantBuffer.applyChanges())
 		return;
 
@@ -115,6 +117,7 @@ void Graphics::renderFrame()
 
 	ImGui::Text(fpsString.c_str());
 	ImGui::SliderFloat("Ambient light intensity", &ambientLightIntensity, 0, 1, "%.2f");
+	ImGui::SliderFloat("Animation timeline", &t_time, 0.0f, 100.0f, "%.2f");
 	ImGui::End();
 
 	ImGui::Render();
@@ -339,7 +342,7 @@ bool Graphics::initScene()
 			return false;
 
 		camera.SetPosition(0.0f, 0.0f, -2.0f);
-		camera.SetProjectionValues(60.0f, 1.0f, 0.1f, 100.0f);
+		camera.SetPerspectiveProjectionValues(60.0f, 1.0f, 0.1f, 100.0f);
 	}
 	catch (COMException & e)
 	{

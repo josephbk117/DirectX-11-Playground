@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <map>
+
 class Joint
 {
 private:
@@ -39,7 +40,7 @@ public:
 class JointTransform
 {
 private:
-	DirectX::XMFLOAT3 pos = { 0,0,0 };
+	DirectX::XMFLOAT3 pos = { 0, 0, 0 };
 	DirectX::XMVECTOR rotation;
 public:
 	JointTransform() = default;
@@ -47,7 +48,7 @@ public:
 	XMMATRIX getLocalTransform() const
 	{
 		XMMATRIX mat = DirectX::XMMatrixIdentity();
-		//mat = mat * DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z);
+		mat = mat * DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z);
 		mat = mat * DirectX::XMMatrixRotationQuaternion(rotation);
 		return mat;
 	}
@@ -61,26 +62,26 @@ public:
 	}
 };
 
-class KeyFrame
-{
-private:
-	float timeStamp = 0.0f;
-	std::map<std::string, JointTransform> pose;
-public:
-	KeyFrame(float timeStamp, const std::map<std::string, JointTransform>& jointKeyFrames)
-	{
-		this->timeStamp = timeStamp;
-		pose = jointKeyFrames;
-	}
-	float getTimeStamp()
-	{
-		return timeStamp;
-	}
-	std::map <std::string, JointTransform> getJointKeyFrames()
-	{
-		return pose;
-	}
-};
+//class KeyFrame
+//{
+//private:
+//	float timeStamp = 0.0f;
+//	std::map<std::string, JointTransform> pose;
+//public:
+//	KeyFrame(float timeStamp, const std::map<std::string, JointTransform>& jointKeyFrames)
+//	{
+//		this->timeStamp = timeStamp;
+//		pose = jointKeyFrames;
+//	}
+//	float getTimeStamp()
+//	{
+//		return timeStamp;
+//	}
+//	std::map <std::string, JointTransform> getJointKeyFrames()
+//	{
+//		return pose;
+//	}
+//};
 
 
 class SkinnedModel : public ModelInterface<SkinnedVertex, CB_VS_Skinned_VertexShader>
@@ -90,10 +91,13 @@ public:
 	bool init(std::vector<SkinnedVertex> vertices, std::vector<DWORD> indices, ID3D11Device * device, ID3D11DeviceContext* context, ID3D11ShaderResourceView* texture, ConstantBuffer<CB_VS_Skinned_VertexShader>& cb_vs_vertexShader)override;
 	void setTexture(ID3D11ShaderResourceView* texture)override;
 	void draw(const XMMATRIX& viewProjectionMatrix)override;
-	XMMATRIX animate(float time);
+	void animate(float time, XMMATRIX* jointMatrices)const;
 private:
+	typedef std::vector<std::vector<JointTransform>> JointTransformCollection;
+	typedef std::multimap<double, std::pair<unsigned int, JointTransform>> AnimationMap;
 	std::vector<SkinnedMesh> meshes;
-	std::vector<JointTransform> tempBoneTransforms;
+	JointTransformCollection tempBoneTransformCollection;
+	AnimationMap animationMap;
 	bool loadModel(const std::string & filePath);
 	void processNode(aiNode * node, const aiScene * scene);
 	SkinnedMesh processMesh(aiMesh * mesh, const aiScene * scene);

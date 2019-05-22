@@ -9,10 +9,22 @@ Camera::Camera()
 	this->UpdateViewMatrix();
 }
 
-void Camera::SetProjectionValues(float fovDegrees, float aspectRatio, float nearZ, float farZ)
+void Camera::SetPerspectiveProjectionValues(float fovDegrees, float aspectRatio, float nearZ, float farZ)
 {
 	float fovRadians = (fovDegrees / 360.0f) * XM_2PI;
 	this->projectionMatrix = XMMatrixPerspectiveFovLH(fovRadians, aspectRatio, nearZ, farZ);
+	projectionType = ProjectionType::PERSPECTIVE;
+}
+
+void Camera::SetOrthographicProjectionValues(float width, float height, float nearZ, float farZ)
+{
+	this->projectionMatrix = XMMatrixOrthographicLH(width, height, nearZ, farZ);
+	projectionType = ProjectionType::OTHOGRAPHIC;
+}
+
+const Camera::ProjectionType Camera::GetProjectionType() const
+{
+	return projectionType;
 }
 
 const XMMATRIX & Camera::GetViewMatrix() const

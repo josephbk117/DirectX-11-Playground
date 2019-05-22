@@ -151,6 +151,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Graphics\Light.cpp" />
     <ClCompile Include="Src\Graphics\SkinnedMesh.cpp" />
     <ClCompile Include="Src\Graphics\SkinnedModel.cpp" />
     <ClCompile Include="Src\Graphics\RenderTexture.cpp" />
@@ -176,6 +177,7 @@
     <ClCompile Include="Src\Timer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Graphics\Light.h" />
     <ClInclude Include="Src\Graphics\ModelInterface.h" />
     <ClInclude Include="Src\Graphics\SkinnedMesh.h" />
     <ClInclude Include="Src\Graphics\SkinnedModel.h" />

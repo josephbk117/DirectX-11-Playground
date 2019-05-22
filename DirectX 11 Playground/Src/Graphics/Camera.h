@@ -5,12 +5,15 @@ using namespace DirectX;
 class Camera
 {
 public:
-	Camera();
-	void SetProjectionValues(float fovDegrees, float aspectRatio, float nearZ, float farZ);
+	enum class ProjectionType { PERSPECTIVE, OTHOGRAPHIC };
 
+	Camera();
+	void SetPerspectiveProjectionValues(float fovDegrees, float aspectRatio, float nearZ, float farZ);
+	void SetOrthographicProjectionValues(float width, float height, float nearZ, float farZ);
+
+	const ProjectionType GetProjectionType()const;
 	const XMMATRIX & GetViewMatrix() const;
 	const XMMATRIX & GetProjectionMatrix() const;
-
 	const XMVECTOR & GetPositionVector() const;
 	const XMFLOAT3 & GetPositionFloat3() const;
 	const XMVECTOR & GetRotationVector() const;
@@ -29,8 +32,10 @@ public:
 	const XMVECTOR & GetRightVector();
 	const XMVECTOR & GetBackwardVector();
 	const XMVECTOR & GetLeftVector();
+
 private:
 	void UpdateViewMatrix();
+	ProjectionType projectionType = ProjectionType::PERSPECTIVE;
 	XMVECTOR posVector;
 	XMVECTOR rotVector;
 	XMFLOAT3 pos;
