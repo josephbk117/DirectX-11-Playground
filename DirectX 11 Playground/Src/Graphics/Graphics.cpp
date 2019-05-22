@@ -29,11 +29,12 @@ float ambientLightIntensity = 0.1f;
 void Graphics::renderFrame()
 {
 	float bgColour[] = { 0.1f,0.1f,0.1f,1 };
+	static float t_time = 0;
 
 	context->ClearRenderTargetView(renderTargetView.Get(), bgColour);
 	context->ClearDepthStencilView(depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-
+	//Set up skinned mesh shader
 	context->IASetInputLayout(skinnedVertexShader.getInputLayout());
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	context->RSSetState(rasterizerState.Get());
@@ -43,7 +44,6 @@ void Graphics::renderFrame()
 	context->PSSetShader(pixelShader.getShader(), NULL, 0);
 
 	context->VSSetConstantBuffers(0, 1, vertexSkinnedInfoConstantBuffer.getAddressOf());
-	static float t_time = 0;
 	vertexSkinnedInfoConstantBuffer.data.mvpMatrix = vertexInfoConstantBuffer.data.mvpMatrix;
 
 	skinnedModel.animate(t_time, &vertexSkinnedInfoConstantBuffer.data.jointMatrices[0]);
@@ -58,6 +58,7 @@ void Graphics::renderFrame()
 	skinnedModel.draw(DirectX::XMMatrixTranslation(1, 1, 4) * camera.GetViewMatrix() * camera.GetProjectionMatrix());
 	skinnedModel.draw(DirectX::XMMatrixTranslation(-1, 1, 4) * camera.GetViewMatrix() * camera.GetProjectionMatrix());
 
+	//Set up regular shader
 	context->IASetInputLayout(vertexShader.getInputLayout());
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	context->RSSetState(rasterizerState.Get());
@@ -73,6 +74,7 @@ void Graphics::renderFrame()
 
 	pixelInfoLightingBuffer.data.ambientLightIntensity = ambientLightIntensity;
 	pixelInfoLightingBuffer.data.ambientLightColour = DirectX::XMFLOAT3(1, 1, 0);
+	pixelInfoLightingBuffer.data.lightMatrix = dirLight.GetLightMatrix();
 	if (!pixelInfoLightingBuffer.applyChanges())
 		return;
 
@@ -80,6 +82,7 @@ void Graphics::renderFrame()
 	context->PSSetConstantBuffers(0, 1, pixelInfoLightingBuffer.getAddressOf());
 
 	models[0].setTexture(texture.Get());
+	models[0].setTexture2(renderTexture.GetShaderResourceView());
 	models[0].draw(camera.GetViewMatrix() * camera.GetProjectionMatrix());
 
 	context->PSSetShader(unlitBasicPixelShader.getShader(), NULL, 0);
@@ -87,13 +90,15 @@ void Graphics::renderFrame()
 	models[1].setTexture(renderTexture.GetShaderResourceView());
 	models[1].draw(DirectX::XMMatrixTranslation(0, 4, 4) * camera.GetViewMatrix() * camera.GetProjectionMatrix());
 
+	//Start rendering on to render texture
 	renderTexture.SetRenderTarget(context.Get(), depthStencilView.Get());
 	renderTexture.ClearRenderTarget(context.Get(), depthStencilView.Get(), 1, 0, 1, 1);
 
-	context->PSSetShader(pixelShader.getShader(), NULL, 0);
+	context->PSSetShader(depthBasicShader.getShader(), NULL, 0);
 	models[0].setTexture(texture.Get());
-	models[0].draw(DirectX::XMMatrixTranslation(0, 0, 1)* camera.GetViewMatrix() * camera.GetProjectionMatrix());
+	models[0].draw(DirectX::XMMatrixTranslation(0, 0, 1) * dirLight.GetLightMatrix());
 
+	//Start rendering on top default render texture
 	context->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), depthStencilView.Get());
 
 	//Start ImGui Frame
@@ -122,9 +127,6 @@ void Graphics::renderFrame()
 
 	ImGui::Render();
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
-
-	context->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), depthStencilView.Get());
-
 	swapchain->Present(0, NULL);
 }
 
@@ -274,7 +276,7 @@ bool Graphics::initShaders()
 		shaderfolder = L"..\\Release\\";
 #endif
 #endif
-	}
+}
 
 	D3D11_INPUT_ELEMENT_DESC layout[] =
 	{
@@ -309,6 +311,9 @@ bool Graphics::initShaders()
 	if (!unlitBasicPixelShader.init(device, shaderfolder + L"unlitBasic.cso"))
 		return false;
 
+	if (!depthBasicShader.init(device, shaderfolder + L"depthBasic.cso"))
+		return false;
+
 	return true;
 }
 
@@ -341,7 +346,7 @@ bool Graphics::initScene()
 		if (!skinnedModel.init("Resources\\Models\\animCylinder.fbx", device.Get(), context.Get(), texture.Get(), vertexSkinnedInfoConstantBuffer))
 			return false;
 
-		camera.SetPosition(0.0f, 0.0f, -2.0f);
+		camera.SetPosition(0.0f, 2.0f, -2.0f);
 		camera.SetPerspectiveProjectionValues(60.0f, 1.0f, 0.1f, 100.0f);
 	}
 	catch (COMException & e)

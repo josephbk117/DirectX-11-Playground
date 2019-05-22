@@ -4,7 +4,7 @@ bool SkinnedModel::init(const std::string & filePath, ID3D11Device * device, ID3
 {
 	this->device = device;
 	this->context = context;
-	this->texture = texture;
+	this->texture1 = texture;
 	this->cb_vs_vertexShader = &cb_vs_vertexShader;
 
 	try
@@ -28,7 +28,7 @@ bool SkinnedModel::init(std::vector<SkinnedVertex> vertices, std::vector<DWORD> 
 {
 	this->device = device;
 	this->context = context;
-	this->texture = texture;
+	this->texture1 = texture;
 	this->cb_vs_vertexShader = &cb_vs_vertexShader;
 
 	meshes.push_back(SkinnedMesh(this->device, this->context, vertices, indices));
@@ -41,7 +41,7 @@ bool SkinnedModel::init(std::vector<SkinnedVertex> vertices, std::vector<DWORD> 
 
 void SkinnedModel::setTexture(ID3D11ShaderResourceView * texture)
 {
-	this->texture = texture;
+	this->texture1 = texture;
 }
 
 void SkinnedModel::draw(const XMMATRIX & viewProjectionMatrix)
@@ -51,7 +51,7 @@ void SkinnedModel::draw(const XMMATRIX & viewProjectionMatrix)
 	cb_vs_vertexShader->applyChanges();
 
 	context->VSSetConstantBuffers(0, 1, cb_vs_vertexShader->getAddressOf());
-	context->PSSetShaderResources(0, 1, &texture);
+	context->PSSetShaderResources(0, 1, &texture1);
 
 	for (SkinnedMesh mesh : meshes)
 		mesh.draw();

@@ -247,6 +247,7 @@
     <FxCompile Include="Resources\Shaders\skinnedVertexShader.hlsl">
       <Filter>Resource Files\Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="Resources\Shaders\depthBasic.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Resources\Textures\bitshiftProductions.png">

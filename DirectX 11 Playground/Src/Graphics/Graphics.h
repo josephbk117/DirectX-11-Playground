@@ -8,6 +8,7 @@
 #include "Model.h"
 #include "SkinnedModel.h"
 #include "RenderTexture.h"
+#include "Light.h"
 #include "..\\Timer.h"
 #include "ImGui\imgui.h"
 #include "ImGui\imgui_impl_win32.h"
@@ -29,16 +30,21 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> context;
 	Microsoft::WRL::ComPtr<IDXGISwapChain> swapchain;
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> renderTargetView;
+
 	VertexShader vertexShader;
 	VertexShader skinnedVertexShader;
 	PixelShader pixelShader;
 	PixelShader unlitBasicPixelShader;
+	PixelShader depthBasicShader;
+
 	ConstantBuffer<CB_VS_VertexShader> vertexInfoConstantBuffer;
 	ConstantBuffer<CB_PS_LightBuffer> pixelInfoLightingBuffer;
 	ConstantBuffer<CB_VS_Skinned_VertexShader> vertexSkinnedInfoConstantBuffer;
+
 	RenderTexture renderTexture;
 	std::vector<Model> models;
 	SkinnedModel skinnedModel;
+	DirectionalLight dirLight;
 
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> depthStencilView;
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> depthStencilBuffer;

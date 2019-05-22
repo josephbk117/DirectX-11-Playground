@@ -16,6 +16,7 @@ public:
 
 class DirectionalLight : public Light
 {
-
+public:
+	DirectionalLight();
 };
 

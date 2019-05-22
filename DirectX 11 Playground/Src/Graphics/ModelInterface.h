@@ -52,7 +52,7 @@ protected:
 	ID3D11Device* device = nullptr;
 	ID3D11DeviceContext* context = nullptr;
 	ConstantBuffer<CONSTANT_BUFFER_STRUCT> * cb_vs_vertexShader = nullptr;
-	ID3D11ShaderResourceView* texture = nullptr;
+	ID3D11ShaderResourceView* texture1 = nullptr;
 
 	XMMATRIX worldMatrix = XMMatrixIdentity();
 

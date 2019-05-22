@@ -4,7 +4,7 @@ bool Model::init(const std::string& filePath, ID3D11Device * device, ID3D11Devic
 {
 	this->device = device;
 	this->context = context;
-	this->texture = texture;
+	this->texture1 = texture;
 	this->cb_vs_vertexShader = &cb_vs_vertexShader;
 
 	try
@@ -29,7 +29,7 @@ bool Model::init( std::vector<Vertex> vertices, std::vector<DWORD> indices, ID3D
 {
 	this->device = device;
 	this->context = context;
-	this->texture = texture;
+	this->texture1 = texture;
 	this->cb_vs_vertexShader = &cb_vs_vertexShader;
 
 	meshes.push_back(Mesh(this->device, this->context, vertices, indices));
@@ -42,7 +42,7 @@ bool Model::init( std::vector<Vertex> vertices, std::vector<DWORD> indices, ID3D
 
 void Model::setTexture(ID3D11ShaderResourceView * texture)
 {
-	this->texture = texture;
+	this->texture1 = texture;
 }
 
 void Model::draw(const XMMATRIX & viewProjectionMatrix)
@@ -52,7 +52,9 @@ void Model::draw(const XMMATRIX & viewProjectionMatrix)
 	cb_vs_vertexShader->applyChanges();
 
 	context->VSSetConstantBuffers(0, 1, cb_vs_vertexShader->getAddressOf());
-	context->PSSetShaderResources(0, 1, &texture);
+	context->PSSetShaderResources(0, 1, &texture1);
+	if(texture2 != nullptr)
+		context->PSSetShaderResources(1, 1, &texture2);
 
 	for (Mesh mesh : meshes)
 		mesh.draw();

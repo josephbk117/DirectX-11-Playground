@@ -16,4 +16,5 @@ struct CB_PS_LightBuffer
 {
 	float ambientLightIntensity;
 	DirectX::XMFLOAT3 ambientLightColour;
+	DirectX::XMMATRIX lightMatrix;
 };
