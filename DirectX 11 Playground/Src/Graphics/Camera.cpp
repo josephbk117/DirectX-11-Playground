@@ -27,6 +27,12 @@ const Camera::ProjectionType Camera::GetProjectionType() const
 	return projectionType;
 }
 
+const XMMATRIX Camera::GetViewDirectionMatrix() const
+{
+	XMMATRIX temp = XMMatrixTranslation(pos.x, pos.y, pos.z) * viewMatrix;
+	return temp;
+}
+
 const XMMATRIX & Camera::GetViewMatrix() const
 {
 	return this->viewMatrix;

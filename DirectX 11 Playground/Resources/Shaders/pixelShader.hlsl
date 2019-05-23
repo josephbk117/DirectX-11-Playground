@@ -22,8 +22,8 @@ float4 main(PS_IN input) : SV_TARGET
 {
 	float4 shadowCoord = mul(input.worldPos, lightMatrix);
 	float visibilty = 1.0;
-	shadowCoord.y -= 0.1;
-	if(shadowMap.Sample(objSamplerState, shadowCoord.xy * 0.5 + 0.5).r < shadowCoord.z)
+	//shadowCoord.y -= 0.1;
+	if(shadowMap.Sample(objSamplerState, shadowCoord.xy * 0.5 + 0.5).z < shadowCoord.z)
 		visibilty = 0.5;
 
 	float3 col = objTexture.Sample(objSamplerState, input.tex);

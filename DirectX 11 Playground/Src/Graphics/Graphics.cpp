@@ -44,6 +44,7 @@ void Graphics::renderFrame()
 	context->PSSetShader(pixelShader.getShader(), NULL, 0);
 
 	context->VSSetConstantBuffers(0, 1, vertexSkinnedInfoConstantBuffer.getAddressOf());
+
 	vertexSkinnedInfoConstantBuffer.data.mvpMatrix = vertexInfoConstantBuffer.data.mvpMatrix;
 
 	skinnedModel.animate(t_time, &vertexSkinnedInfoConstantBuffer.data.jointMatrices[0]);
@@ -81,6 +82,10 @@ void Graphics::renderFrame()
 	context->VSSetConstantBuffers(0, 1, vertexInfoConstantBuffer.getAddressOf());
 	context->PSSetConstantBuffers(0, 1, pixelInfoLightingBuffer.getAddressOf());
 
+	context->PSSetShader(unlitBasicPixelShader.getShader(), NULL, 0);
+	skybox.draw(camera.GetViewDirectionMatrix() * camera.GetProjectionMatrix());
+
+	context->PSSetShader(pixelShader.getShader(), NULL, 0);
 	models[0].setTexture(texture.Get());
 	models[0].setTexture2(renderTexture.GetShaderResourceView());
 	models[0].draw(camera.GetViewMatrix() * camera.GetProjectionMatrix());
@@ -88,7 +93,7 @@ void Graphics::renderFrame()
 	context->PSSetShader(unlitBasicPixelShader.getShader(), NULL, 0);
 
 	models[1].setTexture(renderTexture.GetShaderResourceView());
-	models[1].draw(DirectX::XMMatrixTranslation(0, 4, 4) * camera.GetViewMatrix() * camera.GetProjectionMatrix());
+	models[1].draw(DirectX::XMMatrixScaling(2, 2, 2)* DirectX::XMMatrixTranslation(0, 4, 4) * camera.GetViewMatrix() * camera.GetProjectionMatrix());
 
 	//Start rendering on to render texture
 	renderTexture.SetRenderTarget(context.Get(), depthStencilView.Get());
@@ -282,7 +287,7 @@ bool Graphics::initShaders()
 		shaderfolder = L"..\\Release\\";
 #endif
 #endif
-}
+	}
 
 	D3D11_INPUT_ELEMENT_DESC layout[] =
 	{
@@ -351,6 +356,17 @@ bool Graphics::initScene()
 
 		if (!skinnedModel.init("Resources\\Models\\animCylinder.fbx", device.Get(), context.Get(), texture.Get(), vertexSkinnedInfoConstantBuffer))
 			return false;
+
+		std::wstring cubemapLocations[6];
+		cubemapLocations[0] = L"Resources\\Textures\\Cubemaps\\Sahara Desert Cubemap\\sahara_bk.png";
+		cubemapLocations[1] = L"Resources\\Textures\\Cubemaps\\Sahara Desert Cubemap\\sahara_dn.png";
+		cubemapLocations[2] = L"Resources\\Textures\\Cubemaps\\Sahara Desert Cubemap\\sahara_ft.png";
+		cubemapLocations[3] = L"Resources\\Textures\\Cubemaps\\Sahara Desert Cubemap\\sahara_lf.png";
+		cubemapLocations[4] = L"Resources\\Textures\\Cubemaps\\Sahara Desert Cubemap\\sahara_rt.png";
+		cubemapLocations[5] = L"Resources\\Textures\\Cubemaps\\Sahara Desert Cubemap\\sahara_up.png";
+		cubemap.init(device.Get(), cubemapLocations);
+
+		skybox.init(device.Get(), context.Get(), vertexInfoConstantBuffer, cubemap);
 
 		camera.SetPosition(0.0f, 2.0f, -2.0f);
 		camera.SetPerspectiveProjectionValues(60.0f, 1.0f, 0.1f, 100.0f);

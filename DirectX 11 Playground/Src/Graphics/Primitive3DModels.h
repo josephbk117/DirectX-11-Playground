@@ -14,10 +14,10 @@ namespace Primitive3DModels
 	const VerticesIndicesPair QUAD
 	{
 		{
-			Vertex{-1,1,0,0,0,0,0,1},
-			Vertex{1,1,0,1,0,0,0,1},
-			Vertex{-1,-1,0,0,1,0,0,1},
-			Vertex{1,-1,0,1,1,0,0,1},
+			Vertex{-0.5f,0.5f,0,0,0,0,0,0.5f},
+			Vertex{0.5f,0.5f,0,1.0f,0,0,0,0.5f},
+			Vertex{-0.5f,-0.5f,0,0,1.0f,0,0,0.5f},
+			Vertex{0.5f,-0.5f,0,1.0f,1.0f,0,0,0.5f},
 		},
 		{
 			0, 1, 2,

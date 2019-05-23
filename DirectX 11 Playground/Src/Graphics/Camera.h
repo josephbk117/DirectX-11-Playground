@@ -12,6 +12,7 @@ public:
 	void SetOrthographicProjectionValues(float width, float height, float nearZ, float farZ);
 
 	const ProjectionType GetProjectionType()const;
+	const XMMATRIX GetViewDirectionMatrix()const;
 	const XMMATRIX & GetViewMatrix() const;
 	const XMMATRIX & GetProjectionMatrix() const;
 	const XMVECTOR & GetPositionVector() const;

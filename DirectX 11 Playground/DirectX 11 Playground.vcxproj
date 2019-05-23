@@ -151,6 +151,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Graphics\Skybox.cpp" />
     <ClCompile Include="Src\Graphics\Light.cpp" />
     <ClCompile Include="Src\Graphics\SkinnedMesh.cpp" />
     <ClCompile Include="Src\Graphics\SkinnedModel.cpp" />
@@ -177,6 +178,8 @@
     <ClCompile Include="Src\Timer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Graphics\Skybox.h" />
+    <ClInclude Include="Src\Graphics\CubemapTexture.h" />
     <ClInclude Include="Src\Graphics\Light.h" />
     <ClInclude Include="Src\Graphics\ModelInterface.h" />
     <ClInclude Include="Src\Graphics\SkinnedMesh.h" />
@@ -270,6 +273,12 @@
     <Image Include="Resources\Textures\bitshiftProductions.png" />
     <Image Include="Resources\Textures\cottage_diffuse.png" />
     <Image Include="Resources\Textures\crate.jpg" />
+    <Image Include="Resources\Textures\Cubemaps\Sahara Desert Cubemap\sahara_bk.png" />
+    <Image Include="Resources\Textures\Cubemaps\Sahara Desert Cubemap\sahara_dn.png" />
+    <Image Include="Resources\Textures\Cubemaps\Sahara Desert Cubemap\sahara_ft.png" />
+    <Image Include="Resources\Textures\Cubemaps\Sahara Desert Cubemap\sahara_lf.png" />
+    <Image Include="Resources\Textures\Cubemaps\Sahara Desert Cubemap\sahara_rt.png" />
+    <Image Include="Resources\Textures\Cubemaps\Sahara Desert Cubemap\sahara_up.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

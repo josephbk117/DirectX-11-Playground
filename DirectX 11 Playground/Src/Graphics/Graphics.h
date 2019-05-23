@@ -9,6 +9,8 @@
 #include "SkinnedModel.h"
 #include "RenderTexture.h"
 #include "Light.h"
+#include "CubemapTexture.h"
+#include "Skybox.h"
 #include "..\\Timer.h"
 #include "ImGui\imgui.h"
 #include "ImGui\imgui_impl_win32.h"
@@ -42,6 +44,8 @@ private:
 	ConstantBuffer<CB_VS_Skinned_VertexShader> vertexSkinnedInfoConstantBuffer;
 
 	RenderTexture renderTexture;
+	CubemapTexture cubemap;
+	Skybox skybox;
 	std::vector<Model> models;
 	SkinnedModel skinnedModel;
 	DirectionalLight dirLight;
