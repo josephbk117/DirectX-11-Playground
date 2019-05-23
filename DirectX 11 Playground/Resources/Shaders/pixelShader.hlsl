@@ -19,10 +19,11 @@ Texture2D shadowMap : TEXTURE : register(t1);
 SamplerState objSamplerState : SAMPLER : register(s0);
 
 float4 main(PS_IN input) : SV_TARGET
-{	
-	float4 shadowCoord = mul(lightMatrix, input.worldPos);
+{
+	float4 shadowCoord = mul(input.worldPos, lightMatrix);
 	float visibilty = 1.0;
-	if(shadowMap.Sample(objSamplerState, shadowCoord.xy * 0.5 + 0.5).z <= shadowCoord.z)
+	shadowCoord.y -= 0.1;
+	if(shadowMap.Sample(objSamplerState, shadowCoord.xy * 0.5 + 0.5).r < shadowCoord.z)
 		visibilty = 0.5;
 
 	float3 col = objTexture.Sample(objSamplerState, input.tex);
@@ -30,6 +31,11 @@ float4 main(PS_IN input) : SV_TARGET
 	float fogVal = saturate((1.0 - (input.pos.z/input.pos.w)));
 	col = lerp(col, float3(0.3,0.3,0.3), pow(fogVal, 2));
 	col *= visibilty;
+
+	//col.xy = (shadowCoord.xy/shadowCoord.z) * 0.5 + 0.5;
+	//col.b = shadowCoord.z;
+
+	//col.rgb = shadowMap.Sample(objSamplerState, shadowCoord.xy * 0.5 + 0.5).z;
 
 	return float4(col,1);
 }

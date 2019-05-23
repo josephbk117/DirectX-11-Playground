@@ -98,6 +98,12 @@ void Graphics::renderFrame()
 	models[0].setTexture(texture.Get());
 	models[0].draw(DirectX::XMMatrixTranslation(0, 0, 1) * dirLight.GetLightMatrix());
 
+	context->IASetInputLayout(skinnedVertexShader.getInputLayout());
+	context->VSSetShader(skinnedVertexShader.getShader(), NULL, 0);
+	skinnedModel.draw(DirectX::XMMatrixTranslation(0, 1, 4) * dirLight.GetLightMatrix());
+	skinnedModel.draw(DirectX::XMMatrixTranslation(1, 1, 4) * dirLight.GetLightMatrix());
+	skinnedModel.draw(DirectX::XMMatrixTranslation(-1, 1, 4) * dirLight.GetLightMatrix());
+
 	//Start rendering on top default render texture
 	context->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), depthStencilView.Get());
 
