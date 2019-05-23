@@ -11,6 +11,7 @@ class CubemapTexture
 private:
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> textures[6];
 public:
+	// Order of image file paths : Front, Back, Left, Right, Bottom, Top
 	bool init(ID3D11Device* device, const std::wstring imagePaths[6])
 	{
 		for (unsigned int i = 0; i < 6; i++)

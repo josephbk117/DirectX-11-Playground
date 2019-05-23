@@ -358,11 +358,11 @@ bool Graphics::initScene()
 			return false;
 
 		std::wstring cubemapLocations[6];
-		cubemapLocations[0] = L"Resources\\Textures\\Cubemaps\\Sahara Desert Cubemap\\sahara_bk.png";
-		cubemapLocations[1] = L"Resources\\Textures\\Cubemaps\\Sahara Desert Cubemap\\sahara_dn.png";
-		cubemapLocations[2] = L"Resources\\Textures\\Cubemaps\\Sahara Desert Cubemap\\sahara_ft.png";
-		cubemapLocations[3] = L"Resources\\Textures\\Cubemaps\\Sahara Desert Cubemap\\sahara_lf.png";
-		cubemapLocations[4] = L"Resources\\Textures\\Cubemaps\\Sahara Desert Cubemap\\sahara_rt.png";
+		cubemapLocations[0] = L"Resources\\Textures\\Cubemaps\\Sahara Desert Cubemap\\sahara_ft.png";
+		cubemapLocations[1] = L"Resources\\Textures\\Cubemaps\\Sahara Desert Cubemap\\sahara_bk.png";
+		cubemapLocations[2] = L"Resources\\Textures\\Cubemaps\\Sahara Desert Cubemap\\sahara_lf.png";
+		cubemapLocations[3] = L"Resources\\Textures\\Cubemaps\\Sahara Desert Cubemap\\sahara_rt.png";
+		cubemapLocations[4] = L"Resources\\Textures\\Cubemaps\\Sahara Desert Cubemap\\sahara_dn.png";
 		cubemapLocations[5] = L"Resources\\Textures\\Cubemaps\\Sahara Desert Cubemap\\sahara_up.png";
 		cubemap.init(device.Get(), cubemapLocations);
 
