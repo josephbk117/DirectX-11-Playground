@@ -12,9 +12,13 @@ struct CB_VS_Skinned_VertexShader : public CB_VS_VertexShader
 	DirectX::XMMATRIX jointMatrices[50];
 };
 
+struct CB_VS_LightBuffer
+{
+	DirectX::XMMATRIX lightMatrix;
+};
+
 struct CB_PS_LightBuffer
 {
 	float ambientLightIntensity;
 	DirectX::XMFLOAT3 ambientLightColour;
-	DirectX::XMMATRIX lightMatrix;
 };

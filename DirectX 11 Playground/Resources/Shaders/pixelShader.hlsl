@@ -2,7 +2,6 @@ cbuffer lightBuffer : register(b0)
 {
 	float ambientLightIntensity;
 	float3 ambientLightColour;
-	float4x4 lightMatrix;
 }
 
 struct PS_IN
@@ -11,31 +10,50 @@ struct PS_IN
 	float2 tex : TEXCOORD;
 	float3 norm : NORMAL;
 	float weight : TEXCOORD1;
-	float4 worldPos : TEXCOORD2;
+	float4 lightPos : TEXCOORD2;
 };
 
 Texture2D objTexture : TEXTURE : register(t0);
 Texture2D shadowMap : TEXTURE : register(t1);
 SamplerState objSamplerState : SAMPLER : register(s0);
 
+float ShadowCalculation(float4 fragPosLightSpace)
+{
+    // perform perspective divide
+    float3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    // transform to [0,1] range
+    projCoords = projCoords * 0.5 + 0.5;
+    // get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
+    float closestDepth = shadowMap.Sample(objSamplerState, projCoords.xy).r; 
+    // get depth of current fragment from light's perspective
+    float currentDepth = projCoords.z;
+    // check whether current frag pos is in shadow
+    float shadow = currentDepth > closestDepth  ? 1.0 : 0.0;
+    return shadow;
+}  
+
 float4 main(PS_IN input) : SV_TARGET
 {
-	float4 shadowCoord = mul(input.worldPos, lightMatrix);
-	float visibilty = 1.0;
-	//shadowCoord.y -= 0.1;
-	if(shadowMap.Sample(objSamplerState, shadowCoord.xy * 0.5 + 0.5).z < shadowCoord.z)
-		visibilty = 0.5;
+
+  // perform perspective divide
+    float3 projCoords = input.lightPos.xyz / input.lightPos.w;
+    // transform to [0,1] range
+    projCoords = projCoords * 0.5 + 0.5;
+	projCoords.y = -projCoords.y;
+    // get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
+    float closestDepth = shadowMap.Sample(objSamplerState, projCoords.xy).r; 
+    // get depth of current fragment from light's perspective
+    float currentDepth = projCoords.z;
+    // check whether current frag pos is in shadow
+    float shadow = currentDepth-0.547 > closestDepth  ? 0.5 : 1.0;
+	
+	float visibilty = shadow;
 
 	float3 col = objTexture.Sample(objSamplerState, input.tex);
 	col *= max(dot(input.norm, float3(0,1,0)), ambientLightIntensity);
 	float fogVal = saturate((1.0 - (input.pos.z/input.pos.w)));
-	col = lerp(col, float3(0.3,0.3,0.3), pow(fogVal, 2));
+	col = lerp(col, float3(0.3,0.3,0.3), pow(fogVal, 3));
 	col *= visibilty;
-
-	//col.xy = (shadowCoord.xy/shadowCoord.z) * 0.5 + 0.5;
-	//col.b = shadowCoord.z;
-
-	//col.rgb = shadowMap.Sample(objSamplerState, shadowCoord.xy * 0.5 + 0.5).z;
 
 	return float4(col,1);
 }

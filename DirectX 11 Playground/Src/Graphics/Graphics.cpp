@@ -30,7 +30,7 @@ void Graphics::renderFrame()
 {
 	float bgColour[] = { 0.1f,0.1f,0.1f,1 };
 	static float t_time = 0;
-
+	t_time += 0.01f;
 	context->ClearRenderTargetView(renderTargetView.Get(), bgColour);
 	context->ClearDepthStencilView(depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
@@ -73,13 +73,17 @@ void Graphics::renderFrame()
 	if (!vertexInfoConstantBuffer.applyChanges())
 		return;
 
+	vertexInfoLightingBuffer.data.lightMatrix = dirLight.GetLightMatrix();
+	if (!vertexInfoLightingBuffer.applyChanges())
+		return;
+
 	pixelInfoLightingBuffer.data.ambientLightIntensity = ambientLightIntensity;
 	pixelInfoLightingBuffer.data.ambientLightColour = DirectX::XMFLOAT3(1, 1, 0);
-	pixelInfoLightingBuffer.data.lightMatrix = dirLight.GetLightMatrix();
 	if (!pixelInfoLightingBuffer.applyChanges())
 		return;
 
 	context->VSSetConstantBuffers(0, 1, vertexInfoConstantBuffer.getAddressOf());
+	context->VSSetConstantBuffers(1, 1, vertexInfoLightingBuffer.getAddressOf());
 	context->PSSetConstantBuffers(0, 1, pixelInfoLightingBuffer.getAddressOf());
 
 	context->PSSetShader(unlitBasicPixelShader.getShader(), NULL, 0);
@@ -97,7 +101,7 @@ void Graphics::renderFrame()
 
 	//Start rendering on to render texture
 	renderTexture.SetRenderTarget(context.Get(), depthStencilView.Get());
-	renderTexture.ClearRenderTarget(context.Get(), depthStencilView.Get(), 1, 0, 1, 1);
+	renderTexture.ClearRenderTarget(context.Get(), depthStencilView.Get(), 1, 1, 1, 1);
 
 	context->PSSetShader(depthBasicShader.getShader(), NULL, 0);
 	models[0].setTexture(texture.Get());
@@ -108,6 +112,8 @@ void Graphics::renderFrame()
 	skinnedModel.draw(DirectX::XMMatrixTranslation(0, 1, 4) * dirLight.GetLightMatrix());
 	skinnedModel.draw(DirectX::XMMatrixTranslation(1, 1, 4) * dirLight.GetLightMatrix());
 	skinnedModel.draw(DirectX::XMMatrixTranslation(-1, 1, 4) * dirLight.GetLightMatrix());
+
+	//dirLight.setPosition({ sinf(t_time), 1, cosf(t_time) });
 
 	//Start rendering on top default render texture
 	context->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), depthStencilView.Get());
@@ -174,7 +180,7 @@ bool Graphics::initDirectX(HWND hwnd, int width, int height)
 		scd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 		scd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
-		HRESULT hr = D3D11CreateDeviceAndSwapChain(adapters[0].pAdapter, D3D_DRIVER_TYPE_UNKNOWN, NULL, NULL, NULL, 0, D3D11_SDK_VERSION,
+		HRESULT hr = D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, NULL, nullptr, 0, D3D11_SDK_VERSION,
 			&scd, swapchain.GetAddressOf(), device.GetAddressOf(), NULL, context.GetAddressOf());
 		COM_ERROR_IF_FAILED(hr, "Failed to create device and swap chain");
 
@@ -287,7 +293,7 @@ bool Graphics::initShaders()
 		shaderfolder = L"..\\Release\\";
 #endif
 #endif
-	}
+}
 
 	D3D11_INPUT_ELEMENT_DESC layout[] =
 	{
@@ -339,6 +345,9 @@ bool Graphics::initScene()
 		COM_ERROR_IF_FAILED(hr, "Failed to create constant buffer");
 
 		hr = vertexSkinnedInfoConstantBuffer.init(device.Get(), context.Get());
+		COM_ERROR_IF_FAILED(hr, "Failed to create constant buffer");
+
+		hr = vertexInfoLightingBuffer.init(device.Get(), context.Get());
 		COM_ERROR_IF_FAILED(hr, "Failed to create constant buffer");
 
 		hr = pixelInfoLightingBuffer.init(device.Get(), context.Get());

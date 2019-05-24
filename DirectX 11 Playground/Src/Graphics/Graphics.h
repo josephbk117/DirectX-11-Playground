@@ -40,8 +40,9 @@ private:
 	PixelShader depthBasicShader;
 
 	ConstantBuffer<CB_VS_VertexShader> vertexInfoConstantBuffer;
-	ConstantBuffer<CB_PS_LightBuffer> pixelInfoLightingBuffer;
 	ConstantBuffer<CB_VS_Skinned_VertexShader> vertexSkinnedInfoConstantBuffer;
+	ConstantBuffer<CB_VS_LightBuffer> vertexInfoLightingBuffer;
+	ConstantBuffer<CB_PS_LightBuffer> pixelInfoLightingBuffer;
 
 	RenderTexture renderTexture;
 	CubemapTexture cubemap;
