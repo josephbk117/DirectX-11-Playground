@@ -17,7 +17,7 @@ public:
 		for (unsigned int i = 0; i < 6; i++)
 		{
 			HRESULT hr = DirectX::CreateWICTextureFromFile(device, imagePaths[i].c_str(), nullptr, textures[i].GetAddressOf());
-			COM_ERROR_IF_FAILED(hr, "Failed to create WIC texture from file for Cubemap ");
+			COM_ERROR_IF_FAILED(hr, "Failed to create WIC texture from file for Cubemap");
 		}
 	}
 

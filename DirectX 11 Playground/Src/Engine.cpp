@@ -35,22 +35,37 @@ void Engine::update()
 	while (!mouse.EventBufferIsEmpty())
 	{
 		MouseEvent me = mouse.ReadEvent();
-		if (mouse.IsRightDown())
+
+		static bool isPrevStateRRelease = false;
+
+		if (me.GetType() == MouseEvent::EventType::Move)
 		{
-			if (me.GetType() == MouseEvent::EventType::Move)
+			if (mouse.IsRightDown())
 			{
 				static int prevMouseXpos = me.GetPosX();
 				static int prevMouseYpos = me.GetPosY();
+
+				if (isPrevStateRRelease)
+				{
+					prevMouseXpos = me.GetPosX();
+					prevMouseYpos = me.GetPosY();
+				}
 
 				float deltaX = static_cast<float>(me.GetPosX() - prevMouseXpos) * 0.0025f;
 				float deltaY = static_cast<float>(me.GetPosY() - prevMouseYpos) * 0.0025f;
 
 				prevMouseXpos = me.GetPosX();
 				prevMouseYpos = me.GetPosY();
+
 				this->gfx.camera.AdjustRotation(0, deltaX, 0);
 				this->gfx.camera.AdjustRotation(deltaY, 0, 0);
+
+				isPrevStateRRelease = false;
 			}
 		}
+		else if (me.GetType() == MouseEvent::EventType::RRelease)
+			isPrevStateRRelease = true;
+
 	}
 	const float cameraSpeed = 0.002f * deltaTime;
 
@@ -78,7 +93,7 @@ void Engine::update()
 	{
 		this->gfx.camera.AdjustPosition(0.0f, -cameraSpeed, 0.0f);
 	}
-	
+
 
 }
 
