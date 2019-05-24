@@ -5,6 +5,7 @@ A renderer in DirectX 11 and playing around with it.
 - [X] Basic Lighting
 - [X] Model loading
 - [X] Render to texture support
+- [X] Skybox support
 
 ### Things in progress:
 - Directional shadow mapping
