@@ -100,20 +100,17 @@ void Graphics::renderFrame()
 	models[1].draw(DirectX::XMMatrixScaling(2, 2, 2)* DirectX::XMMatrixTranslation(0, 4, 4) * camera.GetViewMatrix() * camera.GetProjectionMatrix());
 
 	//Start rendering on to render texture
-	renderTexture.SetRenderTarget(context.Get(), depthStencilView.Get());
-	renderTexture.ClearRenderTarget(context.Get(), depthStencilView.Get(), 1, 1, 1, 1);
+	renderTexture.SetRenderTarget();
+	renderTexture.ClearRenderTarget(1, 1, 1, 1);
 
 	context->PSSetShader(depthBasicShader.getShader(), NULL, 0);
-	models[0].setTexture(texture.Get());
-	models[0].draw(DirectX::XMMatrixTranslation(0, 0, 1) * dirLight.GetLightMatrix());
+	models[0].draw(dirLight.GetLightMatrix());
 
 	context->IASetInputLayout(skinnedVertexShader.getInputLayout());
 	context->VSSetShader(skinnedVertexShader.getShader(), NULL, 0);
 	skinnedModel.draw(DirectX::XMMatrixTranslation(0, 1, 4) * dirLight.GetLightMatrix());
 	skinnedModel.draw(DirectX::XMMatrixTranslation(1, 1, 4) * dirLight.GetLightMatrix());
 	skinnedModel.draw(DirectX::XMMatrixTranslation(-1, 1, 4) * dirLight.GetLightMatrix());
-
-	//dirLight.setPosition({ sinf(t_time), 1, cosf(t_time) });
 
 	//Start rendering on top default render texture
 	context->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), depthStencilView.Get());
@@ -262,7 +259,7 @@ bool Graphics::initDirectX(HWND hwnd, int width, int height)
 		COM_ERROR_IF_FAILED(hr, "Error creating sampler state");
 
 		//Initialize an additional Rendertexture
-		renderTexture.Initialize(device.Get(), width, height);
+		renderTexture.Initialize(device.Get(), context.Get(), depthStencilView.Get(), width, height);
 	}
 	catch (COMException & e)
 	{
@@ -293,7 +290,7 @@ bool Graphics::initShaders()
 		shaderfolder = L"..\\Release\\";
 #endif
 #endif
-}
+	}
 
 	D3D11_INPUT_ELEMENT_DESC layout[] =
 	{
