@@ -34,18 +34,18 @@ float ShadowCalculation(float4 fragPosLightSpace)
 
 float4 main(PS_IN input) : SV_TARGET
 {
-
-  // perform perspective divide
+	// perform perspective divide
     float3 projCoords = input.lightPos.xyz / input.lightPos.w;
     // transform to [0,1] range
     projCoords = projCoords * 0.5 + 0.5;
 	projCoords.y = -projCoords.y;
     // get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
-    float closestDepth = shadowMap.Sample(objSamplerState, projCoords.xy).r; 
+    float closestDepth = shadowMap.Sample(objSamplerState, projCoords.xy).r * 0.5 + 0.5;
     // get depth of current fragment from light's perspective
     float currentDepth = projCoords.z;
     // check whether current frag pos is in shadow
-    float shadow = currentDepth-0.547 > closestDepth  ? 0.5 : 1.0;
+	const float bias = 0.001;
+    float shadow = currentDepth-bias > closestDepth ? 0.5 : 1.0;
 	
 	float visibilty = shadow;
 
