@@ -28,45 +28,17 @@ bool Graphics::init(HWND hwnd, int width, int height)
 float ambientLightIntensity = 0.1f;
 void Graphics::renderFrame()
 {
-	float bgColour[] = { 0.1f,0.1f,0.1f,1 };
 	static float t_time = 0;
 	t_time += 0.01f;
-	context->ClearRenderTargetView(renderTargetView.Get(), bgColour);
-	context->ClearDepthStencilView(depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-	//Set up skinned mesh shader
-	context->IASetInputLayout(skinnedVertexShader.getInputLayout());
-	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	context->RSSetState(rasterizerState.Get());
-	context->OMSetDepthStencilState(depthStencilState.Get(), 0);
-	context->PSSetSamplers(0, 1, samplerState.GetAddressOf());
-	context->VSSetShader(skinnedVertexShader.getShader(), NULL, 0);
-	context->PSSetShader(pixelShader.getShader(), NULL, 0);
-
-	context->VSSetConstantBuffers(0, 1, vertexSkinnedInfoConstantBuffer.getAddressOf());
-
-	vertexSkinnedInfoConstantBuffer.data.mvpMatrix = vertexInfoConstantBuffer.data.mvpMatrix;
-
+	//Update all constant buffers
 	skinnedModel.animate(t_time, &vertexSkinnedInfoConstantBuffer.data.jointMatrices[0]);
-
+	vertexSkinnedInfoConstantBuffer.data.mvpMatrix = vertexInfoConstantBuffer.data.mvpMatrix;
 	vertexSkinnedInfoConstantBuffer.data.jointMatrices[0] = vertexSkinnedInfoConstantBuffer.data.jointMatrices[0] * vertexSkinnedInfoConstantBuffer.data.jointMatrices[0];
 	vertexSkinnedInfoConstantBuffer.data.jointMatrices[1] = vertexSkinnedInfoConstantBuffer.data.jointMatrices[1] * vertexSkinnedInfoConstantBuffer.data.jointMatrices[1];
 	vertexSkinnedInfoConstantBuffer.data.jointMatrices[2] = vertexSkinnedInfoConstantBuffer.data.jointMatrices[2] * vertexSkinnedInfoConstantBuffer.data.jointMatrices[2];
 	if (!vertexSkinnedInfoConstantBuffer.applyChanges())
 		return;
-
-	skinnedModel.draw(DirectX::XMMatrixTranslation(0, 1, 4) * camera.GetViewMatrix() * camera.GetProjectionMatrix());
-	skinnedModel.draw(DirectX::XMMatrixTranslation(1, 1, 4) * camera.GetViewMatrix() * camera.GetProjectionMatrix());
-	skinnedModel.draw(DirectX::XMMatrixTranslation(-1, 1, 4) * camera.GetViewMatrix() * camera.GetProjectionMatrix());
-
-	//Set up regular shader
-	context->IASetInputLayout(vertexShader.getInputLayout());
-	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	context->RSSetState(rasterizerState.Get());
-	context->OMSetDepthStencilState(depthStencilState.Get(), 0);
-	context->PSSetSamplers(0, 1, samplerState.GetAddressOf());
-	context->VSSetShader(vertexShader.getShader(), NULL, 0);
-	context->PSSetShader(pixelShader.getShader(), NULL, 0);
 
 	vertexInfoConstantBuffer.data.mvpMatrix = DirectX::XMMatrixIdentity() * camera.GetViewMatrix() * camera.GetProjectionMatrix();
 	vertexInfoConstantBuffer.data.mvpMatrix = DirectX::XMMatrixTranspose(vertexInfoConstantBuffer.data.mvpMatrix);
@@ -82,32 +54,46 @@ void Graphics::renderFrame()
 	if (!pixelInfoLightingBuffer.applyChanges())
 		return;
 
-	context->VSSetConstantBuffers(0, 1, vertexInfoConstantBuffer.getAddressOf());
-	context->VSSetConstantBuffers(1, 1, vertexInfoLightingBuffer.getAddressOf());
-	context->PSSetConstantBuffers(0, 1, pixelInfoLightingBuffer.getAddressOf());
+	float bgColour[] = { 0.1f,0.1f,0.1f,1 };
 
-	context->PSSetShader(unlitBasicPixelShader.getShader(), NULL, 0);
-	skybox.draw(camera.GetViewDirectionMatrix() * camera.GetProjectionMatrix());
+	context->ClearRenderTargetView(renderTargetView.Get(), bgColour);
+	context->ClearDepthStencilView(depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-	context->PSSetShader(pixelShader.getShader(), NULL, 0);
+	//Set up skinned mesh shader
+	regularSkinnedMaterial.bind(context.Get());
+	skinnedModel.draw(DirectX::XMMatrixTranslation(0, 1, 4) * camera.GetViewMatrix() * camera.GetProjectionMatrix());
+	skinnedModel.draw(DirectX::XMMatrixTranslation(1, 1, 4) * camera.GetViewMatrix() * camera.GetProjectionMatrix());
+	skinnedModel.draw(DirectX::XMMatrixTranslation(-1, 1, 4) * camera.GetViewMatrix() * camera.GetProjectionMatrix());
+
+	//Set up regular shader
+	regularMaterial.bind(context.Get());
+
 	models[0].setTexture(texture.Get());
 	models[0].setTexture2(renderTexture.GetShaderResourceView());
 	models[0].draw(camera.GetViewMatrix() * camera.GetProjectionMatrix());
 
-	context->PSSetShader(unlitBasicPixelShader.getShader(), NULL, 0);
+	unlitScreenRenderingMaterial.bind(context.Get());
 
 	models[1].setTexture(renderTexture.GetShaderResourceView());
 	models[1].draw(DirectX::XMMatrixScaling(2, 2, 2)* DirectX::XMMatrixTranslation(0, 4, 4) * camera.GetViewMatrix() * camera.GetProjectionMatrix());
 
-	//Start rendering on to render texture
+	skybox.draw(camera.GetViewDirectionMatrix() * camera.GetProjectionMatrix());
+
+	//Debug stage, Draw OBBs and other gizmo visualization items
+	context->RSSetState(debugRasterizerState.Get());
+	models[0].drawOBB(camera.GetViewMatrix() * camera.GetProjectionMatrix());
+
+	//Start rendering on to depth render texture
 	renderTexture.SetRenderTarget();
 	renderTexture.ClearRenderTarget(1, 1, 1, 1);
 
-	context->PSSetShader(depthBasicShader.getShader(), NULL, 0);
+	depthRenderingMaterial.bind(context.Get());
+
 	models[0].draw(dirLight.GetLightMatrix());
 
 	context->IASetInputLayout(skinnedVertexShader.getInputLayout());
 	context->VSSetShader(skinnedVertexShader.getShader(), NULL, 0);
+
 	skinnedModel.draw(DirectX::XMMatrixTranslation(0, 1, 4) * dirLight.GetLightMatrix());
 	skinnedModel.draw(DirectX::XMMatrixTranslation(1, 1, 4) * dirLight.GetLightMatrix());
 	skinnedModel.draw(DirectX::XMMatrixTranslation(-1, 1, 4) * dirLight.GetLightMatrix());
@@ -120,7 +106,7 @@ void Graphics::renderFrame()
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
 
-	ImGui::Begin("test");
+	ImGui::Begin("Debug Stuff");
 
 	//Fps counter
 	static int fpsCounter = 0;
@@ -232,15 +218,24 @@ bool Graphics::initDirectX(HWND hwnd, int width, int height)
 		//Set the vieport
 		this->context->RSSetViewports(1, &viewport);
 
-		//Create rasterizer desc
+		//Create default rasterizer desc
 		D3D11_RASTERIZER_DESC rasterizerDesc;
 		ZeroMemory(&rasterizerDesc, sizeof(D3D11_RASTERIZER_DESC));
 
 		rasterizerDesc.FillMode = D3D11_FILL_MODE::D3D11_FILL_SOLID;
 		rasterizerDesc.CullMode = D3D11_CULL_MODE::D3D11_CULL_BACK;
 
-		hr = device->CreateRasterizerState(&rasterizerDesc, this->rasterizerState.GetAddressOf());
-		COM_ERROR_IF_FAILED(hr, "Error creating rasterizer state");
+		hr = device->CreateRasterizerState(&rasterizerDesc, this->defaultRasterizerState.GetAddressOf());
+		COM_ERROR_IF_FAILED(hr, "Error creating default rasterizer state");
+
+		//Create default rasterizer desc
+		ZeroMemory(&rasterizerDesc, sizeof(D3D11_RASTERIZER_DESC));
+
+		rasterizerDesc.FillMode = D3D11_FILL_MODE::D3D11_FILL_WIREFRAME;
+		rasterizerDesc.CullMode = D3D11_CULL_MODE::D3D11_CULL_NONE;
+
+		hr = device->CreateRasterizerState(&rasterizerDesc, this->debugRasterizerState.GetAddressOf());
+		COM_ERROR_IF_FAILED(hr, "Error creating debugging rasterizer state");
 
 		//Create sampler state
 		D3D11_SAMPLER_DESC samplerDesc;
@@ -349,6 +344,24 @@ bool Graphics::initScene()
 
 		hr = pixelInfoLightingBuffer.init(device.Get(), context.Get());
 		COM_ERROR_IF_FAILED(hr, "Failed to create constant buffer");
+
+		regularMaterial.setRenderStates(depthStencilState.Get(), defaultRasterizerState.Get(), samplerState.Get());
+		regularMaterial.setShaders(&vertexShader, &pixelShader);
+		regularMaterial.addVertexConstantBuffer(&vertexInfoConstantBuffer);
+		regularMaterial.addVertexConstantBuffer(&vertexInfoLightingBuffer);
+		regularMaterial.addPixelConatantBuffer(&pixelInfoLightingBuffer);
+
+		regularSkinnedMaterial.setRenderStates(depthStencilState.Get(), defaultRasterizerState.Get(), samplerState.Get());
+		regularSkinnedMaterial.setShaders(&skinnedVertexShader, &pixelShader);
+		regularSkinnedMaterial.addVertexConstantBuffer(&vertexSkinnedInfoConstantBuffer);
+
+		depthRenderingMaterial.setRenderStates(depthStencilState.Get(), defaultRasterizerState.Get(), samplerState.Get());
+		depthRenderingMaterial.setShaders(&vertexShader, &depthBasicShader);
+		depthRenderingMaterial.addVertexConstantBuffer(&vertexInfoConstantBuffer);
+
+		unlitScreenRenderingMaterial.setRenderStates(depthStencilState.Get(), defaultRasterizerState.Get(), samplerState.Get());
+		unlitScreenRenderingMaterial.setShaders(&vertexShader, &unlitBasicPixelShader);
+		unlitScreenRenderingMaterial.addVertexConstantBuffer(&vertexSkinnedInfoConstantBuffer);
 
 		Model model1;
 		if (!model1.init("Resources\\Models\\cottage_obj.obj", device.Get(), context.Get(), texture.Get(), vertexInfoConstantBuffer))

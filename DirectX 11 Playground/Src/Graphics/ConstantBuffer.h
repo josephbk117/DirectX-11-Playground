@@ -4,28 +4,35 @@
 #include "ConstantBufferTypes.h"
 #include "../ErrorLogger.h"
 
-template<class T>
-class ConstantBuffer
+class BaseConstantBuffer
 {
-private:
-	ConstantBuffer(const ConstantBuffer& rhs);
+protected:
 	Microsoft::WRL::ComPtr<ID3D11Buffer> buffer;
 	ID3D11DeviceContext* deviceContext = nullptr;
 public:
-	ConstantBuffer() {}
-	T data;
-
+	BaseConstantBuffer() {}
 	ID3D11Buffer* get() const
 	{
 		return buffer.Get();
 	}
-
 	ID3D11Buffer* const* getAddressOf() const
 	{
 		return buffer.GetAddressOf();
 	}
+	virtual HRESULT init(ID3D11Device* device, ID3D11DeviceContext* deviceContext) = 0;
+	virtual bool applyChanges() = 0;
+};
 
-	HRESULT init(ID3D11Device* device, ID3D11DeviceContext* deviceContext)
+template<class T>
+class ConstantBuffer : public BaseConstantBuffer
+{
+private:
+	ConstantBuffer(const ConstantBuffer& rhs);
+public:
+	ConstantBuffer() {}
+	T data;
+
+	HRESULT init(ID3D11Device* device, ID3D11DeviceContext* deviceContext) override
 	{
 		if (buffer.Get() != nullptr)
 			buffer.Reset();
@@ -44,7 +51,7 @@ public:
 		return hr;
 	}
 
-	bool applyChanges()
+	bool applyChanges() override
 	{
 		D3D11_MAPPED_SUBRESOURCE mappedresource;
 		HRESULT hr = deviceContext->Map(buffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedresource);

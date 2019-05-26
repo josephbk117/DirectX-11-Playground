@@ -16,6 +16,14 @@ Mesh::Mesh(const Mesh & mesh)
 	this->vertexBuffer = mesh.vertexBuffer;
 }
 
+Mesh & Mesh::operator=(const Mesh & mesh)
+{
+	this->deviceContext = mesh.deviceContext;
+	this->indexBuffer = mesh.indexBuffer;
+	this->vertexBuffer = mesh.vertexBuffer;
+	return *this;
+}
+
 void Mesh::draw()
 {
 	UINT offset = 0;

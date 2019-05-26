@@ -49,6 +49,12 @@
     <Filter Include="Resource Files\Images">
       <UniqueIdentifier>{2e0ca410-6689-46ec-84d8-b06183650842}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\Shaders\Vertex Shaders">
+      <UniqueIdentifier>{ba58ef30-8410-44e5-9a98-dac0a1c288bd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Shaders\Pixel Shaders">
+      <UniqueIdentifier>{5d9e67dd-f9ed-41c8-8d55-5daa08e7d44d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\MainApp.cpp">
@@ -124,6 +130,9 @@
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="Src\Graphics\Skybox.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Graphics\Material.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
   </ItemGroup>
@@ -242,21 +251,24 @@
     <ClInclude Include="Src\Graphics\Skybox.h">
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Graphics\Material.h">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="Resources\Shaders\depthBasic.hlsl" />
+    <FxCompile Include="Resources\Shaders\skinnedVertexShader.hlsl">
+      <Filter>Resource Files\Shaders\Vertex Shaders</Filter>
+    </FxCompile>
     <FxCompile Include="Resources\Shaders\vertexShader.hlsl">
-      <Filter>Resource Files\Shaders</Filter>
+      <Filter>Resource Files\Shaders\Vertex Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Resources\Shaders\pixelShader.hlsl">
-      <Filter>Resource Files\Shaders</Filter>
+      <Filter>Resource Files\Shaders\Pixel Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Resources\Shaders\unlitBasic.hlsl">
-      <Filter>Resource Files\Shaders</Filter>
+      <Filter>Resource Files\Shaders\Pixel Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Resources\Shaders\skinnedVertexShader.hlsl">
-      <Filter>Resource Files\Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Resources\Shaders\depthBasic.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Resources\Textures\bitshiftProductions.png">

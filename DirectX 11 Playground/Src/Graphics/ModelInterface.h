@@ -15,6 +15,9 @@ template<class VERTEX_DATA_STRUCT, class CONSTANT_BUFFER_STRUCT>
 class ModelInterface
 {
 public:
+	ModelInterface() = default;
+	ModelInterface(const ModelInterface& rhs) = default;
+	~ModelInterface() = default;
 	virtual bool init(const std::string& filePath, ID3D11Device * device, ID3D11DeviceContext* context, ID3D11ShaderResourceView* texture, ConstantBuffer<CONSTANT_BUFFER_STRUCT>& cb_vs_vertexShader) = 0;
 	virtual bool init(std::vector<VERTEX_DATA_STRUCT> vertices, std::vector<DWORD> indices, ID3D11Device * device, ID3D11DeviceContext* context, ID3D11ShaderResourceView* texture, ConstantBuffer<CONSTANT_BUFFER_STRUCT>& cb_vs_vertexShader) = 0;
 	virtual void setTexture(ID3D11ShaderResourceView* texture) = 0;

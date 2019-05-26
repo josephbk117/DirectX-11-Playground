@@ -11,6 +11,7 @@
 #include "Light.h"
 #include "CubemapTexture.h"
 #include "Skybox.h"
+#include "Material.h"
 #include "..\\Timer.h"
 #include "ImGui\imgui.h"
 #include "ImGui\imgui_impl_win32.h"
@@ -51,10 +52,16 @@ private:
 	SkinnedModel skinnedModel;
 	DirectionalLight dirLight;
 
+	Material regularMaterial;
+	Material regularSkinnedMaterial;
+	Material depthRenderingMaterial;
+	Material unlitScreenRenderingMaterial;
+
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> depthStencilView;
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> depthStencilBuffer;
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilState> depthStencilState;
-	Microsoft::WRL::ComPtr<ID3D11RasterizerState> rasterizerState;
+	Microsoft::WRL::ComPtr<ID3D11RasterizerState> defaultRasterizerState;
+	Microsoft::WRL::ComPtr<ID3D11RasterizerState> debugRasterizerState;
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerState;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture;
 

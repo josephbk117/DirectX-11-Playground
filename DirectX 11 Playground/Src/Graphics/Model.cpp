@@ -21,10 +21,13 @@ bool Model::init(const std::string& filePath, ID3D11Device * device, ID3D11Devic
 	this->setPosition(0.0f, 0.0f, 0.0f);
 	this->setRotation(0.0f, 0.0f, 0.0f);
 	this->updateWorldMatrix();
+
+	obb.init(device, context, { -2, -2,-2 }, { 2,2,2 });
+
 	return true;
 }
 
-bool Model::init( std::vector<Vertex> vertices, std::vector<DWORD> indices, ID3D11Device * device, ID3D11DeviceContext* context, 
+bool Model::init(std::vector<Vertex> vertices, std::vector<DWORD> indices, ID3D11Device * device, ID3D11DeviceContext* context,
 	ID3D11ShaderResourceView* texture, ConstantBuffer<CB_VS_VertexShader>& cb_vs_vertexShader)
 {
 	this->device = device;
@@ -37,6 +40,9 @@ bool Model::init( std::vector<Vertex> vertices, std::vector<DWORD> indices, ID3D
 	this->setPosition(0.0f, 0.0f, 0.0f);
 	this->setRotation(0.0f, 0.0f, 0.0f);
 	this->updateWorldMatrix();
+
+	obb.init(device, context, {-2, -2,-2 }, { 2,2,2 });
+
 	return true;
 }
 
@@ -53,7 +59,7 @@ void Model::draw(const XMMATRIX & viewProjectionMatrix)
 
 	context->VSSetConstantBuffers(0, 1, cb_vs_vertexShader->getAddressOf());
 	context->PSSetShaderResources(0, 1, &texture1);
-	if(texture2 != nullptr)
+	if (texture2 != nullptr)
 		context->PSSetShaderResources(1, 1, &texture2);
 
 	for (Mesh mesh : meshes)

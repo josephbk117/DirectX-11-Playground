@@ -151,6 +151,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Graphics\Material.cpp" />
     <ClCompile Include="Src\Graphics\Skybox.cpp" />
     <ClCompile Include="Src\Graphics\Light.cpp" />
     <ClCompile Include="Src\Graphics\SkinnedMesh.cpp" />
@@ -178,6 +179,7 @@
     <ClCompile Include="Src\Timer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Graphics\Material.h" />
     <ClInclude Include="Src\Graphics\Skybox.h" />
     <ClInclude Include="Src\Graphics\CubemapTexture.h" />
     <ClInclude Include="Src\Graphics\Light.h" />
