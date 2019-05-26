@@ -22,8 +22,6 @@ bool Model::init(const std::string& filePath, ID3D11Device * device, ID3D11Devic
 	this->setRotation(0.0f, 0.0f, 0.0f);
 	this->updateWorldMatrix();
 
-	obb.init(device, context, { -2, -2,-2 }, { 2,2,2 });
-
 	return true;
 }
 
@@ -40,8 +38,6 @@ bool Model::init(std::vector<Vertex> vertices, std::vector<DWORD> indices, ID3D1
 	this->setPosition(0.0f, 0.0f, 0.0f);
 	this->setRotation(0.0f, 0.0f, 0.0f);
 	this->updateWorldMatrix();
-
-	obb.init(device, context, {-2, -2,-2 }, { 2,2,2 });
 
 	return true;
 }
@@ -64,6 +60,21 @@ void Model::draw(const XMMATRIX & viewProjectionMatrix)
 
 	for (Mesh mesh : meshes)
 		mesh.draw();
+}
+
+void Model::drawDebugView(const XMMATRIX & viewProjectionMatrix)
+{
+	cb_vs_vertexShader->data.mvpMatrix = worldMatrix * viewProjectionMatrix;
+	cb_vs_vertexShader->data.worldMatrix = worldMatrix;
+	cb_vs_vertexShader->applyChanges();
+
+	context->VSSetConstantBuffers(0, 1, cb_vs_vertexShader->getAddressOf());
+	context->PSSetShaderResources(0, 1, &texture1);
+	if (texture2 != nullptr)
+		context->PSSetShaderResources(1, 1, &texture2);
+
+	for (Mesh mesh : meshes)
+		mesh.drawOBB();
 }
 
 bool Model::loadModel(const std::string & filePath)

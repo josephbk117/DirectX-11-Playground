@@ -31,6 +31,11 @@ void Material::setShaders(VertexShader* vertexShader, PixelShader* pixelShader)
 #endif
 }
 
+void Material::setTopologyType(D3D11_PRIMITIVE_TOPOLOGY topology)
+{
+	this->topology = topology;
+}
+
 void Material::addVertexConstantBuffer(BaseConstantBuffer* constantBuffer)
 {
 	vertexConstantBuffers.push_back(constantBuffer);
@@ -48,7 +53,7 @@ void Material::addVertexConstantBuffer(BaseConstantBuffer* constantBuffer)
 #endif
 }
 
-void Material::addPixelConatantBuffer(BaseConstantBuffer* constantBuffer)
+void Material::addPixelConstantBuffer(BaseConstantBuffer* constantBuffer)
 {
 	pixelConstantBuffers.push_back(constantBuffer);
 
@@ -76,7 +81,7 @@ void Material::bind(ID3D11DeviceContext * context) const
 #endif
 
 	context->IASetInputLayout(vertexShader->getInputLayout());
-	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	context->IASetPrimitiveTopology(topology);
 	context->RSSetState(rasterizerState);
 	context->OMSetDepthStencilState(depthStencilState, 0);
 	context->PSSetSamplers(0, 1, &samplerState);

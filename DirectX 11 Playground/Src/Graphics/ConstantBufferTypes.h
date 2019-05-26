@@ -22,3 +22,8 @@ struct CB_PS_LightBuffer
 	float ambientLightIntensity;
 	DirectX::XMFLOAT3 ambientLightColour;
 };
+
+struct CB_PS_UnlitBasic
+{
+	DirectX::XMVECTOR colour = { 1,1,1,1 };
+};

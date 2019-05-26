@@ -44,6 +44,7 @@ private:
 	ConstantBuffer<CB_VS_Skinned_VertexShader> vertexSkinnedInfoConstantBuffer;
 	ConstantBuffer<CB_VS_LightBuffer> vertexInfoLightingBuffer;
 	ConstantBuffer<CB_PS_LightBuffer> pixelInfoLightingBuffer;
+	ConstantBuffer<CB_PS_UnlitBasic> pixelUnlitBasicBuffer;
 
 	RenderTexture renderTexture;
 	CubemapTexture cubemap;
@@ -56,6 +57,7 @@ private:
 	Material regularSkinnedMaterial;
 	Material depthRenderingMaterial;
 	Material unlitScreenRenderingMaterial;
+	Material debugViewRenderingMaterial;
 
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> depthStencilView;
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> depthStencilBuffer;

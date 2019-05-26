@@ -54,6 +54,9 @@ void Graphics::renderFrame()
 	if (!pixelInfoLightingBuffer.applyChanges())
 		return;
 
+	if (!pixelUnlitBasicBuffer.applyChanges())
+		return;
+
 	float bgColour[] = { 0.1f,0.1f,0.1f,1 };
 
 	context->ClearRenderTargetView(renderTargetView.Get(), bgColour);
@@ -80,8 +83,10 @@ void Graphics::renderFrame()
 	skybox.draw(camera.GetViewDirectionMatrix() * camera.GetProjectionMatrix());
 
 	//Debug stage, Draw OBBs and other gizmo visualization items
-	context->RSSetState(debugRasterizerState.Get());
-	models[0].drawOBB(camera.GetViewMatrix() * camera.GetProjectionMatrix());
+
+	debugViewRenderingMaterial.bind(context.Get());
+	models[0].drawDebugView(camera.GetViewMatrix() * camera.GetProjectionMatrix());
+	models[1].drawDebugView(DirectX::XMMatrixScaling(2, 2, 2) * DirectX::XMMatrixTranslation(0, 4, 4) * camera.GetViewMatrix() * camera.GetProjectionMatrix());
 
 	//Start rendering on to depth render texture
 	renderTexture.SetRenderTarget();
@@ -123,6 +128,7 @@ void Graphics::renderFrame()
 	ImGui::Text(fpsString.c_str());
 	ImGui::SliderFloat("Ambient light intensity", &ambientLightIntensity, 0, 1, "%.2f");
 	ImGui::SliderFloat("Animation timeline", &t_time, 0.0f, 100.0f, "%.2f");
+	ImGui::ColorEdit3("Bounding box colour", &pixelUnlitBasicBuffer.data.colour.m128_f32[0]);
 	ImGui::End();
 
 	ImGui::Render();
@@ -231,7 +237,7 @@ bool Graphics::initDirectX(HWND hwnd, int width, int height)
 		//Create default rasterizer desc
 		ZeroMemory(&rasterizerDesc, sizeof(D3D11_RASTERIZER_DESC));
 
-		rasterizerDesc.FillMode = D3D11_FILL_MODE::D3D11_FILL_WIREFRAME;
+		rasterizerDesc.FillMode = D3D11_FILL_MODE::D3D11_FILL_SOLID;
 		rasterizerDesc.CullMode = D3D11_CULL_MODE::D3D11_CULL_NONE;
 
 		hr = device->CreateRasterizerState(&rasterizerDesc, this->debugRasterizerState.GetAddressOf());
@@ -345,11 +351,14 @@ bool Graphics::initScene()
 		hr = pixelInfoLightingBuffer.init(device.Get(), context.Get());
 		COM_ERROR_IF_FAILED(hr, "Failed to create constant buffer");
 
+		hr = pixelUnlitBasicBuffer.init(device.Get(), context.Get());
+		COM_ERROR_IF_FAILED(hr, "Failed to create constant buffer");
+
 		regularMaterial.setRenderStates(depthStencilState.Get(), defaultRasterizerState.Get(), samplerState.Get());
 		regularMaterial.setShaders(&vertexShader, &pixelShader);
 		regularMaterial.addVertexConstantBuffer(&vertexInfoConstantBuffer);
 		regularMaterial.addVertexConstantBuffer(&vertexInfoLightingBuffer);
-		regularMaterial.addPixelConatantBuffer(&pixelInfoLightingBuffer);
+		regularMaterial.addPixelConstantBuffer(&pixelInfoLightingBuffer);
 
 		regularSkinnedMaterial.setRenderStates(depthStencilState.Get(), defaultRasterizerState.Get(), samplerState.Get());
 		regularSkinnedMaterial.setShaders(&skinnedVertexShader, &pixelShader);
@@ -361,7 +370,13 @@ bool Graphics::initScene()
 
 		unlitScreenRenderingMaterial.setRenderStates(depthStencilState.Get(), defaultRasterizerState.Get(), samplerState.Get());
 		unlitScreenRenderingMaterial.setShaders(&vertexShader, &unlitBasicPixelShader);
-		unlitScreenRenderingMaterial.addVertexConstantBuffer(&vertexSkinnedInfoConstantBuffer);
+		unlitScreenRenderingMaterial.addVertexConstantBuffer(&vertexInfoConstantBuffer);
+
+		debugViewRenderingMaterial.setRenderStates(depthStencilState.Get(), debugRasterizerState.Get(), samplerState.Get());
+		debugViewRenderingMaterial.setShaders(&vertexShader, &unlitBasicPixelShader);
+		debugViewRenderingMaterial.addVertexConstantBuffer(&vertexInfoConstantBuffer);
+		debugViewRenderingMaterial.addPixelConstantBuffer(&pixelUnlitBasicBuffer);
+		debugViewRenderingMaterial.setTopologyType(D3D11_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_LINELIST);
 
 		Model model1;
 		if (!model1.init("Resources\\Models\\cottage_obj.obj", device.Get(), context.Get(), texture.Get(), vertexInfoConstantBuffer))
