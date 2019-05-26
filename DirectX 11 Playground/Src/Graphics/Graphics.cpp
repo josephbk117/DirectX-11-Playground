@@ -29,6 +29,7 @@ float ambientLightIntensity = 0.1f;
 void Graphics::renderFrame()
 {
 	static float t_time = 0;
+	static bool drawDebug = true;
 	t_time += 0.01f;
 
 	//Update all constant buffers
@@ -83,11 +84,12 @@ void Graphics::renderFrame()
 	skybox.draw(camera.GetViewDirectionMatrix() * camera.GetProjectionMatrix());
 
 	//Debug stage, Draw OBBs and other gizmo visualization items
-
-	debugViewRenderingMaterial.bind(context.Get());
-	models[0].drawDebugView(camera.GetViewMatrix() * camera.GetProjectionMatrix());
-	models[1].drawDebugView(DirectX::XMMatrixScaling(2, 2, 2) * DirectX::XMMatrixTranslation(0, 4, 4) * camera.GetViewMatrix() * camera.GetProjectionMatrix());
-
+	if (drawDebug)
+	{
+		debugViewRenderingMaterial.bind(context.Get());
+		models[0].drawDebugView(camera.GetViewMatrix() * camera.GetProjectionMatrix());
+		models[1].drawDebugView(DirectX::XMMatrixScaling(2, 2, 2) * DirectX::XMMatrixTranslation(0, 4, 4) * camera.GetViewMatrix() * camera.GetProjectionMatrix());
+	}
 	//Start rendering on to depth render texture
 	renderTexture.SetRenderTarget();
 	renderTexture.ClearRenderTarget(1, 1, 1, 1);
@@ -129,6 +131,7 @@ void Graphics::renderFrame()
 	ImGui::SliderFloat("Ambient light intensity", &ambientLightIntensity, 0, 1, "%.2f");
 	ImGui::SliderFloat("Animation timeline", &t_time, 0.0f, 100.0f, "%.2f");
 	ImGui::ColorEdit3("Bounding box colour", &pixelUnlitBasicBuffer.data.colour.m128_f32[0]);
+	ImGui::Checkbox("Enable bounding box display", &drawDebug);
 	ImGui::End();
 
 	ImGui::Render();
