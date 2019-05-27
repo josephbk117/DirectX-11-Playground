@@ -1,28 +1,11 @@
 #pragma once
-#include "Vertex.h"
-#include "VertexBuffer.h"
-#include "IndexBuffer.h"
-#include "ConstantBuffer.h"
+#include "..\Scenegraph And Physics\OBB.h"
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
+#include <DirectXCollision.h>
 
 using namespace DirectX;
-
-struct OBB
-{
-	XMFLOAT3 negExtent;
-	XMFLOAT3 posExtent;
-	VertexBuffer<Vertex> vertexBuffer;
-	IndexBuffer indexBuffer;
-	void draw(ID3D11DeviceContext* context)
-	{
-		UINT offset = 0;
-		context->IASetIndexBuffer(indexBuffer.get(), DXGI_FORMAT::DXGI_FORMAT_R32_UINT, 0);
-		context->IASetVertexBuffers(0, 1, vertexBuffer.getAddressOf(), vertexBuffer.getStridePtr(), &offset);
-		context->DrawIndexed(indexBuffer.getIndexCount(), 0, 0);
-	}
-};
 
 class Mesh
 {

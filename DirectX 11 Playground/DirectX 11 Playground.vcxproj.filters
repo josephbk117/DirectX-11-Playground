@@ -55,6 +55,12 @@
     <Filter Include="Resource Files\Shaders\Pixel Shaders">
       <UniqueIdentifier>{5d9e67dd-f9ed-41c8-8d55-5daa08e7d44d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Scene graph  and Physics">
+      <UniqueIdentifier>{56dc1ed0-e087-4444-91e4-0447ff0e2c74}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Scene graph and Physics">
+      <UniqueIdentifier>{1b562169-e8fc-4d33-934d-b38b7bbfdf79}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\MainApp.cpp">
@@ -134,6 +140,12 @@
     </ClCompile>
     <ClCompile Include="Src\Graphics\Material.cpp">
       <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Scenegraph And Physics\Ray.cpp">
+      <Filter>Source Files\Scene graph  and Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Scenegraph And Physics\OBB.cpp">
+      <Filter>Source Files\Scene graph  and Physics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -253,6 +265,12 @@
     </ClInclude>
     <ClInclude Include="Src\Graphics\Material.h">
       <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Scenegraph And Physics\Ray.h">
+      <Filter>Header Files\Scene graph and Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Scenegraph And Physics\OBB.h">
+      <Filter>Header Files\Scene graph and Physics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
