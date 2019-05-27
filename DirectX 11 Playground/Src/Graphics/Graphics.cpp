@@ -25,11 +25,12 @@ bool Graphics::init(HWND hwnd, int width, int height)
 
 	return true;
 }
-float ambientLightIntensity = 0.1f;
 void Graphics::renderFrame()
 {
 	static float t_time = 0;
 	static bool drawDebug = true;
+	static float ambientLightIntensity = 0.1f;
+
 	t_time += 0.01f;
 
 	//Update all constant buffers
@@ -84,11 +85,21 @@ void Graphics::renderFrame()
 	skybox.draw(camera.GetViewDirectionMatrix() * camera.GetProjectionMatrix());
 
 	//Debug stage, Draw OBBs and other gizmo visualization items
+	FXMVECTOR forward = camera.GetForwardVector();
+	
+	Ray ray(camera.GetPositionFloat3(), { forward.m128_f32[0] , forward.m128_f32[1] , forward.m128_f32[2] });
+	for (unsigned int meshIndex = 0; meshIndex < models[0].getMeshes().size(); meshIndex++)
+	{
+		drawDebug = models[0].getMeshes().at(meshIndex).getOBB().doesRayIntersect(ray);
+		if (drawDebug)
+			break;
+	}
+
 	if (drawDebug)
 	{
 		debugViewRenderingMaterial.bind(context.Get());
 		models[0].drawDebugView(camera.GetViewMatrix() * camera.GetProjectionMatrix());
-		models[1].drawDebugView(DirectX::XMMatrixScaling(2, 2, 2) * DirectX::XMMatrixTranslation(0, 4, 4) * camera.GetViewMatrix() * camera.GetProjectionMatrix());
+		//models[1].drawDebugView(DirectX::XMMatrixScaling(2, 2, 2) * DirectX::XMMatrixTranslation(0, 4, 4) * camera.GetViewMatrix() * camera.GetProjectionMatrix());
 	}
 	//Start rendering on to depth render texture
 	renderTexture.SetRenderTarget();

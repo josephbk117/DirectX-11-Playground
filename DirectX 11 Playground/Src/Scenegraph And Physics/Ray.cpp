@@ -25,5 +25,6 @@ const DirectX::XMFLOAT3& Ray::getDirection() const
 
 DirectX::FXMVECTOR Ray::getDirectionAsVector() const
 {
-	return DirectX::FXMVECTOR{ m_direction.x, m_direction.y , m_direction.z , 1 };
+	DirectX::FXMVECTOR f = DirectX::XMVector3Normalize({ m_direction.x, m_direction.y , m_direction.z});
+	return f;
 }

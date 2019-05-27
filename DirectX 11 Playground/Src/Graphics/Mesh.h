@@ -15,6 +15,10 @@ public:
 	Mesh& operator=(const Mesh & mesh);
 	void draw();
 	void drawOBB();
+	OBB& getOBB()
+	{
+		return obb;
+	}
 private:
 	VertexBuffer<Vertex> vertexBuffer;
 	IndexBuffer indexBuffer;

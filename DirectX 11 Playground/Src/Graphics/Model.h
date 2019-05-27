@@ -19,6 +19,10 @@ public:
 	}
 	void draw(const XMMATRIX& viewProjectionMatrix)override;
 	void drawDebugView(const XMMATRIX & viewProjectionMatrix);
+	std::vector<Mesh>& getMeshes()
+	{
+		return meshes;
+	}
 private:
 	std::vector<Mesh> meshes;
 	bool loadModel(const std::string & filePath);

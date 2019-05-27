@@ -2,6 +2,7 @@
 #include "..\Graphics\VertexBuffer.h"
 #include "..\Graphics\IndexBuffer.h"
 #include "..\Graphics\ConstantBuffer.h"
+#include "Ray.h"
 #include <DirectXCollision.h>
 #include <algorithm>
 
@@ -17,5 +18,6 @@ private:
 	BoundingOrientedBox m_boundOrientedBox;
 public:
 	void init(ID3D11Device * device, std::vector<Vertex>& vertices);
-	void draw(ID3D11DeviceContext* context)const;	
+	bool doesRayIntersect(const Ray& ray)const;
+	void draw(ID3D11DeviceContext* context)const;
 };

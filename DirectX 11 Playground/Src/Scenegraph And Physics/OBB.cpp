@@ -50,6 +50,12 @@ void OBB::init(ID3D11Device * device, std::vector<Vertex>& vertices)
 	}
 }
 
+bool OBB::doesRayIntersect(const Ray & ray)const
+{
+	float dist = 0.0f;
+	return m_boundOrientedBox.Intersects(ray.getOriginAsVector(), ray.getDirectionAsVector(), dist);
+}
+
 void OBB::draw(ID3D11DeviceContext * context) const
 {
 	UINT offset = 0;

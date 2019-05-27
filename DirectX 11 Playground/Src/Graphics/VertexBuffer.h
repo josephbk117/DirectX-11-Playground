@@ -5,7 +5,7 @@
 template<class T>
 class VertexBuffer
 {
-private:
+protected:
 	Microsoft::WRL::ComPtr<ID3D11Buffer> buffer;
 	UINT stride = sizeof(T);
 	UINT vertexCount = 0;
@@ -69,5 +69,46 @@ public:
 
 		HRESULT hr = device->CreateBuffer(&vertexBufferDesc, &vertexBufferData, buffer.GetAddressOf());
 		return hr;
+	}
+};
+
+template<class T>
+class DynamicVertexBuffer : public VertexBuffer<T>
+{
+private:
+	ID3D11Device* device = nullptr;
+public:
+	HRESULT init(ID3D11Device* device, T* data, UINT numVertices)
+	{
+		this->device = device;
+
+		if (VertexBuffer<T>::buffer.Get() != nullptr)
+			VertexBuffer<T>::buffer.Reset();
+
+		VertexBuffer<T>::vertexCount = numVertices;
+
+		D3D11_BUFFER_DESC vertexBufferDesc;
+		ZeroMemory(&vertexBufferDesc, sizeof(vertexBufferDesc));
+
+		vertexBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+		vertexBufferDesc.ByteWidth = VertexBuffer<T>::stride * numVertices;
+		vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+		vertexBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+		vertexBufferDesc.MiscFlags = 0;
+
+		D3D11_SUBRESOURCE_DATA vertexBufferData;
+		ZeroMemory(&vertexBufferData, sizeof(vertexBufferData));
+		vertexBufferData.pSysMem = data;
+
+		HRESULT hr = device->CreateBuffer(&vertexBufferDesc, &vertexBufferData, VertexBuffer<T>::buffer.GetAddressOf());
+		return hr;
+	}
+
+	void updateBuffer(ID3D11DeviceContext* context, T* data, UINT numVertices)
+	{
+		D3D11_MAPPED_SUBRESOURCE resource;
+		context->Map(VertexBuffer<T>::buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &resource);
+		memcpy(resource.pData, data, numVertices);
+		context->Unmap(VertexBuffer<T>::buffer, 0);
 	}
 };
