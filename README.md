@@ -6,13 +6,14 @@ A renderer in DirectX 11 and playing around with it.
 - [X] Model loading
 - [X] Render to texture support
 - [X] Skybox support
+- [X] Directional shadow mapping
 
 ### Things in progress:
-- Directional shadow mapping
 - Skinned model animation
+- Material system
+- Object oriented bounding box creation
 
 ### Things to implement:
-- [ ] Material system
 - [ ] Mesh instancing
 - [ ] Deferred Rendering
 - [ ] SSAO
