@@ -75,13 +75,9 @@ public:
 template<class T>
 class DynamicVertexBuffer : public VertexBuffer<T>
 {
-private:
-	ID3D11Device* device = nullptr;
 public:
 	HRESULT init(ID3D11Device* device, T* data, UINT numVertices)
 	{
-		this->device = device;
-
 		if (VertexBuffer<T>::buffer.Get() != nullptr)
 			VertexBuffer<T>::buffer.Reset();
 
@@ -107,8 +103,9 @@ public:
 	void updateBuffer(ID3D11DeviceContext* context, T* data, UINT numVertices)
 	{
 		D3D11_MAPPED_SUBRESOURCE resource;
-		context->Map(VertexBuffer<T>::buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &resource);
+		ZeroMemory(&resource, sizeof(D3D11_MAPPED_SUBRESOURCE));
+		context->Map(VertexBuffer<T>::buffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &resource);
 		memcpy(resource.pData, data, numVertices);
-		context->Unmap(VertexBuffer<T>::buffer, 0);
+		context->Unmap(VertexBuffer<T>::buffer.Get(), 0);
 	}
 };
