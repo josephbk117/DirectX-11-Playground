@@ -28,5 +28,5 @@ public:
 	void setOrigin(const DirectX::XMFLOAT3& origin);
 	void setDirection(const DirectX::XMFLOAT3& direction);
 
-	void draw(ID3D11Device* device,ID3D11DeviceContext * context);
+	void draw(ID3D11Device* device,ID3D11DeviceContext * context, ConstantBuffer<CB_VS_VertexShader>& cb_vs_vertexShader, const DirectX::XMMATRIX & viewProjectionMatrix);
 };

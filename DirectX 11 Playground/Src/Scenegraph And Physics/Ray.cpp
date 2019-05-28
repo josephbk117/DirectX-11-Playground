@@ -41,7 +41,7 @@ void Ray::setDirection(const DirectX::XMFLOAT3 & direction)
 	m_direction = direction;
 }
 
-void Ray::draw(ID3D11Device* device,ID3D11DeviceContext * context)
+void Ray::draw(ID3D11Device* device,ID3D11DeviceContext * context, ConstantBuffer<CB_VS_VertexShader>& cb_vs_vertexShader, const DirectX::XMMATRIX & viewProjectionMatrix)
 {
 	float minX = -0.5f, minY = -0.5f, minZ = -0.5f;
 	float maxX = 0.5f, maxY = 0.5f, maxZ = 0.5f;
@@ -74,6 +74,12 @@ void Ray::draw(ID3D11Device* device,ID3D11DeviceContext * context)
 			m_vertexBuffer.updateBuffer(context, obbVertices.data(), obbVertices.size());
 			isDirty = false;
 		}
+
+		cb_vs_vertexShader.data.mvpMatrix = viewProjectionMatrix;
+		cb_vs_vertexShader.data.worldMatrix = DirectX::XMMatrixIdentity();
+		cb_vs_vertexShader.applyChanges();
+
+		context->VSSetConstantBuffers(0, 1, cb_vs_vertexShader.getAddressOf());
 
 		UINT offset = 0;
 		context->IASetIndexBuffer(m_indexBuffer.get(), DXGI_FORMAT::DXGI_FORMAT_R32_UINT, 0);
