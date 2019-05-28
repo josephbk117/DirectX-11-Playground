@@ -88,8 +88,7 @@ void Graphics::renderFrame()
 	FXMVECTOR forward = camera.GetForwardVector();
 
 	static Ray ray(camera.GetPositionFloat3(), { forward.m128_f32[0] , 0 , forward.m128_f32[2] });
-	float val = sinf(t_time);
-	ray.setDirection({ val*3, 0, 1 });
+	static float val[3] = { 0,1,0 };
 	/*for (unsigned int meshIndex = 0; meshIndex < models[0].getMeshes().size(); meshIndex++)
 	{
 		drawDebug = models[0].getMeshes().at(meshIndex).getOBB().doesRayIntersect(ray);
@@ -101,7 +100,7 @@ void Graphics::renderFrame()
 	{
 		debugViewRenderingMaterial.bind(context.Get());
 		models[0].drawDebugView(camera.GetViewMatrix() * camera.GetProjectionMatrix());
-		//ray.draw(device.Get(), context.Get());
+		ray.draw(device.Get(), context.Get());
 		//models[1].drawDebugView(DirectX::XMMatrixScaling(2, 2, 2) * DirectX::XMMatrixTranslation(0, 4, 4) * camera.GetViewMatrix() * camera.GetProjectionMatrix());
 	}
 	//Start rendering on to depth render texture
@@ -144,6 +143,10 @@ void Graphics::renderFrame()
 	ImGui::Text(fpsString.c_str());
 	ImGui::SliderFloat("Ambient light intensity", &ambientLightIntensity, 0, 1, "%.2f");
 	ImGui::SliderFloat("Animation timeline", &t_time, 0.0f, 100.0f, "%.2f");
+	if (ImGui::SliderFloat3("Look dir", &val[0], -1.0f, 1.0f, "%.2f"))
+	{
+		ray.setDirection({ val[0], val[1], val[2] });
+	}
 	ImGui::ColorEdit3("Bounding box colour", &pixelUnlitBasicBuffer.data.colour.m128_f32[0]);
 	ImGui::Checkbox("Enable bounding box display", &drawDebug);
 	ImGui::End();
@@ -308,7 +311,7 @@ bool Graphics::initShaders()
 		shaderfolder = L"..\\Release\\";
 #endif
 #endif
-	}
+}
 
 	D3D11_INPUT_ELEMENT_DESC layout[] =
 	{

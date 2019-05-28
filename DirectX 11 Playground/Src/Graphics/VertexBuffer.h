@@ -105,7 +105,7 @@ public:
 		D3D11_MAPPED_SUBRESOURCE resource;
 		ZeroMemory(&resource, sizeof(D3D11_MAPPED_SUBRESOURCE));
 		context->Map(VertexBuffer<T>::buffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &resource);
-		memcpy(resource.pData, data, numVertices);
+		memcpy(resource.pData, data, numVertices * VertexBuffer<T>::stride);
 		context->Unmap(VertexBuffer<T>::buffer.Get(), 0);
 	}
 };
