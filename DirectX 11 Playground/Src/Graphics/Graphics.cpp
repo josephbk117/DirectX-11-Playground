@@ -88,7 +88,7 @@ void Graphics::renderFrame()
 	FXMVECTOR forward = camera.GetForwardVector();
 
 	static Ray ray(camera.GetPositionFloat3(), { forward.m128_f32[0] , 0 , forward.m128_f32[2] });
-	ray.setOrigin(camera.GetPositionFloat3());
+	ray.setOrigin(DirectX::XMVECTOR{ 0, 2, 0, 0 });
 	static float val[3] = { 0,1,0 };
 	for (unsigned int meshIndex = 0; meshIndex < models[0].getMeshes().size(); meshIndex++)
 	{
@@ -145,7 +145,7 @@ void Graphics::renderFrame()
 	ImGui::SliderFloat("Animation timeline", &t_time, 0.0f, 100.0f, "%.2f");
 	if (ImGui::SliderFloat3("Look dir", &val[0], -1.0f, 1.0f, "%.2f"))
 	{
-		ray.setDirection({ val[0], val[1], val[2] });
+		ray.setDirection(DirectX::XMVECTOR{ val[0], val[1], val[2] });
 	}
 	ImGui::ColorEdit3("Bounding box colour", &pixelUnlitBasicBuffer.data.colour.m128_f32[0]);
 	ImGui::Checkbox("Enable bounding box display", &drawDebug);

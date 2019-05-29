@@ -16,6 +16,7 @@ private:
 
 	bool hasInit = false;
 	bool isDirty = true;
+
 public:
 	Ray();
 	~Ray();
@@ -26,7 +27,8 @@ public:
 	const DirectX::XMFLOAT3& getDirection()const;
 	DirectX::FXMVECTOR getDirectionAsVector()const;
 	void setOrigin(const DirectX::XMFLOAT3& origin);
+	void setOrigin(const DirectX::XMVECTOR& origin);
 	void setDirection(const DirectX::XMFLOAT3& direction);
-
+	void setDirection(const DirectX::XMVECTOR& direction);
 	void draw(ID3D11Device* device,ID3D11DeviceContext * context, ConstantBuffer<CB_VS_VertexShader>& cb_vs_vertexShader, const DirectX::XMMATRIX & viewProjectionMatrix);
 };

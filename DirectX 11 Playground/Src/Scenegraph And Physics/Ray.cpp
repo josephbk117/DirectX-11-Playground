@@ -15,7 +15,7 @@ const DirectX::XMFLOAT3& Ray::getOrigin() const
 
 DirectX::FXMVECTOR Ray::getOriginAsVector() const
 {
-	 return DirectX::FXMVECTOR{ m_origin.x, m_origin.y ,m_origin.z , 1 };
+	return DirectX::FXMVECTOR{ m_origin.x, m_origin.y ,m_origin.z , 1 };
 }
 
 const DirectX::XMFLOAT3& Ray::getDirection() const
@@ -25,7 +25,7 @@ const DirectX::XMFLOAT3& Ray::getDirection() const
 
 DirectX::FXMVECTOR Ray::getDirectionAsVector() const
 {
-	DirectX::FXMVECTOR f = DirectX::XMVector3Normalize({ m_direction.x, m_direction.y , m_direction.z});
+	DirectX::FXMVECTOR f = DirectX::XMVector3Normalize({ m_direction.x, m_direction.y , m_direction.z });
 	return f;
 }
 
@@ -35,28 +35,66 @@ void Ray::setOrigin(const DirectX::XMFLOAT3 & origin)
 	m_origin = origin;
 }
 
+void Ray::setOrigin(const DirectX::XMVECTOR & origin)
+{
+	isDirty = true;
+	m_origin.x = origin.m128_f32[0];
+	m_origin.y = origin.m128_f32[1];
+	m_origin.z = origin.m128_f32[2];
+}
+
 void Ray::setDirection(const DirectX::XMFLOAT3 & direction)
 {
 	isDirty = true;
 	m_direction = direction;
 }
 
-void Ray::draw(ID3D11Device* device,ID3D11DeviceContext * context, ConstantBuffer<CB_VS_VertexShader>& cb_vs_vertexShader, const DirectX::XMMATRIX & viewProjectionMatrix)
+void Ray::setDirection(const DirectX::XMVECTOR & direction)
+{
+	isDirty = true;
+	m_direction.x = direction.m128_f32[0];
+	m_direction.y = direction.m128_f32[1];
+	m_direction.z = direction.m128_f32[2];
+}
+
+void Ray::draw(ID3D11Device* device, ID3D11DeviceContext * context, ConstantBuffer<CB_VS_VertexShader>& cb_vs_vertexShader, const DirectX::XMMATRIX & viewProjectionMatrix)
 {
 	float minX = -0.5f, minY = -0.5f, minZ = -0.5f;
 	float maxX = 0.5f, maxY = 0.5f, maxZ = 0.5f;
 
 	DirectX::XMFLOAT3 rayEndpoint = m_origin;
-	DirectX::FXMVECTOR f = DirectX::XMVector3Normalize({ m_direction.x, m_direction.y , m_direction.z });
-	rayEndpoint.x += f.m128_f32[0];
-	rayEndpoint.y += f.m128_f32[1];
-	rayEndpoint.z += f.m128_f32[2];
+	DirectX::XMVECTOR normalizedDir = DirectX::XMVector3Normalize({ m_direction.x, m_direction.y , m_direction.z });
+	rayEndpoint.x += normalizedDir.m128_f32[0];
+	rayEndpoint.y += normalizedDir.m128_f32[1];
+	rayEndpoint.z += normalizedDir.m128_f32[2];
+
+	DirectX::XMVECTOR rightVec = DirectX::XMVector3Normalize(DirectX::XMVector3Cross({ m_direction.x, m_direction.y, m_direction.z }, { 0,1,0 }));
+	rightVec = DirectX::XMVectorSubtract(rightVec, normalizedDir);
+	rightVec = DirectX::XMVector3Normalize(rightVec);
+	rightVec = DirectX::XMVectorScale(rightVec, 0.15f);
+
+	DirectX::XMVECTOR leftVec = DirectX::XMVector3Normalize(DirectX::XMVector3Cross({ m_direction.x, m_direction.y, m_direction.z }, { 0, -1, 0 }));
+	leftVec = DirectX::XMVectorSubtract(leftVec, normalizedDir);
+	leftVec = DirectX::XMVector3Normalize(leftVec);
+	leftVec = DirectX::XMVectorScale(leftVec, 0.15f);
+
 
 	std::vector<Vertex> obbVertices = { Vertex(m_origin.x, m_origin.y, m_origin.z, 0, 0, 0, 1, 0),
 										Vertex(rayEndpoint.x, rayEndpoint.y, rayEndpoint.z, 0, 0, 0, 1, 0),
-									};
+										Vertex(
+											rayEndpoint.x + rightVec.m128_f32[0],
+											rayEndpoint.y + rightVec.m128_f32[1],
+											rayEndpoint.z + rightVec.m128_f32[2], 0, 0, 0, 1, 0),
+										Vertex(
+											rayEndpoint.x + leftVec.m128_f32[0],
+											rayEndpoint.y + leftVec.m128_f32[1],
+											rayEndpoint.z + leftVec.m128_f32[2], 0, 0, 0, 1, 0),
+	};
 
-	std::vector<DWORD> obbIndices = {0,1};
+	std::vector<DWORD> obbIndices = { 0, 1,
+									1, 2,
+									1, 3,
+									2, 3};
 
 	if (!hasInit)
 	{
