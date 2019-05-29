@@ -159,6 +159,10 @@ void Graphics::renderFrame()
 	swapchain->Present(0, NULL);
 }
 
+void Graphics::onWindowResized(HWND hwnd, int width, int height)
+{
+}
+
 bool Graphics::initDirectX(HWND hwnd, int width, int height)
 {
 	try
@@ -266,6 +270,15 @@ bool Graphics::initDirectX(HWND hwnd, int width, int height)
 		hr = device->CreateRasterizerState(&rasterizerDesc, this->debugRasterizerState.GetAddressOf());
 		COM_ERROR_IF_FAILED(hr, "Error creating debugging rasterizer state");
 
+		//Create default rasterizer desc
+		ZeroMemory(&rasterizerDesc, sizeof(D3D11_RASTERIZER_DESC));
+
+		rasterizerDesc.FillMode = D3D11_FILL_MODE::D3D11_FILL_SOLID;
+		rasterizerDesc.CullMode = D3D11_CULL_MODE::D3D11_CULL_BACK;
+
+		hr = device->CreateRasterizerState(&rasterizerDesc, this->lightDepthRenderingRasterizerState.GetAddressOf());
+		COM_ERROR_IF_FAILED(hr, "Error creating light depth rendering rasterizer state");
+
 		//Create sampler state
 		D3D11_SAMPLER_DESC samplerDesc;
 		ZeroMemory(&samplerDesc, sizeof(D3D11_SAMPLER_DESC));
@@ -296,7 +309,6 @@ bool Graphics::initDirectX(HWND hwnd, int width, int height)
 
 bool Graphics::initShaders()
 {
-
 	std::wstring shaderfolder = L"";
 #pragma region DetermineShaderPath
 	if (IsDebuggerPresent() == TRUE)
@@ -387,7 +399,7 @@ bool Graphics::initScene()
 		regularSkinnedMaterial.setShaders(&skinnedVertexShader, &pixelShader);
 		regularSkinnedMaterial.addVertexConstantBuffer(&vertexSkinnedInfoConstantBuffer);
 
-		depthRenderingMaterial.setRenderStates(depthStencilState.Get(), defaultRasterizerState.Get(), samplerState.Get());
+		depthRenderingMaterial.setRenderStates(depthStencilState.Get(), lightDepthRenderingRasterizerState.Get(), samplerState.Get());
 		depthRenderingMaterial.setShaders(&vertexShader, &depthBasicShader);
 		depthRenderingMaterial.addVertexConstantBuffer(&vertexInfoConstantBuffer);
 

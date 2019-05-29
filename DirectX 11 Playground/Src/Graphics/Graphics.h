@@ -22,6 +22,7 @@ class Graphics
 public:
 	bool init(HWND hwnd, int width, int height);
 	void renderFrame();
+	void onWindowResized(HWND hwnd, int width, int height);
 	Camera camera;
 
 private:
@@ -64,6 +65,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilState> depthStencilState;
 	Microsoft::WRL::ComPtr<ID3D11RasterizerState> defaultRasterizerState;
 	Microsoft::WRL::ComPtr<ID3D11RasterizerState> debugRasterizerState;
+	Microsoft::WRL::ComPtr<ID3D11RasterizerState> lightDepthRenderingRasterizerState;
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerState;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture;
 

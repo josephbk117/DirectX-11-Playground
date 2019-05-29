@@ -29,6 +29,18 @@ LRESULT WindowContainer::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM 
 
 	switch (uMsg)
 	{
+	case WM_SIZING:
+	{
+		RECT rect;
+		if (GetWindowRect(hwnd, &rect))
+		{
+			int width = rect.right - rect.left;
+			int height = rect.bottom - rect.top;
+			gfx.onWindowResized(hwnd, width, height);
+		}
+		return 0;
+	}
+	// All other messages
 		//Keyboard Messages
 	case WM_KEYDOWN:
 	{
