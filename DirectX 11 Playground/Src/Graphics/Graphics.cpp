@@ -30,8 +30,10 @@ void Graphics::renderFrame()
 	static float t_time = 0;
 	static bool drawDebug = true;
 	static float ambientLightIntensity = 0.1f;
-
+	static DirectX::XMVECTOR lightDir;
 	t_time += 0.01f;
+
+	dirLight.setRotation(lightDir);
 
 	//Update all constant buffers
 	skinnedModel.animate(t_time, &vertexSkinnedInfoConstantBuffer.data.jointMatrices[0]);
@@ -143,6 +145,7 @@ void Graphics::renderFrame()
 	ImGui::Text(fpsString.c_str());
 	ImGui::SliderFloat("Ambient light intensity", &ambientLightIntensity, 0, 1, "%.2f");
 	ImGui::SliderFloat("Animation timeline", &t_time, 0.0f, 100.0f, "%.2f");
+	ImGui::SliderFloat3("Light dir", &lightDir.m128_f32[0], -1.0f, 1.0f, "%.2f");
 	if (ImGui::SliderFloat3("Look dir", &val[0], -1.0f, 1.0f, "%.2f"))
 	{
 		ray.setDirection(DirectX::XMVECTOR{ val[0], val[1], val[2] });

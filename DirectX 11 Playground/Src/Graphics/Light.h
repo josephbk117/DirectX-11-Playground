@@ -22,6 +22,11 @@ public:
 	{
 		return lightCamera.GetPositionFloat3();
 	}
+
+	void setRotation(const XMVECTOR& dir)
+	{
+		lightCamera.SetRotation(dir);
+	}
 };
 
 class DirectionalLight : public Light

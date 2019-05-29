@@ -96,6 +96,7 @@ void Camera::AdjustPosition(float x, float y, float z)
 void Camera::SetRotation(const XMVECTOR & rot)
 {
 	this->rotVector = rot;
+	this->rotVector = XMVector3Normalize(this->rotVector);
 	XMStoreFloat3(&this->rot, rot);
 	this->UpdateViewMatrix();
 }
@@ -104,6 +105,7 @@ void Camera::SetRotation(float x, float y, float z)
 {
 	this->rot = XMFLOAT3(x, y, z);
 	this->rotVector = XMLoadFloat3(&this->rot);
+	this->rotVector = XMVector3Normalize(this->rotVector);
 	this->UpdateViewMatrix();
 }
 
