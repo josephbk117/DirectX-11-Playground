@@ -63,21 +63,33 @@ void Ray::draw(ID3D11Device* device, ID3D11DeviceContext * context, ConstantBuff
 	float maxX = 0.5f, maxY = 0.5f, maxZ = 0.5f;
 
 	DirectX::XMFLOAT3 rayEndpoint = m_origin;
+
 	DirectX::XMVECTOR normalizedDir = DirectX::XMVector3Normalize({ m_direction.x, m_direction.y , m_direction.z });
 	rayEndpoint.x += normalizedDir.m128_f32[0];
 	rayEndpoint.y += normalizedDir.m128_f32[1];
 	rayEndpoint.z += normalizedDir.m128_f32[2];
 
-	DirectX::XMVECTOR rightVec = DirectX::XMVector3Normalize(DirectX::XMVector3Cross({ m_direction.x, m_direction.y, m_direction.z }, { 0,1,0 }));
-	rightVec = DirectX::XMVectorSubtract(rightVec, normalizedDir);
+	DirectX::XMVECTOR rightVec = DirectX::XMVector3Normalize(DirectX::XMVector3Cross({ m_direction.x, m_direction.y, m_direction.z }, { 0, 1, 0 }));
+	rightVec = DirectX::XMVectorSubtract(rightVec, DirectX::XMVectorScale(normalizedDir, 4));
+	rightVec = DirectX::XMVector3Normalize(rightVec);
+
+	DirectX::XMVECTOR upVec = DirectX::XMVector3Cross(rightVec, normalizedDir);
+	upVec = DirectX::XMVector3Normalize(upVec);
+
+	rightVec = DirectX::XMVectorAdd(rightVec, DirectX::XMVectorScale(upVec, 0.25f));
 	rightVec = DirectX::XMVector3Normalize(rightVec);
 	rightVec = DirectX::XMVectorScale(rightVec, 0.15f);
 
 	DirectX::XMVECTOR leftVec = DirectX::XMVector3Normalize(DirectX::XMVector3Cross({ m_direction.x, m_direction.y, m_direction.z }, { 0, -1, 0 }));
-	leftVec = DirectX::XMVectorSubtract(leftVec, normalizedDir);
+	leftVec = DirectX::XMVectorSubtract(leftVec, DirectX::XMVectorScale(normalizedDir, 4));
+	leftVec = DirectX::XMVector3Normalize(leftVec);
+	leftVec = DirectX::XMVectorAdd(leftVec, DirectX::XMVectorScale(upVec, 0.25f));
 	leftVec = DirectX::XMVector3Normalize(leftVec);
 	leftVec = DirectX::XMVectorScale(leftVec, 0.15f);
 
+	DirectX::XMVECTOR topVec, bottomVec;
+	topVec = DirectX::XMVector3Reflect(rightVec, upVec);
+	bottomVec = DirectX::XMVector3Reflect(leftVec, upVec);
 
 	std::vector<Vertex> obbVertices = { Vertex(m_origin.x, m_origin.y, m_origin.z, 0, 0, 0, 1, 0),
 										Vertex(rayEndpoint.x, rayEndpoint.y, rayEndpoint.z, 0, 0, 0, 1, 0),
@@ -89,12 +101,27 @@ void Ray::draw(ID3D11Device* device, ID3D11DeviceContext * context, ConstantBuff
 											rayEndpoint.x + leftVec.m128_f32[0],
 											rayEndpoint.y + leftVec.m128_f32[1],
 											rayEndpoint.z + leftVec.m128_f32[2], 0, 0, 0, 1, 0),
+										Vertex(
+											rayEndpoint.x + topVec.m128_f32[0],
+											rayEndpoint.y + topVec.m128_f32[1],
+											rayEndpoint.z + topVec.m128_f32[2], 0, 0, 0, 1, 0),
+										Vertex(
+											rayEndpoint.x + bottomVec.m128_f32[0],
+											rayEndpoint.y + bottomVec.m128_f32[1],
+											rayEndpoint.z + bottomVec.m128_f32[2], 0, 0, 0, 1, 0),
 	};
 
-	std::vector<DWORD> obbIndices = { 0, 1,
+	std::vector<DWORD> obbIndices = {
+									0, 1,
 									1, 2,
 									1, 3,
-									2, 3};
+									2, 3,
+									1, 4,
+									1, 5,
+									4, 5,
+									2, 4,
+									3, 5
+	};
 
 	if (!hasInit)
 	{
