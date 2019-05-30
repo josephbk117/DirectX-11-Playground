@@ -30,7 +30,7 @@ void Graphics::renderFrame()
 	static float t_time = 0;
 	static bool drawDebug = true;
 	static float ambientLightIntensity = 0.1f;
-	static DirectX::XMVECTOR lightDir;
+	static DirectX::XMVECTOR lightDir = { 0.8f, 0, 0 };
 	t_time += 0.01f;
 
 	dirLight.setRotation(lightDir);
@@ -161,6 +161,40 @@ void Graphics::renderFrame()
 
 void Graphics::onWindowResized(HWND hwnd, int width, int height)
 {
+	//if (swapchain.Get() != nullptr)
+	//{
+	//	context->OMSetRenderTargets(0, 0, 0);
+	//	context->ClearState();
+	//	renderTargetView->Release();
+
+	//	HRESULT hr = swapchain->ResizeBuffers(0, 0, 0, DXGI_FORMAT_UNKNOWN, 0);
+	//	/*if (FAILED(hr))
+	//		ErrorLogger::log(hr, "Swapchain buffer resize failed");*/
+	//	//error hadling
+	//	// Get buffer and create a render-target-view.
+	//	depthStencilBuffer.Reset();
+	//	hr = swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&depthStencilBuffer);
+	//	if (FAILED(hr))
+	//		ErrorLogger::log(hr, "Swapchain buffer creation failed");
+	//	// Perform error handling here!
+
+	//	hr = device->CreateRenderTargetView(depthStencilBuffer.Get(), NULL, renderTargetView.GetAddressOf());
+	//	if (FAILED(hr))
+	//		ErrorLogger::log(hr, "Render target view creation failed");
+	//	// Perform error handling here!
+
+	//	context->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), NULL);
+
+	//	// Set up the viewport.
+	//	D3D11_VIEWPORT vp;
+	//	vp.Width = width;
+	//	vp.Height = height;
+	//	vp.MinDepth = 0.0f;
+	//	vp.MaxDepth = 1.0f;
+	//	vp.TopLeftX = 0;
+	//	vp.TopLeftY = 0;
+	//	context->RSSetViewports(1, &vp);
+	//}
 }
 
 bool Graphics::initDirectX(HWND hwnd, int width, int height)
@@ -295,6 +329,43 @@ bool Graphics::initDirectX(HWND hwnd, int width, int height)
 		hr = device->CreateSamplerState(&samplerDesc, samplerState.GetAddressOf());
 		COM_ERROR_IF_FAILED(hr, "Error creating sampler state");
 
+		//Create blend states
+		D3D11_BLEND_DESC blendDesc;
+		ZeroMemory(&blendDesc, sizeof(D3D11_BLEND_DESC));
+
+		D3D11_RENDER_TARGET_BLEND_DESC renderTargetBlendDesc;
+		ZeroMemory(&renderTargetBlendDesc, sizeof(D3D11_RENDER_TARGET_BLEND_DESC));
+
+		renderTargetBlendDesc.BlendEnable = true;
+		renderTargetBlendDesc.SrcBlend = D3D11_BLEND::D3D11_BLEND_SRC_ALPHA;
+		renderTargetBlendDesc.DestBlend = D3D11_BLEND::D3D11_BLEND_INV_SRC_ALPHA;
+		renderTargetBlendDesc.BlendOp = D3D11_BLEND_OP::D3D11_BLEND_OP_ADD;
+		renderTargetBlendDesc.SrcBlendAlpha = D3D11_BLEND::D3D11_BLEND_ONE;
+		renderTargetBlendDesc.DestBlendAlpha = D3D11_BLEND::D3D11_BLEND_ZERO;
+		renderTargetBlendDesc.BlendOpAlpha = D3D11_BLEND_OP::D3D11_BLEND_OP_ADD;
+		renderTargetBlendDesc.RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE::D3D11_COLOR_WRITE_ENABLE_ALL;
+
+		blendDesc.RenderTarget[0] = renderTargetBlendDesc;
+
+		hr = device->CreateBlendState(&blendDesc, defaultBlendState.GetAddressOf());
+		COM_ERROR_IF_FAILED(hr, "Error creating Blend state");
+
+		ZeroMemory(&blendDesc, sizeof(D3D11_BLEND_DESC));
+		ZeroMemory(&renderTargetBlendDesc, sizeof(D3D11_RENDER_TARGET_BLEND_DESC));
+		renderTargetBlendDesc.BlendEnable = false;
+		renderTargetBlendDesc.SrcBlend = D3D11_BLEND::D3D11_BLEND_SRC_ALPHA;
+		renderTargetBlendDesc.DestBlend = D3D11_BLEND::D3D11_BLEND_INV_SRC_ALPHA;
+		renderTargetBlendDesc.BlendOp = D3D11_BLEND_OP::D3D11_BLEND_OP_ADD;
+		renderTargetBlendDesc.SrcBlendAlpha = D3D11_BLEND::D3D11_BLEND_ONE;
+		renderTargetBlendDesc.DestBlendAlpha = D3D11_BLEND::D3D11_BLEND_ZERO;
+		renderTargetBlendDesc.BlendOpAlpha = D3D11_BLEND_OP::D3D11_BLEND_OP_ADD;
+		renderTargetBlendDesc.RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE::D3D11_COLOR_WRITE_ENABLE_ALL;
+
+		blendDesc.RenderTarget[0] = renderTargetBlendDesc;
+
+		hr = device->CreateBlendState(&blendDesc, disabledBlendState.GetAddressOf());
+		COM_ERROR_IF_FAILED(hr, "Error creating Blend state");
+
 		//Initialize an additional Rendertexture
 		renderTexture.Initialize(device.Get(), context.Get(), depthStencilView.Get(), width, height);
 	}
@@ -389,25 +460,26 @@ bool Graphics::initScene()
 		hr = pixelUnlitBasicBuffer.init(device.Get(), context.Get());
 		COM_ERROR_IF_FAILED(hr, "Failed to create constant buffer");
 
-		regularMaterial.setRenderStates(depthStencilState.Get(), defaultRasterizerState.Get(), samplerState.Get());
+		regularMaterial.setRenderStates(depthStencilState.Get(), defaultRasterizerState.Get(), samplerState.Get(), disabledBlendState.Get());
 		regularMaterial.setShaders(&vertexShader, &pixelShader);
 		regularMaterial.addVertexConstantBuffer(&vertexInfoConstantBuffer);
 		regularMaterial.addVertexConstantBuffer(&vertexInfoLightingBuffer);
 		regularMaterial.addPixelConstantBuffer(&pixelInfoLightingBuffer);
 
-		regularSkinnedMaterial.setRenderStates(depthStencilState.Get(), defaultRasterizerState.Get(), samplerState.Get());
+		regularSkinnedMaterial.setRenderStates(depthStencilState.Get(), defaultRasterizerState.Get(), samplerState.Get(), defaultBlendState.Get());
 		regularSkinnedMaterial.setShaders(&skinnedVertexShader, &pixelShader);
 		regularSkinnedMaterial.addVertexConstantBuffer(&vertexSkinnedInfoConstantBuffer);
+		regularSkinnedMaterial.setRenderQueue(RenderQueue::TRANSPARENT_QUEUE);
 
-		depthRenderingMaterial.setRenderStates(depthStencilState.Get(), lightDepthRenderingRasterizerState.Get(), samplerState.Get());
+		depthRenderingMaterial.setRenderStates(depthStencilState.Get(), lightDepthRenderingRasterizerState.Get(), samplerState.Get(), disabledBlendState.Get());
 		depthRenderingMaterial.setShaders(&vertexShader, &depthBasicShader);
 		depthRenderingMaterial.addVertexConstantBuffer(&vertexInfoConstantBuffer);
 
-		unlitScreenRenderingMaterial.setRenderStates(depthStencilState.Get(), defaultRasterizerState.Get(), samplerState.Get());
+		unlitScreenRenderingMaterial.setRenderStates(depthStencilState.Get(), defaultRasterizerState.Get(), samplerState.Get(), disabledBlendState.Get());
 		unlitScreenRenderingMaterial.setShaders(&vertexShader, &unlitBasicPixelShader);
 		unlitScreenRenderingMaterial.addVertexConstantBuffer(&vertexInfoConstantBuffer);
 
-		debugViewRenderingMaterial.setRenderStates(depthStencilState.Get(), debugRasterizerState.Get(), samplerState.Get());
+		debugViewRenderingMaterial.setRenderStates(depthStencilState.Get(), debugRasterizerState.Get(), samplerState.Get(), disabledBlendState.Get());
 		debugViewRenderingMaterial.setShaders(&vertexShader, &unlitBasicPixelShader);
 		debugViewRenderingMaterial.addVertexConstantBuffer(&vertexInfoConstantBuffer);
 		debugViewRenderingMaterial.addPixelConstantBuffer(&pixelUnlitBasicBuffer);

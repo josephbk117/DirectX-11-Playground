@@ -55,5 +55,5 @@ float4 main(PS_IN input) : SV_TARGET
 	col = lerp(col, float3(0.3,0.3,0.3), pow(fogVal, 3));
 	col *= visibilty;
 
-	return float4(col,1);
+	return float4(col,0.5);
 }

@@ -57,7 +57,7 @@ void Ray::setDirection(const DirectX::XMVECTOR & direction)
 	m_direction.z = direction.m128_f32[2];
 }
 
-void Ray::draw(ID3D11Device* device, ID3D11DeviceContext * context, ConstantBuffer<CB_VS_VertexShader>& cb_vs_vertexShader, const DirectX::XMMATRIX & viewProjectionMatrix)
+void Ray::draw(ID3D11Device* device, ID3D11DeviceContext * context, VertexConstantBuffer<CB_VS_VertexShader>& cb_vs_vertexShader, const DirectX::XMMATRIX & viewProjectionMatrix)
 {
 	float minX = -0.5f, minY = -0.5f, minZ = -0.5f;
 	float maxX = 0.5f, maxY = 0.5f, maxZ = 0.5f;

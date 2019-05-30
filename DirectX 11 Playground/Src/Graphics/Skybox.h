@@ -7,7 +7,7 @@ private:
 	CubemapTexture cubemap;
 	Model model;
 public:
-	void init(ID3D11Device* device, ID3D11DeviceContext* context, ConstantBuffer<CB_VS_VertexShader>& constBuffer, const CubemapTexture& cubemap);
+	void init(ID3D11Device* device, ID3D11DeviceContext* context, VertexConstantBuffer<CB_VS_VertexShader>& constBuffer, const CubemapTexture& cubemap);
 	void draw(const XMMATRIX & viewProjectionMatrix);
 };
 

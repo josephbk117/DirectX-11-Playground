@@ -87,8 +87,8 @@ public:
 class SkinnedModel : public ModelInterface<SkinnedVertex, CB_VS_Skinned_VertexShader>
 {
 public:
-	bool init(const std::string& filePath, ID3D11Device * device, ID3D11DeviceContext* context, ID3D11ShaderResourceView* texture, ConstantBuffer<CB_VS_Skinned_VertexShader>& cb_vs_vertexShader)override;
-	bool init(std::vector<SkinnedVertex> vertices, std::vector<DWORD> indices, ID3D11Device * device, ID3D11DeviceContext* context, ID3D11ShaderResourceView* texture, ConstantBuffer<CB_VS_Skinned_VertexShader>& cb_vs_vertexShader)override;
+	bool init(const std::string& filePath, ID3D11Device * device, ID3D11DeviceContext* context, ID3D11ShaderResourceView* texture, VertexConstantBuffer<CB_VS_Skinned_VertexShader>& cb_vs_vertexShader)override;
+	bool init(std::vector<SkinnedVertex> vertices, std::vector<DWORD> indices, ID3D11Device * device, ID3D11DeviceContext* context, ID3D11ShaderResourceView* texture, VertexConstantBuffer<CB_VS_Skinned_VertexShader>& cb_vs_vertexShader)override;
 	void setTexture(ID3D11ShaderResourceView* texture)override;
 	void draw(const XMMATRIX& viewProjectionMatrix)override;
 	void animate(float time, XMMATRIX* jointMatrices)const;

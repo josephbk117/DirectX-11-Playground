@@ -1,6 +1,6 @@
 #include "SkinnedModel.h"
 #include <iostream>
-bool SkinnedModel::init(const std::string & filePath, ID3D11Device * device, ID3D11DeviceContext * context, ID3D11ShaderResourceView * texture, ConstantBuffer<CB_VS_Skinned_VertexShader>& cb_vs_vertexShader)
+bool SkinnedModel::init(const std::string & filePath, ID3D11Device * device, ID3D11DeviceContext * context, ID3D11ShaderResourceView * texture, VertexConstantBuffer<CB_VS_Skinned_VertexShader>& cb_vs_vertexShader)
 {
 	this->device = device;
 	this->context = context;
@@ -24,7 +24,7 @@ bool SkinnedModel::init(const std::string & filePath, ID3D11Device * device, ID3
 	return true;
 }
 
-bool SkinnedModel::init(std::vector<SkinnedVertex> vertices, std::vector<DWORD> indices, ID3D11Device * device, ID3D11DeviceContext * context, ID3D11ShaderResourceView * texture, ConstantBuffer<CB_VS_Skinned_VertexShader>& cb_vs_vertexShader)
+bool SkinnedModel::init(std::vector<SkinnedVertex> vertices, std::vector<DWORD> indices, ID3D11Device * device, ID3D11DeviceContext * context, ID3D11ShaderResourceView * texture, VertexConstantBuffer<CB_VS_Skinned_VertexShader>& cb_vs_vertexShader)
 {
 	this->device = device;
 	this->context = context;

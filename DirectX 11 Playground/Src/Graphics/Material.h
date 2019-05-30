@@ -5,21 +5,27 @@
 #include <d3d11.h>
 #include <wrl\client.h>
 
+enum class RenderQueue { OPAQUE_QUEUE, TRANSPARENT_QUEUE };
+
 class Material
 {
 private:
 	ID3D11DepthStencilState* depthStencilState = nullptr;
 	ID3D11RasterizerState* rasterizerState = nullptr;
 	ID3D11SamplerState* samplerState = nullptr;
-
-	D3D11_PRIMITIVE_TOPOLOGY topology = D3D11_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	ID3D11BlendState* blendState = nullptr;
 
 	VertexShader* vertexShader = nullptr;
 	PixelShader* pixelShader = nullptr;
 
-	std::vector<BaseConstantBuffer*> vertexConstantBuffers;
-	std::vector<BaseConstantBuffer*> pixelConstantBuffers;
+	D3D11_PRIMITIVE_TOPOLOGY topology = D3D11_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
+	std::vector<BaseVertexConstantBuffer*> vertexConstantBuffers;
+	std::vector<BasePixelConstantBuffer*> pixelConstantBuffers;
+
+	RenderQueue renderQueue = RenderQueue::OPAQUE_QUEUE;
+	bool castShadow = true;
+	bool recieveShadow = true;
 #if _DEBUG
 	bool isCompletlyInitialized[4] = { false, false, true, true };
 #endif
@@ -27,10 +33,18 @@ private:
 public:
 	Material();
 	~Material();
-	void setRenderStates(ID3D11DepthStencilState* depthStencilState, ID3D11RasterizerState* rasterizerState, ID3D11SamplerState* samplerState);
+	void setRenderStates(ID3D11DepthStencilState* depthStencilState, ID3D11RasterizerState* rasterizerState, ID3D11SamplerState* samplerState, ID3D11BlendState* blendState);
+	void setShadowAndRenderQueueStates(RenderQueue queue, bool castShadow, bool recieveShadow);
+	void setRenderQueue(RenderQueue queue);
+	void setIfCastsShadow(bool castShadow);
+	void setIfRecieveShadow(bool recieveShadow);
 	void setShaders(VertexShader* vertexShader, PixelShader* pixelShader);
 	void setTopologyType(D3D11_PRIMITIVE_TOPOLOGY topology);
-	void addVertexConstantBuffer(BaseConstantBuffer* constantBuffer);
-	void addPixelConstantBuffer(BaseConstantBuffer* constantBuffer);
+	void addVertexConstantBuffer(BaseVertexConstantBuffer* constantBuffer);
+	void addPixelConstantBuffer(BasePixelConstantBuffer* constantBuffer);
+	bool doesCastShadow()const;
+	bool doesRecieveShadow()const;
+	RenderQueue getRenderQueue()const;
+	void getShadowAndRenderQueueStates(RenderQueue& queue, bool& castShadow, bool& recieveShadow);
 	void bind(ID3D11DeviceContext* context)const;
 };

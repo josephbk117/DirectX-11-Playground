@@ -41,11 +41,11 @@ private:
 	PixelShader unlitBasicPixelShader;
 	PixelShader depthBasicShader;
 
-	ConstantBuffer<CB_VS_VertexShader> vertexInfoConstantBuffer;
-	ConstantBuffer<CB_VS_Skinned_VertexShader> vertexSkinnedInfoConstantBuffer;
-	ConstantBuffer<CB_VS_LightBuffer> vertexInfoLightingBuffer;
-	ConstantBuffer<CB_PS_LightBuffer> pixelInfoLightingBuffer;
-	ConstantBuffer<CB_PS_UnlitBasic> pixelUnlitBasicBuffer;
+	VertexConstantBuffer<CB_VS_VertexShader> vertexInfoConstantBuffer;
+	VertexConstantBuffer<CB_VS_Skinned_VertexShader> vertexSkinnedInfoConstantBuffer;
+	VertexConstantBuffer<CB_VS_LightBuffer> vertexInfoLightingBuffer;
+	PixelConstantBuffer<CB_PS_LightBuffer> pixelInfoLightingBuffer;
+	PixelConstantBuffer<CB_PS_UnlitBasic> pixelUnlitBasicBuffer;
 
 	RenderTexture renderTexture;
 	CubemapTexture cubemap;
@@ -67,6 +67,8 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11RasterizerState> debugRasterizerState;
 	Microsoft::WRL::ComPtr<ID3D11RasterizerState> lightDepthRenderingRasterizerState;
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerState;
+	Microsoft::WRL::ComPtr<ID3D11BlendState> defaultBlendState;
+	Microsoft::WRL::ComPtr<ID3D11BlendState> disabledBlendState;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture;
 
 	Timer timer;

@@ -1,6 +1,6 @@
 #include "Skybox.h"
 #include "Primitive3DModels.h"
-void Skybox::init(ID3D11Device* device, ID3D11DeviceContext* context, ConstantBuffer<CB_VS_VertexShader>& constBuffer, const CubemapTexture & cubemap)
+void Skybox::init(ID3D11Device* device, ID3D11DeviceContext* context, VertexConstantBuffer<CB_VS_VertexShader>& constBuffer, const CubemapTexture & cubemap)
 {
 	this->cubemap = cubemap;
 	model.init(Primitive3DModels::QUAD.vertices, Primitive3DModels::QUAD.indices, device, context, this->cubemap.getTextures()[0].Get(), constBuffer);

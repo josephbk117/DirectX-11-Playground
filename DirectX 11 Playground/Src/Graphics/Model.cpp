@@ -1,6 +1,6 @@
 #include "Model.h"
 
-bool Model::init(const std::string& filePath, ID3D11Device * device, ID3D11DeviceContext * context, ID3D11ShaderResourceView * texture, ConstantBuffer<CB_VS_VertexShader>& cb_vs_vertexShader)
+bool Model::init(const std::string& filePath, ID3D11Device * device, ID3D11DeviceContext * context, ID3D11ShaderResourceView * texture, VertexConstantBuffer<CB_VS_VertexShader>& cb_vs_vertexShader)
 {
 	this->device = device;
 	this->context = context;
@@ -26,7 +26,7 @@ bool Model::init(const std::string& filePath, ID3D11Device * device, ID3D11Devic
 }
 
 bool Model::init(std::vector<Vertex> vertices, std::vector<DWORD> indices, ID3D11Device * device, ID3D11DeviceContext* context,
-	ID3D11ShaderResourceView* texture, ConstantBuffer<CB_VS_VertexShader>& cb_vs_vertexShader)
+	ID3D11ShaderResourceView* texture, VertexConstantBuffer<CB_VS_VertexShader>& cb_vs_vertexShader)
 {
 	this->device = device;
 	this->context = context;
