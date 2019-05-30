@@ -63,6 +63,13 @@ void Graphics::renderFrame()
 
 	float bgColour[] = { 0.1f,0.1f,0.1f,1 };
 
+	/*
+	Rendering stages:
+	1. Directional light depth rendering for all objects that cast shadow [ Shadow map ]
+	2. In default render texture, Render all opaque objects
+	3. Render all transparent objects
+	*/
+
 	context->ClearRenderTargetView(renderTargetView.Get(), bgColour);
 	context->ClearDepthStencilView(depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
@@ -90,7 +97,7 @@ void Graphics::renderFrame()
 	FXMVECTOR forward = camera.GetForwardVector();
 
 	static Ray ray(camera.GetPositionFloat3(), { forward.m128_f32[0] , 0 , forward.m128_f32[2] });
-	ray.setOrigin(DirectX::XMVECTOR{ 0, 2, 0, 0 });
+	ray.setOrigin(DirectX::XMVECTOR{ 0, 2, -2, 0 });
 	static float val[3] = { 0,1,0 };
 	for (unsigned int meshIndex = 0; meshIndex < models[0].getMeshes().size(); meshIndex++)
 	{

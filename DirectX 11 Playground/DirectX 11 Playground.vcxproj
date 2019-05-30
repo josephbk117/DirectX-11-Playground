@@ -151,6 +151,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Graphics\Renderable.cpp" />
     <ClCompile Include="Src\Scenegraph And Physics\OBB.cpp" />
     <ClCompile Include="Src\Scenegraph And Physics\Ray.cpp" />
     <ClCompile Include="Src\Graphics\Material.cpp" />
@@ -179,8 +180,10 @@
     <ClCompile Include="Src\MainApp.cpp" />
     <ClCompile Include="Src\WindowContainer.cpp" />
     <ClCompile Include="Src\Timer.cpp" />
+    <ClCompile Include="Src\Scenegraph And Physics\Transform.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Graphics\Renderable.h" />
     <ClInclude Include="Src\Scenegraph And Physics\OBB.h" />
     <ClInclude Include="Src\Scenegraph And Physics\Ray.h" />
     <ClInclude Include="Src\Graphics\Material.h" />
@@ -222,6 +225,7 @@
     <ClInclude Include="Src\Graphics\Vertex.h" />
     <ClInclude Include="Src\Graphics\VertexBuffer.h" />
     <ClInclude Include="Src\Timer.h" />
+    <ClInclude Include="Src\Scenegraph And Physics\Transform.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\Shaders\depthBasic.hlsl">
