@@ -12,6 +12,9 @@ public:
 	Camera();
 	void SetPerspectiveProjectionValues(float fovDegrees, float aspectRatio, float nearZ, float farZ);
 	void SetOrthographicProjectionValues(float width, float height, float nearZ, float farZ);
+	void SetRenderTexture(RenderTexture* renderTexture);
+	RenderTexture* GetRenderTexture()const;
+	bool HasRenderTexture()const;
 
 	const ProjectionType GetProjectionType()const;
 	const XMMATRIX GetViewDirectionMatrix()const;
@@ -20,6 +23,7 @@ public:
 	Transform transform;
 
 private:
+	RenderTexture* renderTexture = nullptr;
 	ProjectionType projectionType = ProjectionType::PERSPECTIVE;
 	XMMATRIX projectionMatrix;
 };

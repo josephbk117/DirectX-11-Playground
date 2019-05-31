@@ -36,7 +36,7 @@ void Graphics::renderFrame()
 	dirLight.setRotation(lightDir);
 
 	//Update all constant buffers
-	skinnedModel.animate(t_time, &vertexSkinnedInfoConstantBuffer.data.jointMatrices[0]);
+	//skinnedModel.animate(t_time, &vertexSkinnedInfoConstantBuffer.data.jointMatrices[0]);
 	vertexSkinnedInfoConstantBuffer.data.mvpMatrix = vertexInfoConstantBuffer.data.mvpMatrix;
 	vertexSkinnedInfoConstantBuffer.data.jointMatrices[0] = vertexSkinnedInfoConstantBuffer.data.jointMatrices[0] * vertexSkinnedInfoConstantBuffer.data.jointMatrices[0];
 	vertexSkinnedInfoConstantBuffer.data.jointMatrices[1] = vertexSkinnedInfoConstantBuffer.data.jointMatrices[1] * vertexSkinnedInfoConstantBuffer.data.jointMatrices[1];
@@ -71,65 +71,100 @@ void Graphics::renderFrame()
 	4. Draw all debug visualizations
 	*/
 
+	if (dirLight.doesLightRenderShadowMap())
+	{
+		dirLight.bindShadowMapRenderTexture();
+		//Render all shadow casting objects
+		for (int i = 0; i < renderables.size(); i++)
+		{
+			if (renderables.at(i).getMaterial()->doesCastShadow())
+			{
+				renderables.at(i).overrideMaterialDraw(context.Get(), &depthRenderingMaterial, dirLight.GetLightMatrix());
+			}
+		}
+	}
+
+	context->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), depthStencilView.Get());
 	context->ClearRenderTargetView(renderTargetView.Get(), bgColour);
 	context->ClearDepthStencilView(depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-	//Set up skinned mesh shader
-	regularSkinnedMaterial.bind(context.Get());
-	skinnedModel.draw(DirectX::XMMatrixTranslation(0, 1, 4), camera.transform.GetMatrix() * camera.GetProjectionMatrix());
-	skinnedModel.draw(DirectX::XMMatrixTranslation(1, 1, 4), camera.transform.GetMatrix() * camera.GetProjectionMatrix());
-	skinnedModel.draw(DirectX::XMMatrixTranslation(-1, 1, 4), camera.transform.GetMatrix() * camera.GetProjectionMatrix());
-
-	//Set up regular shader
-	regularMaterial.bind(context.Get());
-
-	models[0].setTexture(texture.Get());
-	models[0].setTexture2(renderTexture.getShaderResourceView());
-	models[0].draw(DirectX::XMMatrixIdentity(), camera.transform.GetMatrix() * camera.GetProjectionMatrix());
-
-	unlitScreenRenderingMaterial.bind(context.Get());
-
-	models[1].setTexture(renderTexture.getShaderResourceView());
-	models[1].draw(DirectX::XMMatrixScaling(2, 2, 2)* DirectX::XMMatrixTranslation(0, 4, 4), camera.transform.GetMatrix() * camera.GetProjectionMatrix());
-
-	skybox.draw(camera.GetViewDirectionMatrix() * camera.GetProjectionMatrix());
-
-	//Debug stage, Draw OBBs and other gizmo visualization items
-	FXMVECTOR forward = camera.transform.GetForwardVector();
-
-	static Ray ray(camera.transform.GetPositionFloat3(), { forward.m128_f32[0] , 0 , forward.m128_f32[2] });
-	ray.setOrigin(DirectX::XMVECTOR{ 0, 2, -2, 0 });
-	static float val[3] = { 0,1,0 };
-	for (unsigned int meshIndex = 0; meshIndex < models[0].getMeshes().size(); meshIndex++)
+	//Render all opaque objects
+	for (unsigned int i = 0; i < renderables.size(); i++)
 	{
-		drawDebug = models[0].getMeshes().at(meshIndex).getOBB().doesRayIntersect(ray);
-		if (drawDebug)
-			break;
+		if (renderables.at(i).getMaterial()->getRenderQueue() == RenderQueue::OPAQUE_QUEUE)
+		{
+			renderables.at(i).setShadowMapTexture(dirLight.getShadowMapRenderTexture());
+			renderables.at(i).draw(context.Get(), camera.transform.GetMatrix() * camera.GetProjectionMatrix());
+		}
 	}
-	debugViewRenderingMaterial.bind(context.Get());
-
-	if (drawDebug)
+	//Render all transparent objects
+	for (unsigned int i = 0; i < renderables.size(); i++)
 	{
-		models[0].drawDebugView(DirectX::XMMatrixIdentity(), camera.transform.GetMatrix() * camera.GetProjectionMatrix());
+		if (renderables.at(i).getMaterial()->getRenderQueue() == RenderQueue::TRANSPARENT_QUEUE)
+		{
+			renderables.at(i).setShadowMapTexture(dirLight.getShadowMapRenderTexture());
+			renderables.at(i).draw(context.Get(), camera.transform.GetMatrix() * camera.GetProjectionMatrix());
+		}
 	}
-	ray.draw(device.Get(), context.Get(), vertexInfoConstantBuffer, camera.transform.GetMatrix() * camera.GetProjectionMatrix());
-	//Start rendering on to depth render texture
-	renderTexture.setRenderTarget();
-	renderTexture.clearRenderTarget(1, 1, 1, 1);
 
-	depthRenderingMaterial.bind(context.Get());
+	//context->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), depthStencilView.Get());
 
-	models[0].draw(DirectX::XMMatrixIdentity(), dirLight.GetLightMatrix());
+	////Set up skinned mesh shader
+	//regularSkinnedMaterial.bind(context.Get());
+	//skinnedModel.draw(DirectX::XMMatrixTranslation(0, 1, 4), camera.transform.GetMatrix() * camera.GetProjectionMatrix());
+	//skinnedModel.draw(DirectX::XMMatrixTranslation(1, 1, 4), camera.transform.GetMatrix() * camera.GetProjectionMatrix());
+	//skinnedModel.draw(DirectX::XMMatrixTranslation(-1, 1, 4), camera.transform.GetMatrix() * camera.GetProjectionMatrix());
 
-	context->IASetInputLayout(skinnedVertexShader.getInputLayout());
-	context->VSSetShader(skinnedVertexShader.getShader(), NULL, 0);
+	////Set up regular shader
+	//regularMaterial.bind(context.Get());
 
-	skinnedModel.draw(DirectX::XMMatrixTranslation(0, 1, 4), dirLight.GetLightMatrix());
-	skinnedModel.draw(DirectX::XMMatrixTranslation(1, 1, 4), dirLight.GetLightMatrix());
-	skinnedModel.draw(DirectX::XMMatrixTranslation(-1, 1, 4), dirLight.GetLightMatrix());
+	//models[0].setTexture(texture.Get());
+	//models[0].setTexture2(renderTexture.getShaderResourceView());
+	//models[0].draw(DirectX::XMMatrixIdentity(), camera.transform.GetMatrix() * camera.GetProjectionMatrix());
 
-	//Start rendering on top default render texture
-	context->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), depthStencilView.Get());
+	//unlitScreenRenderingMaterial.bind(context.Get());
+
+	//models[1].setTexture(renderTexture.getShaderResourceView());
+	//models[1].draw(DirectX::XMMatrixScaling(2, 2, 2)* DirectX::XMMatrixTranslation(0, 4, 4), camera.transform.GetMatrix() * camera.GetProjectionMatrix());
+
+	//skybox.draw(camera.GetViewDirectionMatrix() * camera.GetProjectionMatrix());
+
+	////Debug stage, Draw OBBs and other gizmo visualization items
+	//FXMVECTOR forward = camera.transform.GetForwardVector();
+
+	//static Ray ray(camera.transform.GetPositionFloat3(), { forward.m128_f32[0] , 0 , forward.m128_f32[2] });
+	//ray.setOrigin(DirectX::XMVECTOR{ 0, 2, -2, 0 });
+	//static float val[3] = { 0,1,0 };
+	//for (unsigned int meshIndex = 0; meshIndex < models[0].getMeshes().size(); meshIndex++)
+	//{
+	//	drawDebug = models[0].getMeshes().at(meshIndex).getOBB().doesRayIntersect(ray);
+	//	if (drawDebug)
+	//		break;
+	//}
+	//debugViewRenderingMaterial.bind(context.Get());
+
+	//if (drawDebug)
+	//{
+	//	models[0].drawDebugView(DirectX::XMMatrixIdentity(), camera.transform.GetMatrix() * camera.GetProjectionMatrix());
+	//}
+	//ray.draw(device.Get(), context.Get(), vertexInfoConstantBuffer, camera.transform.GetMatrix() * camera.GetProjectionMatrix());
+	////Start rendering on to depth render texture
+	//renderTexture.setRenderTarget();
+	//renderTexture.clearRenderTarget(1, 1, 1, 1);
+
+	//depthRenderingMaterial.bind(context.Get());
+
+	//models[0].draw(DirectX::XMMatrixIdentity(), dirLight.GetLightMatrix());
+
+	//context->IASetInputLayout(skinnedVertexShader.getInputLayout());
+	//context->VSSetShader(skinnedVertexShader.getShader(), NULL, 0);
+
+	//skinnedModel.draw(DirectX::XMMatrixTranslation(0, 1, 4), dirLight.GetLightMatrix());
+	//skinnedModel.draw(DirectX::XMMatrixTranslation(1, 1, 4), dirLight.GetLightMatrix());
+	//skinnedModel.draw(DirectX::XMMatrixTranslation(-1, 1, 4), dirLight.GetLightMatrix());
+
+	////Start rendering on top default render texture
+	//context->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), depthStencilView.Get());
 
 	//Start ImGui Frame
 	ImGui_ImplDX11_NewFrame();
@@ -154,10 +189,10 @@ void Graphics::renderFrame()
 	ImGui::SliderFloat("Ambient light intensity", &ambientLightIntensity, 0, 1, "%.2f");
 	ImGui::SliderFloat("Animation timeline", &t_time, 0.0f, 100.0f, "%.2f");
 	ImGui::SliderFloat3("Light dir", &lightDir.m128_f32[0], -1.0f, 1.0f, "%.2f");
-	if (ImGui::SliderFloat3("Look dir", &val[0], -1.0f, 1.0f, "%.2f"))
+	/*if (ImGui::SliderFloat3("Look dir", &val[0], -1.0f, 1.0f, "%.2f"))
 	{
 		ray.setDirection(DirectX::XMVECTOR{ val[0], val[1], val[2] });
-	}
+	}*/
 	ImGui::ColorEdit3("Bounding box colour", &pixelUnlitBasicBuffer.data.colour.m128_f32[0]);
 	ImGui::Checkbox("Enable bounding box display", &drawDebug);
 	ImGui::End();
@@ -444,7 +479,7 @@ bool Graphics::initShaders()
 		return false;
 
 	return true;
-}
+	}
 
 bool Graphics::initScene()
 {
@@ -474,18 +509,18 @@ bool Graphics::initScene()
 		regularMaterial.addVertexConstantBuffer(&vertexInfoLightingBuffer);
 		regularMaterial.addPixelConstantBuffer(&pixelInfoLightingBuffer);
 
-		regularSkinnedMaterial.setRenderStates(depthStencilState.Get(), defaultRasterizerState.Get(), samplerState.Get(), defaultBlendState.Get());
+		regularSkinnedMaterial.setRenderStates(depthStencilState.Get(), defaultRasterizerState.Get(), samplerState.Get(), disabledBlendState.Get());
 		regularSkinnedMaterial.setShaders(&skinnedVertexShader, &pixelShader);
 		regularSkinnedMaterial.addVertexConstantBuffer(&vertexSkinnedInfoConstantBuffer);
-		regularSkinnedMaterial.setRenderQueue(RenderQueue::TRANSPARENT_QUEUE);
 
 		depthRenderingMaterial.setRenderStates(depthStencilState.Get(), lightDepthRenderingRasterizerState.Get(), samplerState.Get(), disabledBlendState.Get());
 		depthRenderingMaterial.setShaders(&vertexShader, &depthBasicShader);
 		depthRenderingMaterial.addVertexConstantBuffer(&vertexInfoConstantBuffer);
 
-		unlitScreenRenderingMaterial.setRenderStates(depthStencilState.Get(), defaultRasterizerState.Get(), samplerState.Get(), disabledBlendState.Get());
+		unlitScreenRenderingMaterial.setRenderStates(depthStencilState.Get(), debugRasterizerState.Get(), samplerState.Get(), defaultBlendState.Get());
 		unlitScreenRenderingMaterial.setShaders(&vertexShader, &unlitBasicPixelShader);
 		unlitScreenRenderingMaterial.addVertexConstantBuffer(&vertexInfoConstantBuffer);
+		unlitScreenRenderingMaterial.setRenderQueue(RenderQueue::TRANSPARENT_QUEUE);
 
 		debugViewRenderingMaterial.setRenderStates(depthStencilState.Get(), debugRasterizerState.Get(), samplerState.Get(), disabledBlendState.Get());
 		debugViewRenderingMaterial.setShaders(&vertexShader, &unlitBasicPixelShader);
@@ -493,7 +528,40 @@ bool Graphics::initScene()
 		debugViewRenderingMaterial.addPixelConstantBuffer(&pixelUnlitBasicBuffer);
 		debugViewRenderingMaterial.setTopologyType(D3D11_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_LINELIST);
 
-		Model model1;
+
+		Model* model;
+		model = new Model;
+		if (!model->init("Resources\\Models\\cottage_obj.obj", device.Get(), context.Get(), texture.Get(), vertexInfoConstantBuffer))
+			return false;
+		renderables.emplace_back(&regularMaterial, model);
+
+		model = new Model;
+		if (!model->init(Primitive3DModels::QUAD.vertices, Primitive3DModels::QUAD.indices, device.Get(), context.Get(), texture.Get(), vertexInfoConstantBuffer))
+			return false;
+		renderables.emplace_back(&unlitScreenRenderingMaterial, model);
+		renderables.at(renderables.size() - 1).transform.SetPosition(2, -2, 5);
+
+		model = new Model;
+		if (!model->init(Primitive3DModels::QUAD.vertices, Primitive3DModels::QUAD.indices, device.Get(), context.Get(), texture.Get(), vertexInfoConstantBuffer))
+			return false;
+		renderables.emplace_back(&unlitScreenRenderingMaterial, model);
+		renderables.at(renderables.size() - 1).transform.SetPosition(1, -2, 4);
+
+		model = new Model;
+		if (!model->init(Primitive3DModels::QUAD.vertices, Primitive3DModels::QUAD.indices, device.Get(), context.Get(), texture.Get(), vertexInfoConstantBuffer))
+			return false;
+		renderables.emplace_back(&unlitScreenRenderingMaterial, model);
+		renderables.at(renderables.size() - 1).transform.SetPosition(2, -2, 3);
+
+		model = new Model;
+		if (!model->init("Resources\\Models\\stairsLong.obj", device.Get(), context.Get(), texture.Get(), vertexInfoConstantBuffer))
+			return false;
+		renderables.emplace_back(&regularMaterial, model);
+		renderables.at(renderables.size() - 1).transform.SetPosition(0, 0, 3);
+
+		dirLight.enableShadowMapRendering(&renderTexture);
+
+		/*Model model1;
 		if (!model1.init("Resources\\Models\\cottage_obj.obj", device.Get(), context.Get(), texture.Get(), vertexInfoConstantBuffer))
 			return false;
 		models.push_back(model1);
@@ -504,7 +572,7 @@ bool Graphics::initScene()
 		models.push_back(model2);
 
 		if (!skinnedModel.init("Resources\\Models\\animCylinder.fbx", device.Get(), context.Get(), texture.Get(), vertexSkinnedInfoConstantBuffer))
-			return false;
+			return false;*/
 
 		std::wstring cubemapLocations[6];
 		cubemapLocations[0] = L"Resources\\Textures\\Cubemaps\\Sahara Desert Cubemap\\sahara_ft.png";

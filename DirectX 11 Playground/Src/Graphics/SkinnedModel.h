@@ -84,7 +84,7 @@ public:
 //};
 
 
-class SkinnedModel : public ModelInterface<SkinnedVertex, CB_VS_Skinned_VertexShader>
+class SkinnedModel : public BaseModel<SkinnedVertex, CB_VS_Skinned_VertexShader>
 {
 public:
 	bool init(const std::string& filePath, ID3D11Device * device, ID3D11DeviceContext* context, ID3D11ShaderResourceView* texture, VertexConstantBuffer<CB_VS_Skinned_VertexShader>& cb_vs_vertexShader)override;

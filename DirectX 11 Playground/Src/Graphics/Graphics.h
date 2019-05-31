@@ -12,6 +12,7 @@
 #include "CubemapTexture.h"
 #include "Skybox.h"
 #include "Material.h"
+#include "Renderable.h"
 #include "..\\Timer.h"
 #include "Renderable.h"
 #include "ImGui\imgui.h"
@@ -51,8 +52,9 @@ private:
 	RenderTexture renderTexture;
 	CubemapTexture cubemap;
 	Skybox skybox;
-	std::vector<Model> models;
-	SkinnedModel skinnedModel;
+	//std::vector<Model> models;
+	std::vector<Renderable> renderables;
+	//SkinnedModel skinnedModel;
 	DirectionalLight dirLight;
 
 	Material regularMaterial;

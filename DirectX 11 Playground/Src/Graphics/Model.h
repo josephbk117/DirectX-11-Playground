@@ -4,7 +4,7 @@
 #include "Primitive3DModels.h"
 using namespace DirectX;
 
-class Model : public ModelInterface<Vertex, CB_VS_VertexShader>
+class Model : public BaseModel<Vertex, CB_VS_VertexShader>
 {
 public:
 	Model() {};

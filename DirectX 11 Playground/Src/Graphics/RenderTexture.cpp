@@ -114,7 +114,7 @@ void RenderTexture::clearRenderTarget(float red, float green, float blue, float 
 	// Clear the back buffer.
 	m_context->ClearRenderTargetView(m_renderTargetView, color);
 	// Clear the depth buffer.
-	m_context->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+	m_context->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 	return;
 }
 

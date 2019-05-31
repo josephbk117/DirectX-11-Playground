@@ -2,11 +2,6 @@
 
 Camera::Camera()
 {
-	/*this->pos = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	this->posVector = XMLoadFloat3(&this->pos);
-	this->rot = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	this->rotVector = XMLoadFloat3(&this->rot);
-	this->UpdateViewMatrix();*/
 	transform.SetPosition(0, 0, 0);
 	transform.SetRotation(0, 0, 0);
 }
@@ -22,6 +17,21 @@ void Camera::SetOrthographicProjectionValues(float width, float height, float ne
 {
 	this->projectionMatrix = XMMatrixOrthographicLH(width, height, nearZ, farZ);
 	projectionType = ProjectionType::OTHOGRAPHIC;
+}
+
+void Camera::SetRenderTexture(RenderTexture * renderTexture)
+{
+	this->renderTexture = renderTexture;
+}
+
+RenderTexture * Camera::GetRenderTexture() const
+{
+	return renderTexture;
+}
+
+bool Camera::HasRenderTexture() const
+{
+	return renderTexture != nullptr;
 }
 
 const Camera::ProjectionType Camera::GetProjectionType() const

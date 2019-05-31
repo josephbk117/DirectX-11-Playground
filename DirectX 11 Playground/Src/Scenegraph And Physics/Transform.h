@@ -4,6 +4,7 @@ using namespace DirectX;
 class Transform
 {
 public:
+	Transform();
 	const XMMATRIX & GetMatrix() const;
 	const XMVECTOR & GetPositionVector() const;
 	const XMFLOAT3 & GetPositionFloat3() const;

@@ -1,5 +1,11 @@
 #include "Transform.h"
 
+Transform::Transform()
+{
+	SetPosition(0, 0, 0);
+	SetRotation(0, 0, 0);
+}
+
 const XMMATRIX & Transform::GetMatrix() const
 {
 	return this->matrix;
