@@ -46,7 +46,6 @@ bool RenderTexture::init(ID3D11Device* device, ID3D11DeviceContext* context, ID3
 	D3D11_RENDER_TARGET_VIEW_DESC renderTargetViewDesc;
 	D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc;
 
-
 	// Initialize the render target texture description.
 	ZeroMemory(&textureDesc, sizeof(textureDesc));
 
@@ -92,7 +91,7 @@ void RenderTexture::setRenderTarget()
 {
 #if _DEBUG
 	if (m_context == nullptr || m_depthStencilView == nullptr || m_renderTargetTexture == nullptr || m_renderTargetView == nullptr || m_shaderResourceView == nullptr)
-		ErrorLogger::log("SetRenderTarget called before RenderTexture has been initialized");
+		ErrorLogger::log("SetRenderTarget called before Render Texture has been initialized");
 #endif
 	// Bind the render target view and depth stencil buffer to the output render pipeline.
 	m_context->OMSetRenderTargets(1, &m_renderTargetView, m_depthStencilView);
@@ -101,6 +100,10 @@ void RenderTexture::setRenderTarget()
 
 void RenderTexture::clearRenderTarget(float red, float green, float blue, float alpha)
 {
+#if _DEBUG
+	if (m_context == nullptr || m_depthStencilView == nullptr || m_renderTargetTexture == nullptr || m_renderTargetView == nullptr || m_shaderResourceView == nullptr)
+		ErrorLogger::log("ClearRenderTarget called before Render Texture has been initialized");
+#endif
 	float color[4];
 	// Setup the color to clear the buffer to.
 	color[0] = red;

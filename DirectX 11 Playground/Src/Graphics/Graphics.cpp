@@ -44,7 +44,7 @@ void Graphics::renderFrame()
 	if (!vertexSkinnedInfoConstantBuffer.applyChanges())
 		return;
 
-	vertexInfoConstantBuffer.data.mvpMatrix = DirectX::XMMatrixIdentity() * camera.GetViewMatrix() * camera.GetProjectionMatrix();
+	vertexInfoConstantBuffer.data.mvpMatrix = DirectX::XMMatrixIdentity() * camera.transform.GetMatrix() * camera.GetProjectionMatrix();
 	vertexInfoConstantBuffer.data.mvpMatrix = DirectX::XMMatrixTranspose(vertexInfoConstantBuffer.data.mvpMatrix);
 	if (!vertexInfoConstantBuffer.applyChanges())
 		return;
@@ -76,28 +76,28 @@ void Graphics::renderFrame()
 
 	//Set up skinned mesh shader
 	regularSkinnedMaterial.bind(context.Get());
-	skinnedModel.draw(DirectX::XMMatrixTranslation(0, 1, 4), camera.GetViewMatrix() * camera.GetProjectionMatrix());
-	skinnedModel.draw(DirectX::XMMatrixTranslation(1, 1, 4), camera.GetViewMatrix() * camera.GetProjectionMatrix());
-	skinnedModel.draw(DirectX::XMMatrixTranslation(-1, 1, 4), camera.GetViewMatrix() * camera.GetProjectionMatrix());
+	skinnedModel.draw(DirectX::XMMatrixTranslation(0, 1, 4), camera.transform.GetMatrix() * camera.GetProjectionMatrix());
+	skinnedModel.draw(DirectX::XMMatrixTranslation(1, 1, 4), camera.transform.GetMatrix() * camera.GetProjectionMatrix());
+	skinnedModel.draw(DirectX::XMMatrixTranslation(-1, 1, 4), camera.transform.GetMatrix() * camera.GetProjectionMatrix());
 
 	//Set up regular shader
 	regularMaterial.bind(context.Get());
 
 	models[0].setTexture(texture.Get());
 	models[0].setTexture2(renderTexture.getShaderResourceView());
-	models[0].draw(DirectX::XMMatrixIdentity(), camera.GetViewMatrix() * camera.GetProjectionMatrix());
+	models[0].draw(DirectX::XMMatrixIdentity(), camera.transform.GetMatrix() * camera.GetProjectionMatrix());
 
 	unlitScreenRenderingMaterial.bind(context.Get());
 
 	models[1].setTexture(renderTexture.getShaderResourceView());
-	models[1].draw(DirectX::XMMatrixScaling(2, 2, 2)* DirectX::XMMatrixTranslation(0, 4, 4), camera.GetViewMatrix() * camera.GetProjectionMatrix());
+	models[1].draw(DirectX::XMMatrixScaling(2, 2, 2)* DirectX::XMMatrixTranslation(0, 4, 4), camera.transform.GetMatrix() * camera.GetProjectionMatrix());
 
 	skybox.draw(camera.GetViewDirectionMatrix() * camera.GetProjectionMatrix());
 
 	//Debug stage, Draw OBBs and other gizmo visualization items
-	FXMVECTOR forward = camera.GetForwardVector();
+	FXMVECTOR forward = camera.transform.GetForwardVector();
 
-	static Ray ray(camera.GetPositionFloat3(), { forward.m128_f32[0] , 0 , forward.m128_f32[2] });
+	static Ray ray(camera.transform.GetPositionFloat3(), { forward.m128_f32[0] , 0 , forward.m128_f32[2] });
 	ray.setOrigin(DirectX::XMVECTOR{ 0, 2, -2, 0 });
 	static float val[3] = { 0,1,0 };
 	for (unsigned int meshIndex = 0; meshIndex < models[0].getMeshes().size(); meshIndex++)
@@ -110,9 +110,9 @@ void Graphics::renderFrame()
 
 	if (drawDebug)
 	{
-		models[0].drawDebugView(DirectX::XMMatrixIdentity(), camera.GetViewMatrix() * camera.GetProjectionMatrix());
+		models[0].drawDebugView(DirectX::XMMatrixIdentity(), camera.transform.GetMatrix() * camera.GetProjectionMatrix());
 	}
-	ray.draw(device.Get(), context.Get(), vertexInfoConstantBuffer, camera.GetViewMatrix() * camera.GetProjectionMatrix());
+	ray.draw(device.Get(), context.Get(), vertexInfoConstantBuffer, camera.transform.GetMatrix() * camera.GetProjectionMatrix());
 	//Start rendering on to depth render texture
 	renderTexture.setRenderTarget();
 	renderTexture.clearRenderTarget(1, 1, 1, 1);
@@ -517,7 +517,7 @@ bool Graphics::initScene()
 
 		skybox.init(device.Get(), context.Get(), vertexInfoConstantBuffer, cubemap);
 
-		camera.SetPosition(0.0f, 2.0f, -2.0f);
+		camera.transform.SetPosition(0.0f, 2.0f, -2.0f);
 		camera.SetPerspectiveProjectionValues(60.0f, 1.0f, 0.1f, 100.0f);
 	}
 	catch (COMException & e)
