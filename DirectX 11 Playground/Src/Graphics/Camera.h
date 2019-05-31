@@ -1,4 +1,5 @@
 #pragma once
+#include "RenderTexture.h"
 #include <DirectXMath.h>
 using namespace DirectX;
 

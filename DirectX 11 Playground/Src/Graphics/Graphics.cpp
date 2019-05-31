@@ -66,8 +66,9 @@ void Graphics::renderFrame()
 	/*
 	Rendering stages:
 	1. Directional light depth rendering for all objects that cast shadow [ Shadow map ]
-	2. In default render texture, Render all opaque objects
+	2. In default render texture, Render all opaque objects with shadow map applied
 	3. Render all transparent objects
+	4. Draw all debug visualizations
 	*/
 
 	context->ClearRenderTargetView(renderTargetView.Get(), bgColour);
@@ -75,21 +76,21 @@ void Graphics::renderFrame()
 
 	//Set up skinned mesh shader
 	regularSkinnedMaterial.bind(context.Get());
-	skinnedModel.draw(DirectX::XMMatrixTranslation(0, 1, 4) * camera.GetViewMatrix() * camera.GetProjectionMatrix());
-	skinnedModel.draw(DirectX::XMMatrixTranslation(1, 1, 4) * camera.GetViewMatrix() * camera.GetProjectionMatrix());
-	skinnedModel.draw(DirectX::XMMatrixTranslation(-1, 1, 4) * camera.GetViewMatrix() * camera.GetProjectionMatrix());
+	skinnedModel.draw(DirectX::XMMatrixTranslation(0, 1, 4), camera.GetViewMatrix() * camera.GetProjectionMatrix());
+	skinnedModel.draw(DirectX::XMMatrixTranslation(1, 1, 4), camera.GetViewMatrix() * camera.GetProjectionMatrix());
+	skinnedModel.draw(DirectX::XMMatrixTranslation(-1, 1, 4), camera.GetViewMatrix() * camera.GetProjectionMatrix());
 
 	//Set up regular shader
 	regularMaterial.bind(context.Get());
 
 	models[0].setTexture(texture.Get());
-	models[0].setTexture2(renderTexture.GetShaderResourceView());
-	models[0].draw(camera.GetViewMatrix() * camera.GetProjectionMatrix());
+	models[0].setTexture2(renderTexture.getShaderResourceView());
+	models[0].draw(DirectX::XMMatrixIdentity(), camera.GetViewMatrix() * camera.GetProjectionMatrix());
 
 	unlitScreenRenderingMaterial.bind(context.Get());
 
-	models[1].setTexture(renderTexture.GetShaderResourceView());
-	models[1].draw(DirectX::XMMatrixScaling(2, 2, 2)* DirectX::XMMatrixTranslation(0, 4, 4) * camera.GetViewMatrix() * camera.GetProjectionMatrix());
+	models[1].setTexture(renderTexture.getShaderResourceView());
+	models[1].draw(DirectX::XMMatrixScaling(2, 2, 2)* DirectX::XMMatrixTranslation(0, 4, 4), camera.GetViewMatrix() * camera.GetProjectionMatrix());
 
 	skybox.draw(camera.GetViewDirectionMatrix() * camera.GetProjectionMatrix());
 
@@ -109,23 +110,23 @@ void Graphics::renderFrame()
 
 	if (drawDebug)
 	{
-		models[0].drawDebugView(camera.GetViewMatrix() * camera.GetProjectionMatrix());
+		models[0].drawDebugView(DirectX::XMMatrixIdentity(), camera.GetViewMatrix() * camera.GetProjectionMatrix());
 	}
 	ray.draw(device.Get(), context.Get(), vertexInfoConstantBuffer, camera.GetViewMatrix() * camera.GetProjectionMatrix());
 	//Start rendering on to depth render texture
-	renderTexture.SetRenderTarget();
-	renderTexture.ClearRenderTarget(1, 1, 1, 1);
+	renderTexture.setRenderTarget();
+	renderTexture.clearRenderTarget(1, 1, 1, 1);
 
 	depthRenderingMaterial.bind(context.Get());
 
-	models[0].draw(dirLight.GetLightMatrix());
+	models[0].draw(DirectX::XMMatrixIdentity(), dirLight.GetLightMatrix());
 
 	context->IASetInputLayout(skinnedVertexShader.getInputLayout());
 	context->VSSetShader(skinnedVertexShader.getShader(), NULL, 0);
 
-	skinnedModel.draw(DirectX::XMMatrixTranslation(0, 1, 4) * dirLight.GetLightMatrix());
-	skinnedModel.draw(DirectX::XMMatrixTranslation(1, 1, 4) * dirLight.GetLightMatrix());
-	skinnedModel.draw(DirectX::XMMatrixTranslation(-1, 1, 4) * dirLight.GetLightMatrix());
+	skinnedModel.draw(DirectX::XMMatrixTranslation(0, 1, 4), dirLight.GetLightMatrix());
+	skinnedModel.draw(DirectX::XMMatrixTranslation(1, 1, 4), dirLight.GetLightMatrix());
+	skinnedModel.draw(DirectX::XMMatrixTranslation(-1, 1, 4), dirLight.GetLightMatrix());
 
 	//Start rendering on top default render texture
 	context->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), depthStencilView.Get());
@@ -374,7 +375,7 @@ bool Graphics::initDirectX(HWND hwnd, int width, int height)
 		COM_ERROR_IF_FAILED(hr, "Error creating Blend state");
 
 		//Initialize an additional Rendertexture
-		renderTexture.Initialize(device.Get(), context.Get(), depthStencilView.Get(), width, height);
+		renderTexture.init(device.Get(), context.Get(), depthStencilView.Get(), width, height);
 	}
 	catch (COMException & e)
 	{

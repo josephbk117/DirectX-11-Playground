@@ -17,8 +17,8 @@ public:
 	{
 		this->texture2 = texture;
 	}
-	void draw(const XMMATRIX& viewProjectionMatrix)override;
-	void drawDebugView(const XMMATRIX & viewProjectionMatrix);
+	void draw(const XMMATRIX& worldMatrix, const XMMATRIX& viewProjectionMatrix)override;
+	void drawDebugView(const XMMATRIX& worldMatrix, const XMMATRIX& viewProjectionMatrix);
 	std::vector<Mesh>& getMeshes()
 	{
 		return meshes;

@@ -15,26 +15,31 @@ RenderTexture::~RenderTexture()
 	if (m_shaderResourceView)
 	{
 		m_shaderResourceView->Release();
-		m_shaderResourceView = 0;
+		m_shaderResourceView = nullptr;
 	}
 
 	if (m_renderTargetView)
 	{
 		m_renderTargetView->Release();
-		m_renderTargetView = 0;
+		m_renderTargetView = nullptr;
 	}
 
 	if (m_renderTargetTexture)
 	{
 		m_renderTargetTexture->Release();
-		m_renderTargetTexture = 0;
+		m_renderTargetTexture = nullptr;
 	}
 }
 
-bool RenderTexture::Initialize(ID3D11Device* device, ID3D11DeviceContext* context, ID3D11DepthStencilView* depthStencilView, int textureWidth, int textureHeight)
+bool RenderTexture::init(ID3D11Device* device, ID3D11DeviceContext* context, ID3D11DepthStencilView* depthStencilView, int textureWidth, int textureHeight)
 {
-	this->context = context;
-	this->depthStencilView = depthStencilView;
+#if _DEBUG
+	if (m_context != nullptr || m_depthStencilView != nullptr || m_renderTargetTexture != nullptr || m_renderTargetView != nullptr || m_shaderResourceView != nullptr)
+		ErrorLogger::log("Render texture has already been initialized, Do not call init(...) more than once");
+#endif
+
+	this->m_context = context;
+	this->m_depthStencilView = depthStencilView;
 
 	D3D11_TEXTURE2D_DESC textureDesc;
 	HRESULT result;
@@ -83,14 +88,18 @@ bool RenderTexture::Initialize(ID3D11Device* device, ID3D11DeviceContext* contex
 	return true;
 }
 
-void RenderTexture::SetRenderTarget()
+void RenderTexture::setRenderTarget()
 {
+#if _DEBUG
+	if (m_context == nullptr || m_depthStencilView == nullptr || m_renderTargetTexture == nullptr || m_renderTargetView == nullptr || m_shaderResourceView == nullptr)
+		ErrorLogger::log("SetRenderTarget called before RenderTexture has been initialized");
+#endif
 	// Bind the render target view and depth stencil buffer to the output render pipeline.
-	context->OMSetRenderTargets(1, &m_renderTargetView, depthStencilView);
+	m_context->OMSetRenderTargets(1, &m_renderTargetView, m_depthStencilView);
 	return;
 }
 
-void RenderTexture::ClearRenderTarget(float red, float green, float blue, float alpha)
+void RenderTexture::clearRenderTarget(float red, float green, float blue, float alpha)
 {
 	float color[4];
 	// Setup the color to clear the buffer to.
@@ -100,13 +109,13 @@ void RenderTexture::ClearRenderTarget(float red, float green, float blue, float 
 	color[3] = alpha;
 
 	// Clear the back buffer.
-	context->ClearRenderTargetView(m_renderTargetView, color);
+	m_context->ClearRenderTargetView(m_renderTargetView, color);
 	// Clear the depth buffer.
-	context->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+	m_context->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 	return;
 }
 
-ID3D11ShaderResourceView* RenderTexture::GetShaderResourceView()
+ID3D11ShaderResourceView* RenderTexture::getShaderResourceView()
 {
 	return m_shaderResourceView;
 }

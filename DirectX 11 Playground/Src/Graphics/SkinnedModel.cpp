@@ -17,10 +17,6 @@ bool SkinnedModel::init(const std::string & filePath, ID3D11Device * device, ID3
 		ErrorLogger::log(exception);
 		return false;
 	}
-
-	this->setPosition(0.0f, 0.0f, 0.0f);
-	this->setRotation(0.0f, 0.0f, 0.0f);
-	this->updateWorldMatrix();
 	return true;
 }
 
@@ -32,10 +28,6 @@ bool SkinnedModel::init(std::vector<SkinnedVertex> vertices, std::vector<DWORD> 
 	this->cb_vs_vertexShader = &cb_vs_vertexShader;
 
 	meshes.push_back(SkinnedMesh(this->device, this->context, vertices, indices));
-
-	this->setPosition(0.0f, 0.0f, 0.0f);
-	this->setRotation(0.0f, 0.0f, 0.0f);
-	this->updateWorldMatrix();
 	return true;
 }
 
@@ -44,7 +36,7 @@ void SkinnedModel::setTexture(ID3D11ShaderResourceView * texture)
 	this->texture1 = texture;
 }
 
-void SkinnedModel::draw(const XMMATRIX & viewProjectionMatrix)
+void SkinnedModel::draw(const XMMATRIX& worldMatrix, const XMMATRIX& viewProjectionMatrix)
 {
 	cb_vs_vertexShader->data.mvpMatrix = worldMatrix * viewProjectionMatrix;
 	cb_vs_vertexShader->data.worldMatrix = worldMatrix;
@@ -66,7 +58,6 @@ void SkinnedModel::animate(float time, XMMATRIX* jointMatrices)const
 		indexB = DirectX::XMMin(static_cast<size_t>(time + 1), tempBoneTransformCollection.at(boneIndex).size() - 1);
 		JointTransform A = tempBoneTransformCollection[boneIndex].at(indexA);
 		JointTransform B = tempBoneTransformCollection[boneIndex].at(indexB);
-
 		jointMatrices[boneIndex] = JointTransform::interpolate(A, B, time - indexA).getLocalTransform();
 	}
 }

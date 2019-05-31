@@ -17,11 +17,6 @@ bool Model::init(const std::string& filePath, ID3D11Device * device, ID3D11Devic
 		ErrorLogger::log(exception);
 		return false;
 	}
-
-	this->setPosition(0.0f, 0.0f, 0.0f);
-	this->setRotation(0.0f, 0.0f, 0.0f);
-	this->updateWorldMatrix();
-
 	return true;
 }
 
@@ -34,11 +29,6 @@ bool Model::init(std::vector<Vertex> vertices, std::vector<DWORD> indices, ID3D1
 	this->cb_vs_vertexShader = &cb_vs_vertexShader;
 
 	meshes.push_back(Mesh(this->device, this->context, vertices, indices));
-
-	this->setPosition(0.0f, 0.0f, 0.0f);
-	this->setRotation(0.0f, 0.0f, 0.0f);
-	this->updateWorldMatrix();
-
 	return true;
 }
 
@@ -47,7 +37,7 @@ void Model::setTexture(ID3D11ShaderResourceView * texture)
 	this->texture1 = texture;
 }
 
-void Model::draw(const XMMATRIX & viewProjectionMatrix)
+void Model::draw(const XMMATRIX& worldMatrix, const XMMATRIX& viewProjectionMatrix)
 {
 	cb_vs_vertexShader->data.mvpMatrix = worldMatrix * viewProjectionMatrix;
 	cb_vs_vertexShader->data.worldMatrix = worldMatrix;
@@ -62,7 +52,7 @@ void Model::draw(const XMMATRIX & viewProjectionMatrix)
 		mesh.draw();
 }
 
-void Model::drawDebugView(const XMMATRIX & viewProjectionMatrix)
+void Model::drawDebugView(const XMMATRIX& worldMatrix, const XMMATRIX& viewProjectionMatrix)
 {
 	cb_vs_vertexShader->data.mvpMatrix = worldMatrix * viewProjectionMatrix;
 	cb_vs_vertexShader->data.worldMatrix = worldMatrix;
