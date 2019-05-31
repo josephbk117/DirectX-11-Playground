@@ -16,5 +16,5 @@ SamplerState objSamplerState : SAMPLER : register(s0);
 float4 main(PS_IN input) : SV_TARGET
 {
 	float3 col = lerp(objTexture.Sample(objSamplerState, input.tex), colour.rgb, colour.a);
-	return float4(col, 0.25);
+	return float4(col, 0.5);
 }

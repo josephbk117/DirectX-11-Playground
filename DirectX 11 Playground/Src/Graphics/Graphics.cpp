@@ -1,6 +1,7 @@
 #include "Graphics.h"
 #include "RenderTexture.h"
 #include "Primitive3DModels.h"
+#include <set>
 
 bool Graphics::init(HWND hwnd, int width, int height)
 {
@@ -25,6 +26,29 @@ bool Graphics::init(HWND hwnd, int width, int height)
 
 	return true;
 }
+
+
+XMVECTOR refCameraPos;
+struct OpaqueRenderableCompare
+{
+	bool operator()(Renderable* lhs, Renderable* rhs)
+	{
+		float dist1 = XMVector3Length((refCameraPos - lhs->transform.GetPositionVector())).m128_f32[0];
+		float dist2 = XMVector3Length((refCameraPos - rhs->transform.GetPositionVector())).m128_f32[0];
+		return dist1 > dist2;
+	}
+};
+
+struct TransparentRenderableCompare
+{
+	bool operator()(Renderable* lhs, Renderable* rhs)
+	{
+		float dist1 = XMVector3Length((refCameraPos - lhs->transform.GetPositionVector())).m128_f32[0];
+		float dist2 = XMVector3Length((refCameraPos - rhs->transform.GetPositionVector())).m128_f32[0];
+		return dist1 < dist2;
+	}
+};
+
 void Graphics::renderFrame()
 {
 	static float t_time = 0;
@@ -88,23 +112,32 @@ void Graphics::renderFrame()
 	context->ClearRenderTargetView(renderTargetView.Get(), bgColour);
 	context->ClearDepthStencilView(depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-	//Render all opaque objects
+	//Add all opaque objects to set, and comparision function is distance from camera
+	refCameraPos = camera.transform.GetPositionVector();
+	std::set<Renderable*, OpaqueRenderableCompare> opaqueRenderables;
+	std::set<Renderable*, TransparentRenderableCompare> transparentRenderables;
 	for (unsigned int i = 0; i < renderables.size(); i++)
 	{
 		if (renderables.at(i).getMaterial()->getRenderQueue() == RenderQueue::OPAQUE_QUEUE)
-		{
-			renderables.at(i).setShadowMapTexture(dirLight.getShadowMapRenderTexture());
-			renderables.at(i).draw(context.Get(), camera.transform.GetMatrix() * camera.GetProjectionMatrix());
-		}
+			opaqueRenderables.insert(&renderables[i]);
+		else if (renderables.at(i).getMaterial()->getRenderQueue() == RenderQueue::TRANSPARENT_QUEUE)
+			transparentRenderables.insert(&renderables[i]);
 	}
-	//Render all transparent objects
-	for (unsigned int i = 0; i < renderables.size(); i++)
+
+	//Render all opaque objects
+
+	for (std::set<Renderable*, OpaqueRenderableCompare>::iterator it = opaqueRenderables.begin(); it != opaqueRenderables.end(); ++it)
 	{
-		if (renderables.at(i).getMaterial()->getRenderQueue() == RenderQueue::TRANSPARENT_QUEUE)
-		{
-			renderables.at(i).setShadowMapTexture(dirLight.getShadowMapRenderTexture());
-			renderables.at(i).draw(context.Get(), camera.transform.GetMatrix() * camera.GetProjectionMatrix());
-		}
+		(*it)->setShadowMapTexture(dirLight.getShadowMapRenderTexture());
+		(*it)->draw(context.Get(), camera.transform.GetMatrix() * camera.GetProjectionMatrix());
+	}
+
+	//Render all transparent objects
+
+	for (std::set<Renderable*, TransparentRenderableCompare>::iterator it = transparentRenderables.begin(); it != transparentRenderables.end(); ++it)
+	{
+		(*it)->setShadowMapTexture(dirLight.getShadowMapRenderTexture());
+		(*it)->draw(context.Get(), camera.transform.GetMatrix() * camera.GetProjectionMatrix());
 	}
 
 	//context->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), depthStencilView.Get());
@@ -311,10 +344,10 @@ bool Graphics::initDirectX(HWND hwnd, int width, int height)
 
 		depthstencildesc.DepthEnable = true;
 		depthstencildesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK::D3D11_DEPTH_WRITE_MASK_ALL;
-		depthstencildesc.DepthFunc = D3D11_COMPARISON_FUNC::D3D11_COMPARISON_LESS_EQUAL;
+		depthstencildesc.DepthFunc = D3D11_COMPARISON_FUNC::D3D11_COMPARISON_LESS;
 
-		hr = this->device->CreateDepthStencilState(&depthstencildesc, this->depthStencilState.GetAddressOf());
-		COM_ERROR_IF_FAILED(hr, "Failed to create depth stencil state.");
+		hr = this->device->CreateDepthStencilState(&depthstencildesc, this->defaultDepthStencilState.GetAddressOf());
+		COM_ERROR_IF_FAILED(hr, "Failed to create depth stencil state");
 
 		//Create viewport
 		D3D11_VIEWPORT viewport = { 0 };
@@ -503,26 +536,26 @@ bool Graphics::initScene()
 		hr = pixelUnlitBasicBuffer.init(device.Get(), context.Get());
 		COM_ERROR_IF_FAILED(hr, "Failed to create constant buffer");
 
-		regularMaterial.setRenderStates(depthStencilState.Get(), defaultRasterizerState.Get(), samplerState.Get(), disabledBlendState.Get());
+		regularMaterial.setRenderStates(defaultDepthStencilState.Get(), defaultRasterizerState.Get(), samplerState.Get(), disabledBlendState.Get());
 		regularMaterial.setShaders(&vertexShader, &pixelShader);
 		regularMaterial.addVertexConstantBuffer(&vertexInfoConstantBuffer);
 		regularMaterial.addVertexConstantBuffer(&vertexInfoLightingBuffer);
 		regularMaterial.addPixelConstantBuffer(&pixelInfoLightingBuffer);
 
-		regularSkinnedMaterial.setRenderStates(depthStencilState.Get(), defaultRasterizerState.Get(), samplerState.Get(), disabledBlendState.Get());
+		regularSkinnedMaterial.setRenderStates(defaultDepthStencilState.Get(), defaultRasterizerState.Get(), samplerState.Get(), disabledBlendState.Get());
 		regularSkinnedMaterial.setShaders(&skinnedVertexShader, &pixelShader);
 		regularSkinnedMaterial.addVertexConstantBuffer(&vertexSkinnedInfoConstantBuffer);
 
-		depthRenderingMaterial.setRenderStates(depthStencilState.Get(), lightDepthRenderingRasterizerState.Get(), samplerState.Get(), disabledBlendState.Get());
+		depthRenderingMaterial.setRenderStates(defaultDepthStencilState.Get(), lightDepthRenderingRasterizerState.Get(), samplerState.Get(), disabledBlendState.Get());
 		depthRenderingMaterial.setShaders(&vertexShader, &depthBasicShader);
 		depthRenderingMaterial.addVertexConstantBuffer(&vertexInfoConstantBuffer);
 
-		unlitScreenRenderingMaterial.setRenderStates(depthStencilState.Get(), debugRasterizerState.Get(), samplerState.Get(), defaultBlendState.Get());
+		unlitScreenRenderingMaterial.setRenderStates(defaultDepthStencilState.Get(), debugRasterizerState.Get(), samplerState.Get(), defaultBlendState.Get());
 		unlitScreenRenderingMaterial.setShaders(&vertexShader, &unlitBasicPixelShader);
 		unlitScreenRenderingMaterial.addVertexConstantBuffer(&vertexInfoConstantBuffer);
 		unlitScreenRenderingMaterial.setRenderQueue(RenderQueue::TRANSPARENT_QUEUE);
 
-		debugViewRenderingMaterial.setRenderStates(depthStencilState.Get(), debugRasterizerState.Get(), samplerState.Get(), disabledBlendState.Get());
+		debugViewRenderingMaterial.setRenderStates(defaultDepthStencilState.Get(), debugRasterizerState.Get(), samplerState.Get(), disabledBlendState.Get());
 		debugViewRenderingMaterial.setShaders(&vertexShader, &unlitBasicPixelShader);
 		debugViewRenderingMaterial.addVertexConstantBuffer(&vertexInfoConstantBuffer);
 		debugViewRenderingMaterial.addPixelConstantBuffer(&pixelUnlitBasicBuffer);
@@ -545,7 +578,7 @@ bool Graphics::initScene()
 		if (!model->init(Primitive3DModels::QUAD.vertices, Primitive3DModels::QUAD.indices, device.Get(), context.Get(), texture.Get(), vertexInfoConstantBuffer))
 			return false;
 		renderables.emplace_back(&unlitScreenRenderingMaterial, model);
-		renderables.at(renderables.size() - 1).transform.SetPosition(1, -2, 4);
+		renderables.at(renderables.size() - 1).transform.SetPosition(1.5f, -2, 4);
 
 		model = new Model;
 		if (!model->init(Primitive3DModels::QUAD.vertices, Primitive3DModels::QUAD.indices, device.Get(), context.Get(), texture.Get(), vertexInfoConstantBuffer))
