@@ -299,6 +299,7 @@
     <FxCompile Include="Resources\Shaders\unlitBasic.hlsl">
       <Filter>Resource Files\Shaders\Pixel Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="Resources\Shaders\unlitTransparent.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Resources\Textures\bitshiftProductions.png">

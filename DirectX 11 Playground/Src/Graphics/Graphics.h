@@ -41,6 +41,7 @@ private:
 	VertexShader skinnedVertexShader;
 	PixelShader pixelShader;
 	PixelShader unlitBasicPixelShader;
+	PixelShader unlitTransparentPixelShader;
 	PixelShader depthBasicShader;
 
 	VertexConstantBuffer<CB_VS_VertexShader> vertexInfoConstantBuffer;
@@ -61,11 +62,13 @@ private:
 	Material regularSkinnedMaterial;
 	Material depthRenderingMaterial;
 	Material unlitScreenRenderingMaterial;
+	Material skyboxMaterial;
 	Material debugViewRenderingMaterial;
 
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> depthStencilView;
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> depthStencilBuffer;
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilState> defaultDepthStencilState;
+	Microsoft::WRL::ComPtr<ID3D11DepthStencilState> depthTestDisabledDepthStencilState;
 	Microsoft::WRL::ComPtr<ID3D11RasterizerState> defaultRasterizerState;
 	Microsoft::WRL::ComPtr<ID3D11RasterizerState> debugRasterizerState;
 	Microsoft::WRL::ComPtr<ID3D11RasterizerState> lightDepthRenderingRasterizerState;

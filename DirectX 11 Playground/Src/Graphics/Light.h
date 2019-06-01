@@ -11,22 +11,22 @@ public:
 	XMFLOAT3 colour = { 1, 0, 1 };
 	const XMMATRIX GetLightMatrix() const
 	{
-		return lightCamera.transform.GetMatrix() * lightCamera.GetProjectionMatrix();
+		return lightCamera.GetMatrix() * lightCamera.GetProjectionMatrix();
 	}
 
 	void setPosition(const XMFLOAT3& pos)
 	{
-		lightCamera.transform.SetPosition(pos.x, pos.y, pos.z);
+		lightCamera.SetPosition(pos.x, pos.y, pos.z);
 	}
 
 	XMFLOAT3 getPosition() const
 	{
-		return lightCamera.transform.GetPositionFloat3();
+		return lightCamera.GetPositionFloat3();
 	}
 
 	void setRotation(const XMVECTOR& dir)
 	{
-		lightCamera.transform.SetRotation(dir);
+		lightCamera.SetRotation(dir);
 	}
 
 	void enableShadowMapRendering(RenderTexture* shadowMapRendertexture)

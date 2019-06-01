@@ -1,10 +1,11 @@
 #pragma once
 #include <DirectXMath.h>
 using namespace DirectX;
-class Transform
+
+class BaseTransform
 {
 public:
-	Transform();
+	BaseTransform();
 	const XMMATRIX & GetMatrix() const;
 	const XMVECTOR & GetPositionVector() const;
 	const XMFLOAT3 & GetPositionFloat3() const;
@@ -25,8 +26,8 @@ public:
 	const XMVECTOR & GetBackwardVector();
 	const XMVECTOR & GetLeftVector();
 
-private:
-	void UpdateMatrix();
+protected:
+	virtual void UpdateMatrix();
 	XMVECTOR posVector;
 	XMVECTOR rotVector;
 	XMFLOAT3 pos;
@@ -43,5 +44,11 @@ private:
 	XMVECTOR vec_left;
 	XMVECTOR vec_right;
 	XMVECTOR vec_backward;
+};
+
+class Transform : public BaseTransform
+{
+protected:
+	void UpdateMatrix();
 };
 

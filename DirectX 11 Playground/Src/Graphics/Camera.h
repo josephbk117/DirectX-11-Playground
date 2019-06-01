@@ -4,7 +4,7 @@
 #include <DirectXMath.h>
 using namespace DirectX;
 
-class Camera
+class Camera : public BaseTransform
 {
 public:
 	enum class ProjectionType { PERSPECTIVE, OTHOGRAPHIC };
@@ -20,9 +20,8 @@ public:
 	const XMMATRIX GetViewDirectionMatrix()const;
 	const XMMATRIX & GetProjectionMatrix() const;
 
-	Transform transform;
-
 private:
+	void UpdateMatrix() override;
 	RenderTexture* renderTexture = nullptr;
 	ProjectionType projectionType = ProjectionType::PERSPECTIVE;
 	XMMATRIX projectionMatrix;

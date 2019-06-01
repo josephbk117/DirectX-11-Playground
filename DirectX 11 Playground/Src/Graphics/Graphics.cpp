@@ -68,7 +68,7 @@ void Graphics::renderFrame()
 	if (!vertexSkinnedInfoConstantBuffer.applyChanges())
 		return;
 
-	vertexInfoConstantBuffer.data.mvpMatrix = DirectX::XMMatrixIdentity() * camera.transform.GetMatrix() * camera.GetProjectionMatrix();
+	vertexInfoConstantBuffer.data.mvpMatrix = DirectX::XMMatrixIdentity() * camera.GetMatrix() * camera.GetProjectionMatrix();
 	vertexInfoConstantBuffer.data.mvpMatrix = DirectX::XMMatrixTranspose(vertexInfoConstantBuffer.data.mvpMatrix);
 	if (!vertexInfoConstantBuffer.applyChanges())
 		return;
@@ -113,7 +113,7 @@ void Graphics::renderFrame()
 	context->ClearDepthStencilView(depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 	//Add all opaque objects to set, and comparision function is distance from camera
-	refCameraPos = camera.transform.GetPositionVector();
+	refCameraPos = camera.GetPositionVector();
 	std::set<Renderable*, OpaqueRenderableCompare> opaqueRenderables;
 	std::set<Renderable*, TransparentRenderableCompare> transparentRenderables;
 	for (unsigned int i = 0; i < renderables.size(); i++)
@@ -129,15 +129,18 @@ void Graphics::renderFrame()
 	for (std::set<Renderable*, OpaqueRenderableCompare>::iterator it = opaqueRenderables.begin(); it != opaqueRenderables.end(); ++it)
 	{
 		(*it)->setShadowMapTexture(dirLight.getShadowMapRenderTexture());
-		(*it)->draw(context.Get(), camera.transform.GetMatrix() * camera.GetProjectionMatrix());
+		(*it)->draw(context.Get(), camera.GetMatrix() * camera.GetProjectionMatrix());
 	}
 
+	//Draw skybox
+	skyboxMaterial.bind(context.Get());
+	skybox.draw(camera.GetViewDirectionMatrix() * camera.GetProjectionMatrix());
 	//Render all transparent objects
 
 	for (std::set<Renderable*, TransparentRenderableCompare>::iterator it = transparentRenderables.begin(); it != transparentRenderables.end(); ++it)
 	{
 		(*it)->setShadowMapTexture(dirLight.getShadowMapRenderTexture());
-		(*it)->draw(context.Get(), camera.transform.GetMatrix() * camera.GetProjectionMatrix());
+		(*it)->draw(context.Get(), camera.GetMatrix() * camera.GetProjectionMatrix());
 	}
 
 	//context->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), depthStencilView.Get());
@@ -349,6 +352,16 @@ bool Graphics::initDirectX(HWND hwnd, int width, int height)
 		hr = this->device->CreateDepthStencilState(&depthstencildesc, this->defaultDepthStencilState.GetAddressOf());
 		COM_ERROR_IF_FAILED(hr, "Failed to create depth stencil state");
 
+		//Set depth-stencil state with disabled depth testing
+		depthstencildesc = { 0 };
+
+		depthstencildesc.DepthEnable = false;
+		depthstencildesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK::D3D11_DEPTH_WRITE_MASK_ALL;
+		depthstencildesc.DepthFunc = D3D11_COMPARISON_FUNC::D3D11_COMPARISON_LESS;
+
+		hr = this->device->CreateDepthStencilState(&depthstencildesc, this->depthTestDisabledDepthStencilState.GetAddressOf());
+		COM_ERROR_IF_FAILED(hr, "Failed to create depth stencil state");
+
 		//Create viewport
 		D3D11_VIEWPORT viewport = { 0 };
 
@@ -473,7 +486,7 @@ bool Graphics::initShaders()
 		shaderfolder = L"..\\Release\\";
 #endif
 #endif
-	}
+}
 
 	D3D11_INPUT_ELEMENT_DESC layout[] =
 	{
@@ -508,11 +521,14 @@ bool Graphics::initShaders()
 	if (!unlitBasicPixelShader.init(device, shaderfolder + L"unlitBasic.cso"))
 		return false;
 
+	if (!unlitTransparentPixelShader.init(device, shaderfolder + L"unlitTransparent.cso"))
+		return false;
+
 	if (!depthBasicShader.init(device, shaderfolder + L"depthBasic.cso"))
 		return false;
 
 	return true;
-	}
+}
 
 bool Graphics::initScene()
 {
@@ -550,10 +566,14 @@ bool Graphics::initScene()
 		depthRenderingMaterial.setShaders(&vertexShader, &depthBasicShader);
 		depthRenderingMaterial.addVertexConstantBuffer(&vertexInfoConstantBuffer);
 
-		unlitScreenRenderingMaterial.setRenderStates(defaultDepthStencilState.Get(), debugRasterizerState.Get(), samplerState.Get(), defaultBlendState.Get());
-		unlitScreenRenderingMaterial.setShaders(&vertexShader, &unlitBasicPixelShader);
+		unlitScreenRenderingMaterial.setRenderStates(depthTestDisabledDepthStencilState.Get(), debugRasterizerState.Get(), samplerState.Get(), defaultBlendState.Get());
+		unlitScreenRenderingMaterial.setShaders(&vertexShader, &unlitTransparentPixelShader);
 		unlitScreenRenderingMaterial.addVertexConstantBuffer(&vertexInfoConstantBuffer);
 		unlitScreenRenderingMaterial.setRenderQueue(RenderQueue::TRANSPARENT_QUEUE);
+
+		skyboxMaterial.setRenderStates(defaultDepthStencilState.Get(), debugRasterizerState.Get(), samplerState.Get(), disabledBlendState.Get());
+		skyboxMaterial.setShaders(&vertexShader, &unlitBasicPixelShader);
+		skyboxMaterial.addVertexConstantBuffer(&vertexInfoConstantBuffer);
 
 		debugViewRenderingMaterial.setRenderStates(defaultDepthStencilState.Get(), debugRasterizerState.Get(), samplerState.Get(), disabledBlendState.Get());
 		debugViewRenderingMaterial.setShaders(&vertexShader, &unlitBasicPixelShader);
@@ -572,25 +592,26 @@ bool Graphics::initScene()
 		if (!model->init(Primitive3DModels::QUAD.vertices, Primitive3DModels::QUAD.indices, device.Get(), context.Get(), texture.Get(), vertexInfoConstantBuffer))
 			return false;
 		renderables.emplace_back(&unlitScreenRenderingMaterial, model);
-		renderables.at(renderables.size() - 1).transform.SetPosition(2, -2, 5);
+		renderables.at(renderables.size() - 1).transform.SetPosition(2, 2, 5);
 
 		model = new Model;
 		if (!model->init(Primitive3DModels::QUAD.vertices, Primitive3DModels::QUAD.indices, device.Get(), context.Get(), texture.Get(), vertexInfoConstantBuffer))
 			return false;
 		renderables.emplace_back(&unlitScreenRenderingMaterial, model);
-		renderables.at(renderables.size() - 1).transform.SetPosition(1.5f, -2, 4);
+		renderables.at(renderables.size() - 1).transform.SetPosition(1.5f, 2, 4);
+		renderables.at(renderables.size() - 1).transform.SetRotation(0, 0, 45);
 
 		model = new Model;
 		if (!model->init(Primitive3DModels::QUAD.vertices, Primitive3DModels::QUAD.indices, device.Get(), context.Get(), texture.Get(), vertexInfoConstantBuffer))
 			return false;
 		renderables.emplace_back(&unlitScreenRenderingMaterial, model);
-		renderables.at(renderables.size() - 1).transform.SetPosition(2, -2, 3);
+		renderables.at(renderables.size() - 1).transform.SetPosition(2, 2, 3);
 
 		model = new Model;
 		if (!model->init("Resources\\Models\\stairsLong.obj", device.Get(), context.Get(), texture.Get(), vertexInfoConstantBuffer))
 			return false;
 		renderables.emplace_back(&regularMaterial, model);
-		renderables.at(renderables.size() - 1).transform.SetPosition(0, 0, 3);
+		renderables.at(renderables.size() - 1).transform.SetPosition(0, 1, -3);
 
 		dirLight.enableShadowMapRendering(&renderTexture);
 
@@ -618,7 +639,7 @@ bool Graphics::initScene()
 
 		skybox.init(device.Get(), context.Get(), vertexInfoConstantBuffer, cubemap);
 
-		camera.transform.SetPosition(0.0f, 2.0f, -2.0f);
+		camera.SetPosition(0.0f, 2.0f, -2.0f);
 		camera.SetPerspectiveProjectionValues(60.0f, 1.0f, 0.1f, 100.0f);
 	}
 	catch (COMException & e)
