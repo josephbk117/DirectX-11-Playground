@@ -247,40 +247,61 @@ void Graphics::renderFrame()
 
 void Graphics::onWindowResized(HWND hwnd, int width, int height)
 {
-	//if (swapchain.Get() != nullptr)
-	//{
-	//	context->OMSetRenderTargets(0, 0, 0);
-	//	context->ClearState();
-	//	renderTargetView->Release();
+	//swapchain->ResizeBuffers(0, 0, 0, DXGI_FORMAT_UNKNOWN, 0);
+	//DXGI_MODE_DESC modeDesc = { 0 };
+	//modeDesc.Height = height;
+	//modeDesc.Width = width;
+	//modeDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	//modeDesc.RefreshRate.Numerator = 60;
+	//modeDesc.RefreshRate.Denominator = 1;
+	//modeDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+	//modeDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
 
-	//	HRESULT hr = swapchain->ResizeBuffers(0, 0, 0, DXGI_FORMAT_UNKNOWN, 0);
-	//	/*if (FAILED(hr))
-	//		ErrorLogger::log(hr, "Swapchain buffer resize failed");*/
-	//	//error hadling
-	//	// Get buffer and create a render-target-view.
-	//	depthStencilBuffer.Reset();
-	//	hr = swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&depthStencilBuffer);
-	//	if (FAILED(hr))
-	//		ErrorLogger::log(hr, "Swapchain buffer creation failed");
-	//	// Perform error handling here!
+	//swapchain->ResizeTarget(&modeDesc);
+	//context->OMSetRenderTargets(0, 0, 0);
+	//context->ClearState();
+	//renderTargetView->Release();
 
-	//	hr = device->CreateRenderTargetView(depthStencilBuffer.Get(), NULL, renderTargetView.GetAddressOf());
-	//	if (FAILED(hr))
-	//		ErrorLogger::log(hr, "Render target view creation failed");
-	//	// Perform error handling here!
+	//depthStencilBuffer.Reset();
+	//swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&depthStencilBuffer);
 
-	//	context->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), NULL);
+	//device->CreateRenderTargetView(depthStencilBuffer.Get(), NULL, renderTargetView.GetAddressOf());
+	//context->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), NULL);
+	////if (swapchain.Get() != nullptr)
+	////{
+	////	context->OMSetRenderTargets(0, 0, 0);
+	////	context->ClearState();
+	////	renderTargetView->Release();
 
-	//	// Set up the viewport.
-	//	D3D11_VIEWPORT vp;
-	//	vp.Width = width;
-	//	vp.Height = height;
-	//	vp.MinDepth = 0.0f;
-	//	vp.MaxDepth = 1.0f;
-	//	vp.TopLeftX = 0;
-	//	vp.TopLeftY = 0;
-	//	context->RSSetViewports(1, &vp);
-	//}
+	////	HRESULT hr = swapchain->ResizeBuffers(0, 0, 0, DXGI_FORMAT_UNKNOWN, 0);
+	////	/*if (FAILED(hr))
+	////		ErrorLogger::log(hr, "Swapchain buffer resize failed");*/
+	////	//error hadling
+	////	// Get buffer and create a render-target-view.
+	////	depthStencilBuffer.Reset();
+	////	hr = swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&depthStencilBuffer);
+	////	if (FAILED(hr))
+	////		ErrorLogger::log(hr, "Swapchain buffer creation failed");
+	////	// Perform error handling here!
+
+	////	hr = device->CreateRenderTargetView(depthStencilBuffer.Get(), NULL, renderTargetView.GetAddressOf());
+	////	if (FAILED(hr))
+	////		ErrorLogger::log(hr, "Render target view creation failed");
+	////	// Perform error handling here!
+
+	////	context->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), NULL);
+
+	//// Set up the viewport.
+	//D3D11_VIEWPORT vp;
+	//vp.Width = width;
+	//vp.Height = height;
+	//vp.MinDepth = 0.0f;
+	//vp.MaxDepth = 1.0f;
+	//vp.TopLeftX = 0;
+	//vp.TopLeftY = 0;
+	//context->RSSetViewports(1, &vp);
+
+	camera.SetPerspectiveProjectionValues(60.0f, width / (float)height, 0.1f, 100.0f);
 }
 
 bool Graphics::initDirectX(HWND hwnd, int width, int height)
