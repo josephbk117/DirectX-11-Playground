@@ -1,5 +1,13 @@
 #include "Material.h"
 
+Material* Material::prevBoundMaterial = nullptr;
+ID3D11DepthStencilState* Material::prevdepthStencilState = nullptr;
+ID3D11RasterizerState* Material::prevRasterizerState = nullptr;
+ID3D11SamplerState* Material::prevSamplerState = nullptr;
+ID3D11BlendState* Material::prevBlendState = nullptr;
+VertexShader* Material::prevVertexShader = nullptr;
+PixelShader* Material::prevPixelShader = nullptr;
+
 Material::Material()
 {
 }
@@ -117,6 +125,8 @@ void Material::getShadowAndRenderQueueStates(RenderQueue & queue, bool & castSha
 
 void Material::bind(ID3D11DeviceContext * context) const
 {
+	if (prevBoundMaterial == const_cast<Material*>(this))
+		return;
 #if _DEBUG
 	if (std::find(&isCompletlyInitialized[0], &isCompletlyInitialized[3], false) == nullptr)
 	{
@@ -124,21 +134,36 @@ void Material::bind(ID3D11DeviceContext * context) const
 		exit(-1);
 	}
 #endif
+	context->IASetPrimitiveTopology(topology);
+	if (prevRasterizerState != rasterizerState)
+		context->RSSetState(rasterizerState);
+	if (prevdepthStencilState != depthStencilState)
+		context->OMSetDepthStencilState(depthStencilState, 0);
+	if (prevBlendState != blendState)
+		context->OMSetBlendState(blendState, nullptr, 0xFFFFFF);
+	if (prevSamplerState != samplerState)
+		context->PSSetSamplers(0, 1, &samplerState);
 
 	context->IASetInputLayout(vertexShader->getInputLayout());
-	context->IASetPrimitiveTopology(topology);
-	context->RSSetState(rasterizerState);
-	context->OMSetDepthStencilState(depthStencilState, 0);
-	context->OMSetBlendState(blendState, nullptr, 0xFFFFFF);
-	context->PSSetSamplers(0, 1, &samplerState);
 	context->VSSetShader(vertexShader->getShader(), NULL, 0);
-	context->PSSetShader(pixelShader->getShader(), NULL, 0);
+
+	if (prevPixelShader != pixelShader)
+		context->PSSetShader(pixelShader->getShader(), NULL, 0);
 
 	for (unsigned int index = 0; index < vertexConstantBuffers.size(); index++)
 		context->VSSetConstantBuffers(index, 1, vertexConstantBuffers[index]->getAddressOf());
 
 	for (unsigned int index = 0; index < pixelConstantBuffers.size(); index++)
 		context->PSSetConstantBuffers(index, 1, pixelConstantBuffers[index]->getAddressOf());
+
+	prevBoundMaterial = const_cast<Material*>(this);
+
+	prevdepthStencilState = depthStencilState;
+	prevRasterizerState = rasterizerState;
+	prevSamplerState = samplerState;
+	prevBlendState = blendState;
+	prevVertexShader = vertexShader;
+	prevPixelShader = pixelShader;
 }
 
 void Material::bind(ID3D11DeviceContext * context, PixelShader * overridePixelShader) const

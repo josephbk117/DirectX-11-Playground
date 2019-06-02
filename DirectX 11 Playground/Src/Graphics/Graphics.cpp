@@ -138,8 +138,7 @@ void Graphics::renderFrame()
 		(*it)->setShadowMapTexture(dirLight.getShadowMapRenderTexture());
 		(*it)->draw(context.Get(), camera.GetMatrix() * camera.GetProjectionMatrix());
 	}
-	regularSkinnedMaterial.bind(context.Get());
-	renderables.at(renderables.size() - 1).draw(context.Get(), camera.GetMatrix() * camera.GetProjectionMatrix());
+
 	//Draw skybox
 	skyboxMaterial.bind(context.Get());
 	skybox.draw(camera.GetViewDirectionMatrix() * camera.GetProjectionMatrix());
@@ -619,7 +618,7 @@ bool Graphics::initScene()
 		model = new Model;
 		if (!model->init("Resources\\Models\\stairsLong.obj", device.Get(), context.Get(), texture.Get(), vertexInfoConstantBuffer))
 			return false;
-		renderables.emplace_back(&regularSkinnedMaterial, model);
+		renderables.emplace_back(&regularMaterial, model);
 		renderables.at(renderables.size() - 1).transform.SetPosition(0, 1, -3);
 
 		SkinnedModel* skinnedModel = new SkinnedModel;

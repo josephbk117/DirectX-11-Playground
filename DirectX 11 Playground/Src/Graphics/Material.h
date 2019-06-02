@@ -10,6 +10,14 @@ enum class RenderQueue { OPAQUE_QUEUE, TRANSPARENT_QUEUE };
 class Material
 {
 private:
+	static Material* prevBoundMaterial;
+	static ID3D11DepthStencilState* prevdepthStencilState;
+	static ID3D11RasterizerState* prevRasterizerState;
+	static ID3D11SamplerState* prevSamplerState;
+	static ID3D11BlendState* prevBlendState;
+	static VertexShader* prevVertexShader;
+	static PixelShader* prevPixelShader;
+
 	ID3D11DepthStencilState* depthStencilState = nullptr;
 	ID3D11RasterizerState* rasterizerState = nullptr;
 	ID3D11SamplerState* samplerState = nullptr;
