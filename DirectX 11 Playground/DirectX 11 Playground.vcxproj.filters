@@ -153,6 +153,9 @@
     <ClCompile Include="Src\Scenegraph And Physics\Transform.cpp">
       <Filter>Source Files\Scene graph  and Physics</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Graphics\Animator.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\ErrorLogger.h">
@@ -283,6 +286,9 @@
     </ClInclude>
     <ClInclude Include="Src\Scenegraph And Physics\Transform.h">
       <Filter>Header Files\Scene graph and Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Graphics\Animator.h">
+      <Filter>Header Files\Graphics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

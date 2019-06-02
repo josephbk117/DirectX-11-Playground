@@ -37,6 +37,11 @@ void Model::setTexture(ID3D11ShaderResourceView * texture)
 	this->texture1 = texture;
 }
 
+void Model::setTexture2(ID3D11ShaderResourceView * texture)
+{
+	this->texture2 = texture;
+}
+
 void Model::draw(const XMMATRIX& worldMatrix, const XMMATRIX& viewProjectionMatrix)
 {
 	cb_vs_vertexShader->data.mvpMatrix = worldMatrix * viewProjectionMatrix;
@@ -65,6 +70,13 @@ void Model::drawDebugView(const XMMATRIX& worldMatrix, const XMMATRIX& viewProje
 
 	for (Mesh mesh : meshes)
 		mesh.drawOBB();
+}
+
+std::vector<Mesh>& Model::getMeshes()
+{
+
+	return meshes;
+
 }
 
 bool Model::loadModel(const std::string & filePath)

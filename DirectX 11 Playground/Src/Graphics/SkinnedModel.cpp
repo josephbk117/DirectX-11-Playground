@@ -36,6 +36,11 @@ void SkinnedModel::setTexture(ID3D11ShaderResourceView * texture)
 	this->texture1 = texture;
 }
 
+void SkinnedModel::setTexture2(ID3D11ShaderResourceView * texture)
+{
+	this->texture2 = texture;
+}
+
 void SkinnedModel::draw(const XMMATRIX& worldMatrix, const XMMATRIX& viewProjectionMatrix)
 {
 	cb_vs_vertexShader->data.mvpMatrix = worldMatrix * viewProjectionMatrix;
@@ -47,19 +52,6 @@ void SkinnedModel::draw(const XMMATRIX& worldMatrix, const XMMATRIX& viewProject
 
 	for (SkinnedMesh mesh : meshes)
 		mesh.draw();
-}
-
-void SkinnedModel::animate(float time, XMMATRIX* jointMatrices)const
-{
-	for (unsigned int boneIndex = 0; boneIndex < tempBoneTransformCollection.size(); boneIndex++)
-	{
-		unsigned int indexA, indexB;
-		indexA = DirectX::XMMin(static_cast<size_t>(time), tempBoneTransformCollection.at(boneIndex).size() - 1);
-		indexB = DirectX::XMMin(static_cast<size_t>(time + 1), tempBoneTransformCollection.at(boneIndex).size() - 1);
-		JointTransform A = tempBoneTransformCollection[boneIndex].at(indexA);
-		JointTransform B = tempBoneTransformCollection[boneIndex].at(indexB);
-		jointMatrices[boneIndex] = JointTransform::interpolate(A, B, time - indexA).getLocalTransform();
-	}
 }
 
 bool SkinnedModel::loadModel(const std::string & filePath)

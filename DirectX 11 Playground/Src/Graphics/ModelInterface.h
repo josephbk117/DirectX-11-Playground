@@ -19,6 +19,7 @@ public:
 	ModelInterface(const ModelInterface& rhs) = default;
 	virtual ~ModelInterface() {}
 	virtual void setTexture(ID3D11ShaderResourceView* texture) = 0;
+	virtual void setTexture2(ID3D11ShaderResourceView* texture) = 0;
 	virtual void draw(const XMMATRIX& worldMatrix, const XMMATRIX& viewProjectionMatrix) = 0;
 protected:
 	virtual bool loadModel(const std::string & filePath) = 0;

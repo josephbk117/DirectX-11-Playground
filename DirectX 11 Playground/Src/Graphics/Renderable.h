@@ -1,20 +1,25 @@
 #pragma once
 #include "Material.h"
 #include "Model.h"
+#include "SkinnedModel.h"
 #include "RenderTexture.h"
 #include "..\Scenegraph And Physics\Transform.h"
 
 //TODO: Dispose Model* properly, currently leaking memory
-
+class SkinnedModel;
 class Renderable
 {
 private:
 	Material* m_material = nullptr;
-	Model* m_model = nullptr;
+	ModelInterface* m_model = nullptr;
+	bool isSkinnedModel = false;
+	friend class Animator;
 public:
 	Renderable();
 	Renderable(Material* mat, Model* model);
+	Renderable(Material* mat, SkinnedModel* model);
 	~Renderable();
+	bool getIfSkinnedModel()const;
 	Material* getMaterial() const;
 	ModelInterface* getModel() const;
 	void draw(ID3D11DeviceContext* context, const XMMATRIX& viewProjectionMatrix);

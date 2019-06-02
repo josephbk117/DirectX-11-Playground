@@ -151,6 +151,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Graphics\Animator.cpp" />
     <ClCompile Include="Src\Graphics\Renderable.cpp" />
     <ClCompile Include="Src\Scenegraph And Physics\OBB.cpp" />
     <ClCompile Include="Src\Scenegraph And Physics\Ray.cpp" />
@@ -183,6 +184,7 @@
     <ClCompile Include="Src\Scenegraph And Physics\Transform.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Graphics\Animator.h" />
     <ClInclude Include="Src\Graphics\Renderable.h" />
     <ClInclude Include="Src\Scenegraph And Physics\OBB.h" />
     <ClInclude Include="Src\Scenegraph And Physics\Ray.h" />

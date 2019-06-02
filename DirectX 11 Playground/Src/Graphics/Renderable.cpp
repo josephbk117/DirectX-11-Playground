@@ -8,11 +8,24 @@ Renderable::Renderable(Material * mat, Model * model)
 {
 	this->m_material = mat;
 	this->m_model = model;
+	isSkinnedModel = false;
+}
+
+Renderable::Renderable(Material * mat, SkinnedModel * model)
+{
+	this->m_material = mat;
+	this->m_model = model;
+	isSkinnedModel = true;
 }
 
 Renderable::~Renderable()
 {
 	//delete model;
+}
+
+bool Renderable::getIfSkinnedModel() const
+{
+	return isSkinnedModel;
 }
 
 Material * Renderable::getMaterial() const

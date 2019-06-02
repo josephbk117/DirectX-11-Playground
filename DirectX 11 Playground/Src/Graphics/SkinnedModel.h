@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 #include <map>
+#include "Animator.h"
+class Animator;
 
 class Joint
 {
@@ -90,15 +92,18 @@ public:
 	bool init(const std::string& filePath, ID3D11Device * device, ID3D11DeviceContext* context, ID3D11ShaderResourceView* texture, VertexConstantBuffer<CB_VS_Skinned_VertexShader>& cb_vs_vertexShader)override;
 	bool init(std::vector<SkinnedVertex> vertices, std::vector<DWORD> indices, ID3D11Device * device, ID3D11DeviceContext* context, ID3D11ShaderResourceView* texture, VertexConstantBuffer<CB_VS_Skinned_VertexShader>& cb_vs_vertexShader)override;
 	void setTexture(ID3D11ShaderResourceView* texture)override;
+	void setTexture2(ID3D11ShaderResourceView* texture)override;
 	void draw(const XMMATRIX& worldMatrix,const XMMATRIX& viewProjectionMatrix)override;
-	void animate(float time, XMMATRIX* jointMatrices)const;
-private:
 	typedef std::vector<std::vector<JointTransform>> JointTransformCollection;
 	typedef std::multimap<double, std::pair<unsigned int, JointTransform>> AnimationMap;
+	friend class Animator;
+private:
+	ID3D11ShaderResourceView* texture2 = nullptr;
 	std::vector<SkinnedMesh> meshes;
 	JointTransformCollection tempBoneTransformCollection;
 	AnimationMap animationMap;
 	bool loadModel(const std::string & filePath);
 	void processNode(aiNode * node, const aiScene * scene);
 	SkinnedMesh processMesh(aiMesh * mesh, const aiScene * scene);
+
 };

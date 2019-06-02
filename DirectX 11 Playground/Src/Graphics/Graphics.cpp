@@ -1,6 +1,7 @@
 #include "Graphics.h"
 #include "RenderTexture.h"
 #include "Primitive3DModels.h"
+#include "Animator.h"
 #include <set>
 
 bool Graphics::init(HWND hwnd, int width, int height)
@@ -61,6 +62,13 @@ void Graphics::renderFrame()
 
 	//Update all constant buffers
 	//skinnedModel.animate(t_time, &vertexSkinnedInfoConstantBuffer.data.jointMatrices[0]);
+
+	for (int i = 0; i < renderables.size(); i++)
+	{
+		if (renderables.at(i).getIfSkinnedModel())
+			Animator::animate(t_time, &vertexSkinnedInfoConstantBuffer.data.jointMatrices[0], &renderables[i]);
+	}
+
 	vertexSkinnedInfoConstantBuffer.data.mvpMatrix = vertexInfoConstantBuffer.data.mvpMatrix;
 	vertexSkinnedInfoConstantBuffer.data.jointMatrices[0] = vertexSkinnedInfoConstantBuffer.data.jointMatrices[0] * vertexSkinnedInfoConstantBuffer.data.jointMatrices[0];
 	vertexSkinnedInfoConstantBuffer.data.jointMatrices[1] = vertexSkinnedInfoConstantBuffer.data.jointMatrices[1] * vertexSkinnedInfoConstantBuffer.data.jointMatrices[1];
@@ -130,7 +138,8 @@ void Graphics::renderFrame()
 		(*it)->setShadowMapTexture(dirLight.getShadowMapRenderTexture());
 		(*it)->draw(context.Get(), camera.GetMatrix() * camera.GetProjectionMatrix());
 	}
-
+	regularSkinnedMaterial.bind(context.Get());
+	renderables.at(renderables.size() - 1).draw(context.Get(), camera.GetMatrix() * camera.GetProjectionMatrix());
 	//Draw skybox
 	skyboxMaterial.bind(context.Get());
 	skybox.draw(camera.GetViewDirectionMatrix() * camera.GetProjectionMatrix());
@@ -485,7 +494,7 @@ bool Graphics::initShaders()
 		shaderfolder = L"..\\Release\\";
 #endif
 #endif
-}
+	}
 
 	D3D11_INPUT_ELEMENT_DESC layout[] =
 	{
@@ -560,6 +569,7 @@ bool Graphics::initScene()
 		regularSkinnedMaterial.setRenderStates(defaultDepthStencilState.Get(), defaultRasterizerState.Get(), samplerState.Get(), disabledBlendState.Get());
 		regularSkinnedMaterial.setShaders(&skinnedVertexShader, &pixelShader);
 		regularSkinnedMaterial.addVertexConstantBuffer(&vertexSkinnedInfoConstantBuffer);
+		regularSkinnedMaterial.addPixelConstantBuffer(&pixelInfoLightingBuffer);
 
 		depthRenderingMaterial.setRenderStates(defaultDepthStencilState.Get(), lightDepthRenderingRasterizerState.Get(), samplerState.Get(), disabledBlendState.Get());
 		depthRenderingMaterial.setShaders(&vertexShader, &depthBasicShader);
@@ -609,14 +619,14 @@ bool Graphics::initScene()
 		model = new Model;
 		if (!model->init("Resources\\Models\\stairsLong.obj", device.Get(), context.Get(), texture.Get(), vertexInfoConstantBuffer))
 			return false;
-		renderables.emplace_back(&regularMaterial, model);
+		renderables.emplace_back(&regularSkinnedMaterial, model);
 		renderables.at(renderables.size() - 1).transform.SetPosition(0, 1, -3);
 
-		/*model = new SkinnedModel;
-		if (!model->init("Resources\\Models\\animCylinder.fbx", device.Get(), context.Get(), texture.Get(), vertexSkinnedInfoConstantBuffer))
+		SkinnedModel* skinnedModel = new SkinnedModel;
+		if (!skinnedModel->init("Resources\\Models\\animCylinder.fbx", device.Get(), context.Get(), texture.Get(), vertexSkinnedInfoConstantBuffer))
 			return false;
-		renderables.emplace_back(&regularMaterial, model);*/
-		renderables.at(renderables.size() - 1).transform.SetPosition(0, 1, -3);
+		renderables.emplace_back(&regularSkinnedMaterial, skinnedModel);
+		renderables.at(renderables.size() - 1).transform.SetPosition(0, 2, 0);
 
 		dirLight.enableShadowMapRendering(&renderTexture);
 
