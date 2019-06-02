@@ -7,15 +7,18 @@ A renderer in DirectX 11 and playing around with it.
 - [X] Render to texture support
 - [X] Skybox support
 - [X] Directional shadow mapping
+- [X] Material System
+- [X] Object oriented bounding box creation
 
 ### Things in progress:
 - Skinned model animation
-- Material system
-- Object oriented bounding box creation
+- Debug draw capability
 
 ### Things to implement:
+- [ ] Frustum culling
+- [ ] Scene graph implementation
 - [ ] Mesh instancing
-- [ ] Deferred Rendering
+- [ ] Deferred rendering
 - [ ] SSAO
 - [ ] Rudamentary particle system
 - [ ] PBR support
