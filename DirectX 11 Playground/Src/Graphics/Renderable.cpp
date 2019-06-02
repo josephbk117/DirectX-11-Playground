@@ -37,6 +37,12 @@ void Renderable::overrideMaterialDraw(ID3D11DeviceContext * context, Material * 
 	m_model->draw(transform.GetMatrix(), viewProjectionMatrix);
 }
 
+void Renderable::overridePixelShaderDraw(ID3D11DeviceContext * context, PixelShader * overridePixelShader, const XMMATRIX & viewProjectionMatrix)
+{
+	m_material->bind(context, overridePixelShader);
+	m_model->draw(transform.GetMatrix(), viewProjectionMatrix);
+}
+
 void Renderable::overrideWorldMatrixDraw(ID3D11DeviceContext * context, const XMMATRIX & worldMatrix, const XMMATRIX & viewProjectionMatrix)
 {
 	m_material->bind(context);

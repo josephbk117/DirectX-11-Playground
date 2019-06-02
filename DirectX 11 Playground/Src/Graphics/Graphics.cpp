@@ -91,8 +91,9 @@ void Graphics::renderFrame()
 	Rendering stages:
 	1. Directional light depth rendering for all objects that cast shadow [ Shadow map ]
 	2. In default render texture, Render all opaque objects with shadow map applied
-	3. Render all transparent objects
-	4. Draw all debug visualizations
+	3. Draw skybox
+	4. Render all transparent objects
+	5. Draw all debug visualizations
 	*/
 
 	if (dirLight.doesLightRenderShadowMap())
@@ -102,9 +103,7 @@ void Graphics::renderFrame()
 		for (int i = 0; i < renderables.size(); i++)
 		{
 			if (renderables.at(i).getMaterial()->doesCastShadow())
-			{
-				renderables.at(i).overrideMaterialDraw(context.Get(), &depthRenderingMaterial, dirLight.GetLightMatrix());
-			}
+				renderables.at(i).overridePixelShaderDraw(context.Get(), &depthBasicShader, dirLight.GetLightMatrix());
 		}
 	}
 
@@ -355,8 +354,8 @@ bool Graphics::initDirectX(HWND hwnd, int width, int height)
 		//Set depth-stencil state with disabled depth testing
 		depthstencildesc = { 0 };
 
-		depthstencildesc.DepthEnable = false;
-		depthstencildesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK::D3D11_DEPTH_WRITE_MASK_ALL;
+		depthstencildesc.DepthEnable = true;
+		depthstencildesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK::D3D11_DEPTH_WRITE_MASK_ZERO;
 		depthstencildesc.DepthFunc = D3D11_COMPARISON_FUNC::D3D11_COMPARISON_LESS;
 
 		hr = this->device->CreateDepthStencilState(&depthstencildesc, this->depthTestDisabledDepthStencilState.GetAddressOf());
@@ -611,6 +610,12 @@ bool Graphics::initScene()
 		if (!model->init("Resources\\Models\\stairsLong.obj", device.Get(), context.Get(), texture.Get(), vertexInfoConstantBuffer))
 			return false;
 		renderables.emplace_back(&regularMaterial, model);
+		renderables.at(renderables.size() - 1).transform.SetPosition(0, 1, -3);
+
+		/*model = new SkinnedModel;
+		if (!model->init("Resources\\Models\\animCylinder.fbx", device.Get(), context.Get(), texture.Get(), vertexSkinnedInfoConstantBuffer))
+			return false;
+		renderables.emplace_back(&regularMaterial, model);*/
 		renderables.at(renderables.size() - 1).transform.SetPosition(0, 1, -3);
 
 		dirLight.enableShadowMapRendering(&renderTexture);

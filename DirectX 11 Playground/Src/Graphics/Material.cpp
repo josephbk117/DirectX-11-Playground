@@ -140,3 +140,81 @@ void Material::bind(ID3D11DeviceContext * context) const
 	for (unsigned int index = 0; index < pixelConstantBuffers.size(); index++)
 		context->PSSetConstantBuffers(index, 1, pixelConstantBuffers[index]->getAddressOf());
 }
+
+void Material::bind(ID3D11DeviceContext * context, PixelShader * overridePixelShader) const
+{
+#if _DEBUG
+	if (std::find(&isCompletlyInitialized[0], &isCompletlyInitialized[3], false) == nullptr)
+	{
+		ErrorLogger::log("Material was not completly initialized before binding");
+		exit(-1);
+	}
+#endif
+
+	context->IASetInputLayout(vertexShader->getInputLayout());
+	context->IASetPrimitiveTopology(topology);
+	context->RSSetState(rasterizerState);
+	context->OMSetDepthStencilState(depthStencilState, 0);
+	context->OMSetBlendState(blendState, nullptr, 0xFFFFFF);
+	context->PSSetSamplers(0, 1, &samplerState);
+	context->VSSetShader(vertexShader->getShader(), NULL, 0);
+	context->PSSetShader(overridePixelShader->getShader(), NULL, 0);
+
+	for (unsigned int index = 0; index < vertexConstantBuffers.size(); index++)
+		context->VSSetConstantBuffers(index, 1, vertexConstantBuffers[index]->getAddressOf());
+
+	for (unsigned int index = 0; index < pixelConstantBuffers.size(); index++)
+		context->PSSetConstantBuffers(index, 1, pixelConstantBuffers[index]->getAddressOf());
+}
+
+void Material::bind(ID3D11DeviceContext * context, VertexShader * overrideOvertexShader) const
+{
+#if _DEBUG
+	if (std::find(&isCompletlyInitialized[0], &isCompletlyInitialized[3], false) == nullptr)
+	{
+		ErrorLogger::log("Material was not completly initialized before binding");
+		exit(-1);
+	}
+#endif
+
+	context->IASetInputLayout(vertexShader->getInputLayout());
+	context->IASetPrimitiveTopology(topology);
+	context->RSSetState(rasterizerState);
+	context->OMSetDepthStencilState(depthStencilState, 0);
+	context->OMSetBlendState(blendState, nullptr, 0xFFFFFF);
+	context->PSSetSamplers(0, 1, &samplerState);
+	context->VSSetShader(overrideOvertexShader->getShader(), NULL, 0);
+	context->PSSetShader(pixelShader->getShader(), NULL, 0);
+
+	for (unsigned int index = 0; index < vertexConstantBuffers.size(); index++)
+		context->VSSetConstantBuffers(index, 1, vertexConstantBuffers[index]->getAddressOf());
+
+	for (unsigned int index = 0; index < pixelConstantBuffers.size(); index++)
+		context->PSSetConstantBuffers(index, 1, pixelConstantBuffers[index]->getAddressOf());
+}
+
+void Material::bind(ID3D11DeviceContext * context, VertexShader * overrideOvertexShader, PixelShader * overridePixelShader) const
+{
+#if _DEBUG
+	if (std::find(&isCompletlyInitialized[0], &isCompletlyInitialized[3], false) == nullptr)
+	{
+		ErrorLogger::log("Material was not completly initialized before binding");
+		exit(-1);
+	}
+#endif
+
+	context->IASetInputLayout(vertexShader->getInputLayout());
+	context->IASetPrimitiveTopology(topology);
+	context->RSSetState(rasterizerState);
+	context->OMSetDepthStencilState(depthStencilState, 0);
+	context->OMSetBlendState(blendState, nullptr, 0xFFFFFF);
+	context->PSSetSamplers(0, 1, &samplerState);
+	context->VSSetShader(overrideOvertexShader->getShader(), NULL, 0);
+	context->PSSetShader(overridePixelShader->getShader(), NULL, 0);
+
+	for (unsigned int index = 0; index < vertexConstantBuffers.size(); index++)
+		context->VSSetConstantBuffers(index, 1, vertexConstantBuffers[index]->getAddressOf());
+
+	for (unsigned int index = 0; index < pixelConstantBuffers.size(); index++)
+		context->PSSetConstantBuffers(index, 1, pixelConstantBuffers[index]->getAddressOf());
+}

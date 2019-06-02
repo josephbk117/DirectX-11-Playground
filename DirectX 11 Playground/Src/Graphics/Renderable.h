@@ -19,6 +19,7 @@ public:
 	ModelInterface* getModel() const;
 	void draw(ID3D11DeviceContext* context, const XMMATRIX& viewProjectionMatrix);
 	void overrideMaterialDraw(ID3D11DeviceContext* context, Material* material, const XMMATRIX& viewProjectionMatrix);
+	void overridePixelShaderDraw(ID3D11DeviceContext* context, PixelShader* material, const XMMATRIX& viewProjectionMatrix);
 	void overrideWorldMatrixDraw(ID3D11DeviceContext* context, const XMMATRIX& worldMatrix, const XMMATRIX& viewProjectionMatrix);
 	void overrideWorldMatrixAndMaterial(ID3D11DeviceContext* context, Material* material, const XMMATRIX& worldMatrix, const XMMATRIX& viewProjectionMatrix);
 	void setShadowMapTexture(RenderTexture* texture);
