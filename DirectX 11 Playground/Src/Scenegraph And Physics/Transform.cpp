@@ -106,14 +106,14 @@ void BaseTransform::SetLookAtPos(XMFLOAT3 lookAtPos)
 	float pitch = 0.0f;
 	if (lookAtPos.y != 0.0f)
 	{
-		const float distance = sqrt(lookAtPos.x * lookAtPos.x + lookAtPos.z * lookAtPos.z);
-		pitch = atan(lookAtPos.y / distance);
+		const float distance = sqrtf(lookAtPos.x * lookAtPos.x + lookAtPos.z * lookAtPos.z);
+		pitch = atanf(lookAtPos.y / distance);
 	}
 
 	float yaw = 0.0f;
 	if (lookAtPos.x != 0.0f)
 	{
-		yaw = atan(lookAtPos.x / lookAtPos.z);
+		yaw = atanf(lookAtPos.x / lookAtPos.z);
 	}
 	if (lookAtPos.z > 0)
 		yaw += XM_PI;

@@ -40,9 +40,9 @@ void OBB::init(ID3D11Device * device, std::vector<Vertex>& vertices)
 										2,6,
 										3,7
 		};
-		HRESULT hr = m_vertexBuffer.init(device, obbVertices.data(), obbVertices.size());
+		HRESULT hr = m_vertexBuffer.init(device, obbVertices.data(), static_cast<UINT>(obbVertices.size()));
 		COM_ERROR_IF_FAILED(hr, "Failed to initialize vertex buffer for OBB");
-		hr = m_indexBuffer.init(device, obbIndices.data(), obbIndices.size());
+		hr = m_indexBuffer.init(device, obbIndices.data(), static_cast<UINT>(obbIndices.size()));
 		COM_ERROR_IF_FAILED(hr, "Failed to initialize indices buffer for OBB");
 
 		XMFLOAT3 extents[2] = { m_negExtent, m_posExtent };
