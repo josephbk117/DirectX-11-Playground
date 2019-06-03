@@ -151,10 +151,16 @@ void Material::bind(ID3D11DeviceContext * context) const
 		context->PSSetShader(pixelShader->getShader(), NULL, 0);
 
 	for (unsigned int index = 0; index < vertexConstantBuffers.size(); index++)
+	{
+		vertexConstantBuffers[index]->applyChanges();
 		context->VSSetConstantBuffers(index, 1, vertexConstantBuffers[index]->getAddressOf());
+	}
 
 	for (unsigned int index = 0; index < pixelConstantBuffers.size(); index++)
+	{
+		pixelConstantBuffers[index]->applyChanges();
 		context->PSSetConstantBuffers(index, 1, pixelConstantBuffers[index]->getAddressOf());
+	}
 
 	prevBoundMaterial = const_cast<Material*>(this);
 
@@ -242,4 +248,9 @@ void Material::bind(ID3D11DeviceContext * context, VertexShader * overrideOverte
 
 	for (unsigned int index = 0; index < pixelConstantBuffers.size(); index++)
 		context->PSSetConstantBuffers(index, 1, pixelConstantBuffers[index]->getAddressOf());
+}
+
+Material * const Material::getCurrentBoundMaterial()
+{
+	return prevBoundMaterial;
 }

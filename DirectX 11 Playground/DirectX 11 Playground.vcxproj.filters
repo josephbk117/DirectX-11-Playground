@@ -290,6 +290,9 @@
     <ClInclude Include="Src\Graphics\Animator.h">
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Graphics\DebugViewer.h">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\Shaders\depthBasic.hlsl" />

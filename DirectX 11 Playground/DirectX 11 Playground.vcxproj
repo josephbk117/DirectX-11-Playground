@@ -186,6 +186,7 @@
   <ItemGroup>
     <ClInclude Include="Src\Graphics\Animator.h" />
     <ClInclude Include="Src\Graphics\Renderable.h" />
+    <ClInclude Include="Src\Graphics\DebugViewer.h" />
     <ClInclude Include="Src\Scenegraph And Physics\OBB.h" />
     <ClInclude Include="Src\Scenegraph And Physics\Ray.h" />
     <ClInclude Include="Src\Graphics\Material.h" />

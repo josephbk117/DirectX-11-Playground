@@ -2,6 +2,7 @@
 #include "RenderTexture.h"
 #include "Primitive3DModels.h"
 #include "Animator.h"
+#include "DebugViewer.h"
 #include <set>
 
 bool Graphics::init(HWND hwnd, int width, int height)
@@ -73,25 +74,25 @@ void Graphics::renderFrame()
 	vertexSkinnedInfoConstantBuffer.data.jointMatrices[0] = vertexSkinnedInfoConstantBuffer.data.jointMatrices[0] * vertexSkinnedInfoConstantBuffer.data.jointMatrices[0];
 	vertexSkinnedInfoConstantBuffer.data.jointMatrices[1] = vertexSkinnedInfoConstantBuffer.data.jointMatrices[1] * vertexSkinnedInfoConstantBuffer.data.jointMatrices[1];
 	vertexSkinnedInfoConstantBuffer.data.jointMatrices[2] = vertexSkinnedInfoConstantBuffer.data.jointMatrices[2] * vertexSkinnedInfoConstantBuffer.data.jointMatrices[2];
-	if (!vertexSkinnedInfoConstantBuffer.applyChanges())
-		return;
+	/*if (!vertexSkinnedInfoConstantBuffer.applyChanges())
+		return;*/
 
 	vertexInfoConstantBuffer.data.mvpMatrix = DirectX::XMMatrixIdentity() * camera.GetMatrix() * camera.GetProjectionMatrix();
 	vertexInfoConstantBuffer.data.mvpMatrix = DirectX::XMMatrixTranspose(vertexInfoConstantBuffer.data.mvpMatrix);
-	if (!vertexInfoConstantBuffer.applyChanges())
-		return;
+	/*if (!vertexInfoConstantBuffer.applyChanges())
+		return;*/
 
 	vertexInfoLightingBuffer.data.lightMatrix = dirLight.GetLightMatrix();
-	if (!vertexInfoLightingBuffer.applyChanges())
-		return;
+	/*if (!vertexInfoLightingBuffer.applyChanges())
+		return;*/
 
 	pixelInfoLightingBuffer.data.ambientLightIntensity = ambientLightIntensity;
 	pixelInfoLightingBuffer.data.ambientLightColour = DirectX::XMFLOAT3(1, 1, 0);
-	if (!pixelInfoLightingBuffer.applyChanges())
-		return;
+	/*if (!pixelInfoLightingBuffer.applyChanges())
+		return;*/
 
-	if (!pixelUnlitBasicBuffer.applyChanges())
-		return;
+	/*if (!pixelUnlitBasicBuffer.applyChanges())
+		return;*/
 
 	float bgColour[] = { 0.1f,0.1f,0.1f,1 };
 
@@ -149,6 +150,38 @@ void Graphics::renderFrame()
 		(*it)->setShadowMapTexture(dirLight.getShadowMapRenderTexture());
 		(*it)->draw(context.Get(), camera.GetMatrix() * camera.GetProjectionMatrix());
 	}
+
+	DebugViewer::setColour(1, 1, 0);
+	DebugViewer::startDebugView(context.Get());
+	static Ray ray1;
+	ray1.setDirection(XMVECTOR{ 1,1,0 });
+	ray1.setOrigin(XMFLOAT3{ 0,2,0 });
+	ray1.draw(device.Get(), context.Get(), vertexInfoConstantBuffer, camera.GetMatrix() * camera.GetProjectionMatrix());
+	DebugViewer::endDebugView(context.Get());
+
+	DebugViewer::setColour(0, 1, 1);
+	DebugViewer::startDebugView(context.Get());
+	static Ray ray2;
+	ray2.setDirection(XMVECTOR{ -1,1,0 });
+	ray2.setOrigin(XMFLOAT3{ 0,2,0 });
+	ray2.draw(device.Get(), context.Get(), vertexInfoConstantBuffer, camera.GetMatrix() * camera.GetProjectionMatrix());
+	DebugViewer::endDebugView(context.Get());
+
+	DebugViewer::setColour(0, 1, 0);
+	DebugViewer::startDebugView(context.Get());
+	static Ray ray3;
+	ray3.setDirection(XMVECTOR{ 1,-1,0 });
+	ray3.setOrigin(XMFLOAT3{ 0,2,0 });
+	ray3.draw(device.Get(), context.Get(), vertexInfoConstantBuffer, camera.GetMatrix() * camera.GetProjectionMatrix());
+	DebugViewer::endDebugView(context.Get());
+
+	DebugViewer::setColour(1, 0, 0);
+	DebugViewer::startDebugView(context.Get());
+	static Ray ray4;
+	ray4.setDirection(XMVECTOR{ -1,-1,0 });
+	ray4.setOrigin(XMFLOAT3{ 0,2,0 });
+	ray4.draw(device.Get(), context.Get(), vertexInfoConstantBuffer, camera.GetMatrix() * camera.GetProjectionMatrix());
+	DebugViewer::endDebugView(context.Get());
 
 	//context->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), depthStencilView.Get());
 
@@ -610,6 +643,7 @@ bool Graphics::initScene()
 		debugViewRenderingMaterial.addPixelConstantBuffer(&pixelUnlitBasicBuffer);
 		debugViewRenderingMaterial.setTopologyType(D3D11_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_LINELIST);
 
+		DebugViewer::setDebugMaterialAndColourData(&debugViewRenderingMaterial, &pixelUnlitBasicBuffer.data.colour);
 
 		Model* model;
 		model = new Model;

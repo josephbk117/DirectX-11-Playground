@@ -58,4 +58,5 @@ public:
 	void bind(ID3D11DeviceContext* context, PixelShader* overridePixelShader)const;
 	void bind(ID3D11DeviceContext* context, VertexShader* overrideOvertexShader)const;
 	void bind(ID3D11DeviceContext* context, VertexShader* overrideOvertexShader, PixelShader* overridePixelShader)const;
+	static Material* const getCurrentBoundMaterial();
 };
