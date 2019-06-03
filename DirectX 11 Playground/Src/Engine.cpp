@@ -18,7 +18,7 @@ bool Engine::processMessages()
 
 void Engine::update()
 {
-	float deltaTime = timer.getMillisecondsElapsed();
+	float deltaTime = static_cast<float>(timer.getMillisecondsElapsed());
 	timer.restart();
 
 	while (!keyboard.CharBufferIsEmpty())

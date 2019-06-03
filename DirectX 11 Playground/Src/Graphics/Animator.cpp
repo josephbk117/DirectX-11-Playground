@@ -6,7 +6,7 @@ void Animator::animate(float time, XMMATRIX * jointMatrices, Renderable * render
 
 	for (unsigned int boneIndex = 0; boneIndex < skModel->tempBoneTransformCollection.size(); boneIndex++)
 	{
-		unsigned int indexA, indexB;
+		size_t indexA, indexB;
 		indexA = DirectX::XMMin(static_cast<size_t>(time), skModel->tempBoneTransformCollection.at(boneIndex).size() - 1);
 		indexB = DirectX::XMMin(static_cast<size_t>(time + 1), skModel->tempBoneTransformCollection.at(boneIndex).size() - 1);
 		JointTransform A = skModel->tempBoneTransformCollection[boneIndex].at(indexA);

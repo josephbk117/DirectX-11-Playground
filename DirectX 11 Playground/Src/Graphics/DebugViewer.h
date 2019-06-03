@@ -13,7 +13,10 @@ public:
 	{
 #if _DEBUG
 		if (material == nullptr || colour == nullptr)
+		{
 			ErrorLogger::log("Cannot initialize Debug view material and colour vector as null");
+			exit(-1);
+		}
 #endif
 		m_material = material;
 		m_colour = colour;
@@ -22,7 +25,10 @@ public:
 	{
 #if _DEBUG
 		if (m_material == nullptr || m_colour == nullptr)
+		{
 			ErrorLogger::log("Cannot call 'setColour' without specifying the debug material and colour vector");
+			exit(-1);
+		}
 #endif
 		m_colourToSet.m128_f32[0] = r;
 		m_colourToSet.m128_f32[1] = g;
@@ -32,7 +38,10 @@ public:
 	{
 #if _DEBUG
 		if (m_material == nullptr || m_colour == nullptr)
+		{
 			ErrorLogger::log("Cannot call 'startDebugView' without specifying the debug material and colour vector");
+			exit(-1);
+		}
 #endif
 		m_prevActiveMaterial = Material::getCurrentBoundMaterial();
 

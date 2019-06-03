@@ -19,6 +19,7 @@ public:
 			HRESULT hr = DirectX::CreateWICTextureFromFile(device, imagePaths[i].c_str(), nullptr, textures[i].GetAddressOf());
 			COM_ERROR_IF_FAILED(hr, "Failed to create WIC texture from file for Cubemap");
 		}
+		return true;
 	}
 
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>* getTextures()
