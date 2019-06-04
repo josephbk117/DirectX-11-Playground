@@ -16,6 +16,7 @@ A renderer in DirectX 11 and playing around with it.
 
 ### Things to implement:
 - [ ] Frustum culling
+- [ ] Tessellation support
 - [ ] Scene graph implementation
 - [ ] Mesh instancing
 - [ ] Deferred rendering
