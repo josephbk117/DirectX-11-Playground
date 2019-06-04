@@ -91,8 +91,8 @@ void Graphics::renderFrame()
 	/*if (!pixelInfoLightingBuffer.applyChanges())
 		return;*/
 
-	/*if (!pixelUnlitBasicBuffer.applyChanges())
-		return;*/
+		/*if (!pixelUnlitBasicBuffer.applyChanges())
+			return;*/
 
 	float bgColour[] = { 0.1f,0.1f,0.1f,1 };
 
@@ -151,8 +151,13 @@ void Graphics::renderFrame()
 		(*it)->draw(context.Get(), camera.GetMatrix() * camera.GetProjectionMatrix());
 	}
 
+
+
 	DebugViewer::setColour(1, 1, 0);
 	DebugViewer::startDebugView(context.Get());
+
+
+
 	static Ray ray1;
 	ray1.setDirection(XMVECTOR{ 1,1,0 });
 	ray1.setOrigin(XMFLOAT3{ 0,2,0 });
@@ -181,6 +186,15 @@ void Graphics::renderFrame()
 	ray4.setDirection(XMVECTOR{ -1,-1,0 });
 	ray4.setOrigin(XMFLOAT3{ 0,2,0 });
 	ray4.draw(device.Get(), context.Get(), vertexInfoConstantBuffer, camera.GetMatrix() * camera.GetProjectionMatrix());
+
+	for (const Renderable& renderable : renderables)
+	{
+		ModelInterface* modelInterface = renderable.getModel();
+		Model* model = dynamic_cast<Model*>(modelInterface);
+		if (model != nullptr)
+			model->drawDebugView(renderable.transform.GetMatrix(), camera.GetMatrix() * camera.GetProjectionMatrix());
+	}
+
 	DebugViewer::endDebugView(context.Get());
 
 	//context->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), depthStencilView.Get());
