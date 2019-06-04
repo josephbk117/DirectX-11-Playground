@@ -15,7 +15,7 @@ public:
 	Mesh& operator=(const Mesh & mesh);
 	void draw();
 	void drawOBB();
-	OBB& getOBB()
+	const OBB& getOBB() const
 	{
 		return obb;
 	}

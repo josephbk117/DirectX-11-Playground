@@ -57,13 +57,10 @@ void Graphics::renderFrame()
 	static bool drawDebug = true;
 	static float ambientLightIntensity = 0.1f;
 	static DirectX::XMVECTOR lightDir = { 0.8f, 0, 0 };
+	static DirectX::XMVECTOR rayDir = { 0.8f, 0, 0 };
 	t_time += 0.01f;
 
 	dirLight.setRotation(lightDir);
-
-	//Update all constant buffers
-	//skinnedModel.animate(t_time, &vertexSkinnedInfoConstantBuffer.data.jointMatrices[0]);
-
 	for (int i = 0; i < renderables.size(); i++)
 	{
 		if (renderables.at(i).getIfSkinnedModel())
@@ -151,12 +148,8 @@ void Graphics::renderFrame()
 		(*it)->draw(context.Get(), camera.GetMatrix() * camera.GetProjectionMatrix());
 	}
 
-
-
 	DebugViewer::setColour(1, 1, 0);
 	DebugViewer::startDebugView(context.Get());
-
-
 
 	static Ray ray1;
 	ray1.setDirection(XMVECTOR{ 1,1,0 });
@@ -183,15 +176,30 @@ void Graphics::renderFrame()
 	DebugViewer::setColour(1, 0, 0);
 	DebugViewer::startDebugView(context.Get());
 	static Ray ray4;
-	ray4.setDirection(XMVECTOR{ -1,-1,0 });
-	ray4.setOrigin(XMFLOAT3{ 0,2,0 });
+	ray4.setDirection(XMVECTOR{ -1, -1, 0 });
+	ray4.setOrigin(XMFLOAT3{ 0, 2, 0 });
 	ray4.draw(device.Get(), context.Get(), vertexInfoConstantBuffer, camera.GetMatrix() * camera.GetProjectionMatrix());
+
+	static Ray ray5;
+	ray5.setDirection(rayDir);
+	ray5.setOrigin(XMFLOAT3{ 0, 2, 0 });
+	ray5.draw(device.Get(), context.Get(), vertexInfoConstantBuffer, camera.GetMatrix() * camera.GetProjectionMatrix());
 
 	for (const Renderable& renderable : renderables)
 	{
 		ModelInterface* modelInterface = renderable.getModel();
 		Model* model = dynamic_cast<Model*>(modelInterface);
-		if (model != nullptr)
+		if (model == nullptr)
+			continue;
+		bool hasIntersected = false;
+		for (const Mesh& mesh : model->getMeshes())
+		{
+			hasIntersected = mesh.getOBB().doesRayIntersect(ray5);
+			if (hasIntersected)
+				break;
+		}
+
+		if (hasIntersected)
 			model->drawDebugView(renderable.transform.GetMatrix(), camera.GetMatrix() * camera.GetProjectionMatrix());
 	}
 
@@ -279,10 +287,10 @@ void Graphics::renderFrame()
 	ImGui::SliderFloat("Ambient light intensity", &ambientLightIntensity, 0, 1, "%.2f");
 	ImGui::SliderFloat("Animation timeline", &t_time, 0.0f, 100.0f, "%.2f");
 	ImGui::SliderFloat3("Light dir", &lightDir.m128_f32[0], -1.0f, 1.0f, "%.2f");
-	/*if (ImGui::SliderFloat3("Look dir", &val[0], -1.0f, 1.0f, "%.2f"))
+	if (ImGui::SliderFloat3("Ray Look dir", &rayDir.m128_f32[0], -1.0f, 1.0f, "%.2f"))
 	{
-		ray.setDirection(DirectX::XMVECTOR{ val[0], val[1], val[2] });
-	}*/
+		ray5.setDirection(rayDir);
+	}
 	ImGui::ColorEdit3("Bounding box colour", &pixelUnlitBasicBuffer.data.colour.m128_f32[0]);
 	ImGui::Checkbox("Enable bounding box display", &drawDebug);
 	ImGui::End();
@@ -561,7 +569,7 @@ bool Graphics::initShaders()
 		shaderfolder = L"..\\Release\\";
 #endif
 #endif
-	}
+}
 
 	D3D11_INPUT_ELEMENT_DESC layout[] =
 	{
