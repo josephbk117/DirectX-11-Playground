@@ -45,9 +45,7 @@ struct OpaqueRenderableCompare
 			return dist1 > dist2;
 		}
 		else
-		{
 			return (lhsRenderQueueIndex < rhsRenderQueueIndex);
-		}
 	}
 };
 
@@ -65,54 +63,40 @@ struct TransparentRenderableCompare
 			return dist1 < dist2;
 		}
 		else
-		{
 			return (rhsRenderQueueIndex < lhsRenderQueueIndex);
-		}
 	}
 };
 
 void Graphics::renderFrame()
 {
 	static float t_time = 0;
-	static bool drawDebug = true;
 	static float ambientLightIntensity = 0.1f;
 	static DirectX::XMVECTOR lightDir = { 0.8f, 0, 0 };
 	static DirectX::XMVECTOR rayDir = { 0.8f, 0, 0 };
 	static float shadowBias = 0.001f;
+	static bool renderWithPostProcessing = false;
 	t_time += 0.01f;
 
-
 	dirLight.setRotation(lightDir);
-	for (int i = 0; i < renderables.size(); i++)
+	for (Renderable& renderable : renderables)
 	{
-		if (renderables.at(i).getIfSkinnedModel())
-			Animator::animate(t_time, &vertexSkinnedInfoConstantBuffer.data.jointMatrices[0], &renderables[i]);
+		if (renderable.getIfSkinnedModel())
+			Animator::animate(t_time, &vertexSkinnedInfoConstantBuffer.data.jointMatrices[0], &renderable);
 	}
 
 	vertexSkinnedInfoConstantBuffer.data.mvpMatrix = vertexInfoConstantBuffer.data.mvpMatrix;
 	vertexSkinnedInfoConstantBuffer.data.jointMatrices[0] = vertexSkinnedInfoConstantBuffer.data.jointMatrices[0] * vertexSkinnedInfoConstantBuffer.data.jointMatrices[0];
 	vertexSkinnedInfoConstantBuffer.data.jointMatrices[1] = vertexSkinnedInfoConstantBuffer.data.jointMatrices[1] * vertexSkinnedInfoConstantBuffer.data.jointMatrices[1];
 	vertexSkinnedInfoConstantBuffer.data.jointMatrices[2] = vertexSkinnedInfoConstantBuffer.data.jointMatrices[2] * vertexSkinnedInfoConstantBuffer.data.jointMatrices[2];
-	/*if (!vertexSkinnedInfoConstantBuffer.applyChanges())
-		return;*/
 
 	vertexInfoConstantBuffer.data.mvpMatrix = DirectX::XMMatrixIdentity() * camera.GetMatrix() * camera.GetProjectionMatrix();
 	vertexInfoConstantBuffer.data.mvpMatrix = DirectX::XMMatrixTranspose(vertexInfoConstantBuffer.data.mvpMatrix);
-	/*if (!vertexInfoConstantBuffer.applyChanges())
-		return;*/
 
 	vertexInfoLightingBuffer.data.lightMatrix = dirLight.GetLightMatrix();
-	/*if (!vertexInfoLightingBuffer.applyChanges())
-		return;*/
 
 	pixelInfoLightingBuffer.data.ambientLightIntensity = ambientLightIntensity;
 	pixelInfoLightingBuffer.data.ambientLightColour = DirectX::XMFLOAT3(1, 1, 0);
 	pixelInfoLightingBuffer.data.bias = shadowBias;
-	/*if (!pixelInfoLightingBuffer.applyChanges())
-		return;*/
-
-		/*if (!pixelUnlitBasicBuffer.applyChanges())
-			return;*/
 
 	float bgColour[] = { 0.1f,0.1f,0.1f,1 };
 
@@ -136,8 +120,6 @@ void Graphics::renderFrame()
 		}
 	}
 
-
-
 	//Add all opaque objects to set, and comparision function is distance from camera
 	refCameraPos = camera.GetPositionVector();
 	std::set<Renderable*, OpaqueRenderableCompare> opaqueRenderables;
@@ -151,8 +133,17 @@ void Graphics::renderFrame()
 			transparentRenderables.insert(&renderables[i]);
 	}
 
-	postProcessingRenderTexture.setRenderTarget();
-	postProcessingRenderTexture.clearRenderTarget(0, 0, 0, 1);
+	if (!renderWithPostProcessing)
+	{
+		context->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), depthStencilView.Get());
+		context->ClearRenderTargetView(renderTargetView.Get(), bgColour);
+		context->ClearDepthStencilView(depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+	}
+	else
+	{
+		postProcessingRenderTexture.setRenderTarget();
+		postProcessingRenderTexture.clearRenderTarget(0, 0, 0, 1);
+	}
 
 	//Render all opaque objects
 
@@ -232,71 +223,15 @@ void Graphics::renderFrame()
 
 	DebugViewer::endDebugView(context.Get());
 
-	context->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), depthStencilView.Get());
-	context->ClearRenderTargetView(renderTargetView.Get(), bgColour);
-	context->ClearDepthStencilView(depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+	if (renderWithPostProcessing)
+	{
+		context->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), depthStencilView.Get());
+		context->ClearRenderTargetView(renderTargetView.Get(), bgColour);
+		context->ClearDepthStencilView(depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-	postProcessingMaterial.bind(context.Get());
-	postProcessingQuad.draw(XMMatrixIdentity(), XMMatrixIdentity());
-
-	//context->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), depthStencilView.Get());
-
-	////Set up skinned mesh shader
-	//regularSkinnedMaterial.bind(context.Get());
-	//skinnedModel.draw(DirectX::XMMatrixTranslation(0, 1, 4), camera.transform.GetMatrix() * camera.GetProjectionMatrix());
-	//skinnedModel.draw(DirectX::XMMatrixTranslation(1, 1, 4), camera.transform.GetMatrix() * camera.GetProjectionMatrix());
-	//skinnedModel.draw(DirectX::XMMatrixTranslation(-1, 1, 4), camera.transform.GetMatrix() * camera.GetProjectionMatrix());
-
-	////Set up regular shader
-	//regularMaterial.bind(context.Get());
-
-	//models[0].setTexture(texture.Get());
-	//models[0].setTexture2(renderTexture.getShaderResourceView());
-	//models[0].draw(DirectX::XMMatrixIdentity(), camera.transform.GetMatrix() * camera.GetProjectionMatrix());
-
-	//unlitScreenRenderingMaterial.bind(context.Get());
-
-	//models[1].setTexture(renderTexture.getShaderResourceView());
-	//models[1].draw(DirectX::XMMatrixScaling(2, 2, 2)* DirectX::XMMatrixTranslation(0, 4, 4), camera.transform.GetMatrix() * camera.GetProjectionMatrix());
-
-	//skybox.draw(camera.GetViewDirectionMatrix() * camera.GetProjectionMatrix());
-
-	////Debug stage, Draw OBBs and other gizmo visualization items
-	//FXMVECTOR forward = camera.transform.GetForwardVector();
-
-	//static Ray ray(camera.transform.GetPositionFloat3(), { forward.m128_f32[0] , 0 , forward.m128_f32[2] });
-	//ray.setOrigin(DirectX::XMVECTOR{ 0, 2, -2, 0 });
-	//static float val[3] = { 0,1,0 };
-	//for (unsigned int meshIndex = 0; meshIndex < models[0].getMeshes().size(); meshIndex++)
-	//{
-	//	drawDebug = models[0].getMeshes().at(meshIndex).getOBB().doesRayIntersect(ray);
-	//	if (drawDebug)
-	//		break;
-	//}
-	//debugViewRenderingMaterial.bind(context.Get());
-
-	//if (drawDebug)
-	//{
-	//	models[0].drawDebugView(DirectX::XMMatrixIdentity(), camera.transform.GetMatrix() * camera.GetProjectionMatrix());
-	//}
-	//ray.draw(device.Get(), context.Get(), vertexInfoConstantBuffer, camera.transform.GetMatrix() * camera.GetProjectionMatrix());
-	////Start rendering on to depth render texture
-	//renderTexture.setRenderTarget();
-	//renderTexture.clearRenderTarget(1, 1, 1, 1);
-
-	//depthRenderingMaterial.bind(context.Get());
-
-	//models[0].draw(DirectX::XMMatrixIdentity(), dirLight.GetLightMatrix());
-
-	//context->IASetInputLayout(skinnedVertexShader.getInputLayout());
-	//context->VSSetShader(skinnedVertexShader.getShader(), NULL, 0);
-
-	//skinnedModel.draw(DirectX::XMMatrixTranslation(0, 1, 4), dirLight.GetLightMatrix());
-	//skinnedModel.draw(DirectX::XMMatrixTranslation(1, 1, 4), dirLight.GetLightMatrix());
-	//skinnedModel.draw(DirectX::XMMatrixTranslation(-1, 1, 4), dirLight.GetLightMatrix());
-
-	////Start rendering on top default render texture
-	//context->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), depthStencilView.Get());
+		postProcessingMaterial.bind(context.Get());
+		postProcessingQuad.draw(XMMatrixIdentity(), XMMatrixIdentity());
+	}
 
 	//Start ImGui Frame
 	ImGui_ImplDX11_NewFrame();
@@ -327,7 +262,7 @@ void Graphics::renderFrame()
 		ray5.setDirection(rayDir);
 	}
 	ImGui::ColorEdit3("Bounding box colour", &pixelUnlitBasicBuffer.data.colour.m128_f32[0]);
-	ImGui::Checkbox("Enable bounding box display", &drawDebug);
+	ImGui::Checkbox("Render with post processing", &renderWithPostProcessing);
 	ImGui::End();
 
 	ImGui::Render();
