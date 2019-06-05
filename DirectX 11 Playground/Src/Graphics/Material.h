@@ -5,7 +5,7 @@
 #include <d3d11.h>
 #include <wrl\client.h>
 
-enum class RenderQueue { OPAQUE_QUEUE, TRANSPARENT_QUEUE };
+enum RenderQueue { OPAQUE_QUEUE = 1000, TRANSPARENT_QUEUE = 2000, POST_PROCESSING_QUEUE = 3000 };
 
 class Material
 {
@@ -33,11 +33,11 @@ private:
 	std::vector<BaseVertexConstantBuffer*> vertexConstantBuffers;
 	std::vector<BasePixelConstantBuffer*> pixelConstantBuffers;
 
-	RenderQueue renderQueue = RenderQueue::OPAQUE_QUEUE;
+	int renderQueue = RenderQueue::OPAQUE_QUEUE;
 	bool castShadow = true;
 	bool recieveShadow = true;
 #if _DEBUG
-	bool isCompletlyInitialized[4] = { false, false, true, true };
+	bool isCompletlyInitialized[2] = { false, false };
 #endif
 
 public:
@@ -46,8 +46,13 @@ public:
 	void setRenderStates(ID3D11DepthStencilState* depthStencilState, ID3D11RasterizerState* rasterizerState, ID3D11SamplerState* samplerState, ID3D11BlendState* blendState);
 	void setSamplerState2(ID3D11SamplerState* samplerState);
 	void setSamplerState3(ID3D11SamplerState* samplerState);
-	void setShadowAndRenderQueueStates(RenderQueue queue, bool castShadow, bool recieveShadow);
-	void setRenderQueue(RenderQueue queue);
+	void setShadowAndRenderQueueStates(int queueIndex, bool castShadow, bool recieveShadow);
+	/* Can use enum RenderQueue to get basis queue indices for common object types like Opaque, Transparent, etc..
+	RenderQueue::OPAQUE_QUEUE = 1000
+	RenderQueue::TRANSPARENT_QUEUE = 2000
+	RenderQueue::POST_PROCESSING = 3000
+	*/
+	void setRenderQueue(int queueIndex);
 	void setIfCastsShadow(bool castShadow);
 	void setIfRecieveShadow(bool recieveShadow);
 	void setShaders(VertexShader* vertexShader, PixelShader* pixelShader);
@@ -56,8 +61,8 @@ public:
 	void addPixelConstantBuffer(BasePixelConstantBuffer* constantBuffer);
 	bool doesCastShadow()const;
 	bool doesRecieveShadow()const;
-	RenderQueue getRenderQueue()const;
-	void getShadowAndRenderQueueStates(RenderQueue& queue, bool& castShadow, bool& recieveShadow);
+	int getRenderQueue()const;
+	void getShadowAndRenderQueueStates(int& queue, bool& castShadow, bool& recieveShadow);
 	void bind(ID3D11DeviceContext* context)const;
 	void bind(ID3D11DeviceContext* context, PixelShader* overridePixelShader)const;
 	void bind(ID3D11DeviceContext* context, VertexShader* overrideOvertexShader)const;

@@ -3,9 +3,9 @@
 Mesh::Mesh(ID3D11Device * device, ID3D11DeviceContext * context, std::vector<Vertex>& vertices, std::vector<DWORD>& indices)
 {
 	this->deviceContext = context;
-	HRESULT hr = vertexBuffer.init(device, vertices.data(), vertices.size());
+	HRESULT hr = vertexBuffer.init(device, vertices.data(), static_cast<UINT>(vertices.size()));
 	COM_ERROR_IF_FAILED(hr, "Failed to initialize vertex buffer for mesh");
-	hr = indexBuffer.init(device, indices.data(), indices.size());
+	hr = indexBuffer.init(device, indices.data(), static_cast<UINT>(indices.size()));
 	COM_ERROR_IF_FAILED(hr, "Failed to initialize indices buffer for mesh");
 
 	obb.init(device, vertices);

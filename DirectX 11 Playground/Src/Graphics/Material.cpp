@@ -24,7 +24,7 @@ void Material::setRenderStates(ID3D11DepthStencilState* depthStencilState, ID3D1
 	this->blendState = blendState;
 
 #if _DEBUG
-	if (this->depthStencilState != nullptr && this->rasterizerState != nullptr && this->samplerState != nullptr && this->blendState != nullptr)
+	if (this->depthStencilState != nullptr && this->rasterizerState != nullptr && this->samplerState1 != nullptr && this->blendState != nullptr)
 		isCompletlyInitialized[0] = true;
 #endif
 }
@@ -39,16 +39,16 @@ void Material::setSamplerState3(ID3D11SamplerState * samplerState)
 	this->samplerState3 = samplerState;
 }
 
-void Material::setShadowAndRenderQueueStates(RenderQueue queue, bool castShadow, bool recieveShadow)
+void Material::setShadowAndRenderQueueStates(int queueIndex, bool castShadow, bool recieveShadow)
 {
-	this->renderQueue = queue;
+	this->renderQueue = queueIndex;
 	this->castShadow = castShadow;
 	this->recieveShadow = recieveShadow;
 }
 
-void Material::setRenderQueue(RenderQueue queue)
+void Material::setRenderQueue(int queueIndex)
 {
-	this->renderQueue = queue;
+	this->renderQueue = queueIndex;
 }
 
 void Material::setIfCastsShadow(bool castShadow)
@@ -80,35 +80,11 @@ void Material::setTopologyType(D3D11_PRIMITIVE_TOPOLOGY topology)
 void Material::addVertexConstantBuffer(BaseVertexConstantBuffer* constantBuffer)
 {
 	vertexConstantBuffers.push_back(constantBuffer);
-
-#if _DEBUG
-	isCompletlyInitialized[2] = true;
-	for (BaseConstantBuffer* bcb : vertexConstantBuffers)
-	{
-		if (bcb == nullptr)
-		{
-			isCompletlyInitialized[2] = false;
-			break;
-}
-	}
-#endif
 }
 
 void Material::addPixelConstantBuffer(BasePixelConstantBuffer* constantBuffer)
 {
 	pixelConstantBuffers.push_back(constantBuffer);
-
-#if _DEBUG
-	isCompletlyInitialized[3] = true;
-	for (BaseConstantBuffer* bcb : pixelConstantBuffers)
-	{
-		if (bcb == nullptr)
-		{
-			isCompletlyInitialized[2] = false;
-			break;
-}
-	}
-#endif
 }
 
 bool Material::doesCastShadow() const
@@ -121,12 +97,12 @@ bool Material::doesRecieveShadow() const
 	return recieveShadow;
 }
 
-RenderQueue Material::getRenderQueue() const
+int Material::getRenderQueue() const
 {
 	return renderQueue;
 }
 
-void Material::getShadowAndRenderQueueStates(RenderQueue & queue, bool & castShadow, bool & recieveShadow)
+void Material::getShadowAndRenderQueueStates(int & queue, bool & castShadow, bool & recieveShadow)
 {
 	queue = this->renderQueue;
 	castShadow = this->castShadow;
@@ -138,7 +114,7 @@ void Material::bind(ID3D11DeviceContext * context) const
 	if (prevBoundMaterial == const_cast<Material*>(this))
 		return;
 #if _DEBUG
-	if (std::find(&isCompletlyInitialized[0], &isCompletlyInitialized[3], false) == nullptr)
+	if (!isCompletlyInitialized[0] || !isCompletlyInitialized[1])
 	{
 		ErrorLogger::log("Material was not completly initialized before binding");
 		exit(-1);

@@ -309,6 +309,8 @@
       <Filter>Resource Files\Shaders\Pixel Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Resources\Shaders\unlitTransparent.hlsl" />
+    <FxCompile Include="Resources\Shaders\postProcessingVertexShader.hlsl" />
+    <FxCompile Include="Resources\Shaders\postProcessingPixelShader.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Resources\Textures\bitshiftProductions.png">

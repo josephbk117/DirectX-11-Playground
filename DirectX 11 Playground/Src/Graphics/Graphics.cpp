@@ -35,9 +35,19 @@ struct OpaqueRenderableCompare
 {
 	bool operator()(Renderable* lhs, Renderable* rhs)
 	{
-		float dist1 = XMVector3Length((refCameraPos - lhs->transform.GetPositionVector())).m128_f32[0];
-		float dist2 = XMVector3Length((refCameraPos - rhs->transform.GetPositionVector())).m128_f32[0];
-		return dist1 > dist2;
+		int lhsRenderQueueIndex = lhs->getMaterial()->getRenderQueue();
+		int rhsRenderQueueIndex = rhs->getMaterial()->getRenderQueue();
+
+		if (lhsRenderQueueIndex == rhsRenderQueueIndex)
+		{
+			float dist1 = XMVector3Length((refCameraPos - lhs->transform.GetPositionVector())).m128_f32[0];
+			float dist2 = XMVector3Length((refCameraPos - rhs->transform.GetPositionVector())).m128_f32[0];
+			return dist1 > dist2;
+		}
+		else
+		{
+			return (lhsRenderQueueIndex < rhsRenderQueueIndex);
+		}
 	}
 };
 
@@ -45,9 +55,19 @@ struct TransparentRenderableCompare
 {
 	bool operator()(Renderable* lhs, Renderable* rhs)
 	{
-		float dist1 = XMVector3Length((refCameraPos - lhs->transform.GetPositionVector())).m128_f32[0];
-		float dist2 = XMVector3Length((refCameraPos - rhs->transform.GetPositionVector())).m128_f32[0];
-		return dist1 < dist2;
+		int lhsRenderQueueIndex = lhs->getMaterial()->getRenderQueue();
+		int rhsRenderQueueIndex = rhs->getMaterial()->getRenderQueue();
+
+		if (lhsRenderQueueIndex == rhsRenderQueueIndex)
+		{
+			float dist1 = XMVector3Length((refCameraPos - lhs->transform.GetPositionVector())).m128_f32[0];
+			float dist2 = XMVector3Length((refCameraPos - rhs->transform.GetPositionVector())).m128_f32[0];
+			return dist1 < dist2;
+		}
+		else
+		{
+			return (rhsRenderQueueIndex < lhsRenderQueueIndex);
+		}
 	}
 };
 
@@ -116,9 +136,7 @@ void Graphics::renderFrame()
 		}
 	}
 
-	context->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), depthStencilView.Get());
-	context->ClearRenderTargetView(renderTargetView.Get(), bgColour);
-	context->ClearDepthStencilView(depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+
 
 	//Add all opaque objects to set, and comparision function is distance from camera
 	refCameraPos = camera.GetPositionVector();
@@ -126,11 +144,15 @@ void Graphics::renderFrame()
 	std::set<Renderable*, TransparentRenderableCompare> transparentRenderables;
 	for (unsigned int i = 0; i < renderables.size(); i++)
 	{
-		if (renderables.at(i).getMaterial()->getRenderQueue() == RenderQueue::OPAQUE_QUEUE)
+		int renderQueueIndex = renderables.at(i).getMaterial()->getRenderQueue();
+		if (renderQueueIndex >= RenderQueue::OPAQUE_QUEUE && renderQueueIndex < RenderQueue::TRANSPARENT_QUEUE)
 			opaqueRenderables.insert(&renderables[i]);
-		else if (renderables.at(i).getMaterial()->getRenderQueue() == RenderQueue::TRANSPARENT_QUEUE)
+		else if (renderQueueIndex >= RenderQueue::TRANSPARENT_QUEUE && renderQueueIndex < RenderQueue::POST_PROCESSING_QUEUE)
 			transparentRenderables.insert(&renderables[i]);
 	}
+
+	postProcessingRenderTexture.setRenderTarget();
+	postProcessingRenderTexture.clearRenderTarget(0, 0, 0, 1);
 
 	//Render all opaque objects
 
@@ -153,12 +175,12 @@ void Graphics::renderFrame()
 		(*it)->draw(context.Get(), camera.GetMatrix() * camera.GetProjectionMatrix());
 	}
 
-	DebugViewer::setColour(1, 1, 0);
+	DebugViewer::setColour( 1, 1, 0 );
 	DebugViewer::startDebugView(context.Get());
 
 	static Ray ray1;
-	ray1.setDirection(XMVECTOR{ 1,1,0 });
-	ray1.setOrigin(XMFLOAT3{ 0,2,0 });
+	ray1.setDirection(XMVECTOR{ 1, 1, 0 });
+	ray1.setOrigin(XMFLOAT3{ 0, 2, 0 });
 	ray1.draw(device.Get(), context.Get(), vertexInfoConstantBuffer, camera.GetMatrix() * camera.GetProjectionMatrix());
 	DebugViewer::endDebugView(context.Get());
 
@@ -209,6 +231,13 @@ void Graphics::renderFrame()
 	}
 
 	DebugViewer::endDebugView(context.Get());
+
+	context->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), depthStencilView.Get());
+	context->ClearRenderTargetView(renderTargetView.Get(), bgColour);
+	context->ClearDepthStencilView(depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+
+	postProcessingMaterial.bind(context.Get());
+	postProcessingQuad.draw(XMMatrixIdentity(), XMMatrixIdentity());
 
 	//context->OMSetRenderTargets(1, renderTargetView.GetAddressOf(), depthStencilView.Get());
 
@@ -292,7 +321,7 @@ void Graphics::renderFrame()
 	ImGui::SliderFloat("Ambient light intensity", &ambientLightIntensity, 0, 1, "%.2f");
 	ImGui::SliderFloat("Shadow bias", &shadowBias, 0.0f, 1.0f, "%.3f");
 	ImGui::SliderFloat("Animation timeline", &t_time, 0.0f, 100.0f, "%.2f");
-	ImGui::SliderFloat3("Light dir", &lightDir.m128_f32[0], -1.0f, 1.0f, "%.2f");
+	ImGui::SliderFloat3("Light dir", &lightDir.m128_f32[0], -3.141f, 3.141f, "%.2f");
 	if (ImGui::SliderFloat3("Ray Look dir", &rayDir.m128_f32[0], -1.0f, 1.0f, "%.2f"))
 	{
 		ray5.setDirection(rayDir);
@@ -559,7 +588,8 @@ bool Graphics::initDirectX(HWND hwnd, int width, int height)
 		COM_ERROR_IF_FAILED(hr, "Error creating Blend state");
 
 		//Initialize an additional Rendertexture
-		renderTexture.init(device.Get(), context.Get(), depthStencilView.Get(), width, height);
+		lightDepthRenderTexture.init(device.Get(), context.Get(), depthStencilView.Get(), width, height);
+		postProcessingRenderTexture.init(device.Get(), context.Get(), depthStencilView.Get(), width, height);
 	}
 	catch (COMException & e)
 	{
@@ -589,7 +619,7 @@ bool Graphics::initShaders()
 		shaderfolder = L"..\\Release\\";
 #endif
 #endif
-}
+	}
 
 	D3D11_INPUT_ELEMENT_DESC layout[] =
 	{
@@ -615,6 +645,9 @@ bool Graphics::initShaders()
 	if (!vertexShader.init(device, shaderfolder + L"vertexShader.cso", layout, numElements))
 		return false;
 
+	if (!postProcessingVertexShader.init(device, shaderfolder + L"postProcessingVertexShader.cso", layout, numElements))
+		return false;
+
 	if (!skinnedVertexShader.init(device, shaderfolder + L"skinnedVertexShader.cso", skinnedLayout, skinnedNumElements))
 		return false;
 
@@ -628,6 +661,9 @@ bool Graphics::initShaders()
 		return false;
 
 	if (!depthBasicShader.init(device, shaderfolder + L"depthBasic.cso"))
+		return false;
+
+	if (!postProcessingPixelShader.init(device, shaderfolder + L"postProcessingPixelShader.cso"))
 		return false;
 
 	return true;
@@ -686,6 +722,9 @@ bool Graphics::initScene()
 		debugViewRenderingMaterial.addPixelConstantBuffer(&pixelUnlitBasicBuffer);
 		debugViewRenderingMaterial.setTopologyType(D3D11_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_LINELIST);
 
+		postProcessingMaterial.setRenderStates(defaultDepthStencilState.Get(), defaultRasterizerState.Get(), defaultSamplerState.Get(), disabledBlendState.Get());
+		postProcessingMaterial.setShaders(&postProcessingVertexShader, &postProcessingPixelShader);
+
 		DebugViewer::setDebugMaterialAndColourData(&debugViewRenderingMaterial, &pixelUnlitBasicBuffer.data.colour);
 
 		Model* model;
@@ -693,6 +732,9 @@ bool Graphics::initScene()
 		if (!model->init("Resources\\Models\\cottage_obj.obj", device.Get(), context.Get(), texture.Get(), vertexInfoConstantBuffer))
 			return false;
 		renderables.emplace_back(&regularMaterial, model);
+
+		if (!postProcessingQuad.init(Primitive3DModels::QUAD.vertices, Primitive3DModels::QUAD.indices, device.Get(), context.Get(), postProcessingRenderTexture.getShaderResourceView(), vertexInfoConstantBuffer))
+			return false;
 
 		Model quadModel;
 		if (!quadModel.init(Primitive3DModels::QUAD.vertices, Primitive3DModels::QUAD.indices, device.Get(), context.Get(), texture.Get(), vertexInfoConstantBuffer))
@@ -726,7 +768,7 @@ bool Graphics::initScene()
 		renderables.emplace_back(&regularSkinnedMaterial, skinnedModel);
 		renderables.at(renderables.size() - 1).transform.SetPosition(0, 2, 0);
 
-		dirLight.enableShadowMapRendering(&renderTexture);
+		dirLight.enableShadowMapRendering(&lightDepthRenderTexture);
 
 		std::wstring cubemapLocations[6];
 		cubemapLocations[0] = L"Resources\\Textures\\Cubemaps\\Sahara Desert Cubemap\\sahara_ft.png";

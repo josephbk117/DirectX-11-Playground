@@ -39,10 +39,12 @@ private:
 
 	VertexShader vertexShader;
 	VertexShader skinnedVertexShader;
+	VertexShader postProcessingVertexShader;
 	PixelShader pixelShader;
 	PixelShader unlitBasicPixelShader;
 	PixelShader unlitTransparentPixelShader;
 	PixelShader depthBasicShader;
+	PixelShader postProcessingPixelShader;
 
 	VertexConstantBuffer<CB_VS_VertexShader> vertexInfoConstantBuffer;
 	VertexConstantBuffer<CB_VS_Skinned_VertexShader> vertexSkinnedInfoConstantBuffer;
@@ -50,12 +52,12 @@ private:
 	PixelConstantBuffer<CB_PS_LightBuffer> pixelInfoLightingBuffer;
 	PixelConstantBuffer<CB_PS_UnlitBasic> pixelUnlitBasicBuffer;
 
-	RenderTexture renderTexture;
+	RenderTexture lightDepthRenderTexture;
+	RenderTexture postProcessingRenderTexture;
 	CubemapTexture cubemap;
 	Skybox skybox;
-	//std::vector<Model> models;
 	std::vector<Renderable> renderables;
-	//SkinnedModel skinnedModel;
+	Model postProcessingQuad;
 	DirectionalLight dirLight;
 
 	Material regularMaterial;
@@ -64,6 +66,7 @@ private:
 	Material unlitScreenRenderingMaterial;
 	Material skyboxMaterial;
 	Material debugViewRenderingMaterial;
+	Material postProcessingMaterial;
 
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> depthStencilView;
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> depthStencilBuffer;
