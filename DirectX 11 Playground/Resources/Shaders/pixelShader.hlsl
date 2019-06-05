@@ -2,6 +2,7 @@ cbuffer lightBuffer : register(b0)
 {
 	float ambientLightIntensity;
 	float3 ambientLightColour;
+	float bias;
 }
 
 struct PS_IN
@@ -16,6 +17,7 @@ struct PS_IN
 Texture2D objTexture : TEXTURE : register(t0);
 Texture2D shadowMap : TEXTURE : register(t1);
 SamplerState objSamplerState : SAMPLER : register(s0);
+SamplerState shadowSamplerState : SAMPLER : register(s1);
 
 float ShadowCalculation(float4 fragPosLightSpace)
 {
@@ -40,11 +42,10 @@ float4 main(PS_IN input) : SV_TARGET
     projCoords = projCoords * 0.5 + 0.5;
 	projCoords.y = -projCoords.y;
     // get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
-    float closestDepth = shadowMap.Sample(objSamplerState, projCoords.xy).r * 0.5 + 0.5;
+    float closestDepth = shadowMap.Sample(shadowSamplerState, projCoords.xy).r;
     // get depth of current fragment from light's perspective
     float currentDepth = projCoords.z;
     // check whether current frag pos is in shadow
-	const float bias = 0.001;
     float shadow = currentDepth-bias > closestDepth ? 0.5 : 1.0;
 	
 	float visibilty = shadow;

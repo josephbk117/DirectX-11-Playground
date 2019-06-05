@@ -20,13 +20,23 @@ void Material::setRenderStates(ID3D11DepthStencilState* depthStencilState, ID3D1
 {
 	this->depthStencilState = depthStencilState;
 	this->rasterizerState = rasterizerState;
-	this->samplerState = samplerState;
+	this->samplerState1 = samplerState;
 	this->blendState = blendState;
 
 #if _DEBUG
 	if (this->depthStencilState != nullptr && this->rasterizerState != nullptr && this->samplerState != nullptr && this->blendState != nullptr)
 		isCompletlyInitialized[0] = true;
 #endif
+}
+
+void Material::setSamplerState2(ID3D11SamplerState * samplerState)
+{
+	this->samplerState2 = samplerState;
+}
+
+void Material::setSamplerState3(ID3D11SamplerState * samplerState)
+{
+	this->samplerState3 = samplerState;
 }
 
 void Material::setShadowAndRenderQueueStates(RenderQueue queue, bool castShadow, bool recieveShadow)
@@ -79,7 +89,7 @@ void Material::addVertexConstantBuffer(BaseVertexConstantBuffer* constantBuffer)
 		{
 			isCompletlyInitialized[2] = false;
 			break;
-		}
+}
 	}
 #endif
 }
@@ -96,7 +106,7 @@ void Material::addPixelConstantBuffer(BasePixelConstantBuffer* constantBuffer)
 		{
 			isCompletlyInitialized[2] = false;
 			break;
-		}
+}
 	}
 #endif
 }
@@ -132,7 +142,7 @@ void Material::bind(ID3D11DeviceContext * context) const
 	{
 		ErrorLogger::log("Material was not completly initialized before binding");
 		exit(-1);
-	}
+}
 #endif
 	context->IASetPrimitiveTopology(topology);
 	if (prevRasterizerState != rasterizerState)
@@ -141,8 +151,13 @@ void Material::bind(ID3D11DeviceContext * context) const
 		context->OMSetDepthStencilState(depthStencilState, 0);
 	if (prevBlendState != blendState)
 		context->OMSetBlendState(blendState, nullptr, 0xFFFFFF);
-	if (prevSamplerState != samplerState)
-		context->PSSetSamplers(0, 1, &samplerState);
+	if (prevSamplerState != samplerState1)
+		context->PSSetSamplers(0, 1, &samplerState1);
+
+	if(samplerState2 != nullptr)
+		context->PSSetSamplers(1, 1, &samplerState2);
+	if (samplerState3 != nullptr)
+		context->PSSetSamplers(2, 1, &samplerState3);
 
 	context->IASetInputLayout(vertexShader->getInputLayout());
 	context->VSSetShader(vertexShader->getShader(), NULL, 0);
@@ -166,7 +181,7 @@ void Material::bind(ID3D11DeviceContext * context) const
 
 	prevdepthStencilState = depthStencilState;
 	prevRasterizerState = rasterizerState;
-	prevSamplerState = samplerState;
+	prevSamplerState = samplerState1;
 	prevBlendState = blendState;
 	prevVertexShader = vertexShader;
 	prevPixelShader = pixelShader;
@@ -187,7 +202,7 @@ void Material::bind(ID3D11DeviceContext * context, PixelShader * overridePixelSh
 	context->RSSetState(rasterizerState);
 	context->OMSetDepthStencilState(depthStencilState, 0);
 	context->OMSetBlendState(blendState, nullptr, 0xFFFFFF);
-	context->PSSetSamplers(0, 1, &samplerState);
+	context->PSSetSamplers(0, 1, &samplerState1);
 	context->VSSetShader(vertexShader->getShader(), NULL, 0);
 	context->PSSetShader(overridePixelShader->getShader(), NULL, 0);
 
@@ -213,7 +228,7 @@ void Material::bind(ID3D11DeviceContext * context, VertexShader * overrideOverte
 	context->RSSetState(rasterizerState);
 	context->OMSetDepthStencilState(depthStencilState, 0);
 	context->OMSetBlendState(blendState, nullptr, 0xFFFFFF);
-	context->PSSetSamplers(0, 1, &samplerState);
+	context->PSSetSamplers(0, 1, &samplerState1);
 	context->VSSetShader(overrideOvertexShader->getShader(), NULL, 0);
 	context->PSSetShader(pixelShader->getShader(), NULL, 0);
 
@@ -239,7 +254,7 @@ void Material::bind(ID3D11DeviceContext * context, VertexShader * overrideOverte
 	context->RSSetState(rasterizerState);
 	context->OMSetDepthStencilState(depthStencilState, 0);
 	context->OMSetBlendState(blendState, nullptr, 0xFFFFFF);
-	context->PSSetSamplers(0, 1, &samplerState);
+	context->PSSetSamplers(0, 1, &samplerState1);
 	context->VSSetShader(overrideOvertexShader->getShader(), NULL, 0);
 	context->PSSetShader(overridePixelShader->getShader(), NULL, 0);
 

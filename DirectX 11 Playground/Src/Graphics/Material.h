@@ -20,7 +20,9 @@ private:
 
 	ID3D11DepthStencilState* depthStencilState = nullptr;
 	ID3D11RasterizerState* rasterizerState = nullptr;
-	ID3D11SamplerState* samplerState = nullptr;
+	ID3D11SamplerState* samplerState1 = nullptr;
+	ID3D11SamplerState* samplerState2 = nullptr;
+	ID3D11SamplerState* samplerState3 = nullptr;
 	ID3D11BlendState* blendState = nullptr;
 
 	VertexShader* vertexShader = nullptr;
@@ -42,6 +44,8 @@ public:
 	Material();
 	~Material();
 	void setRenderStates(ID3D11DepthStencilState* depthStencilState, ID3D11RasterizerState* rasterizerState, ID3D11SamplerState* samplerState, ID3D11BlendState* blendState);
+	void setSamplerState2(ID3D11SamplerState* samplerState);
+	void setSamplerState3(ID3D11SamplerState* samplerState);
 	void setShadowAndRenderQueueStates(RenderQueue queue, bool castShadow, bool recieveShadow);
 	void setRenderQueue(RenderQueue queue);
 	void setIfCastsShadow(bool castShadow);

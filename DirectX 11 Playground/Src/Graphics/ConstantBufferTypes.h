@@ -21,6 +21,7 @@ struct CB_PS_LightBuffer
 {
 	float ambientLightIntensity;
 	DirectX::XMFLOAT3 ambientLightColour;
+	float bias = 0.001f;
 };
 
 struct CB_PS_UnlitBasic

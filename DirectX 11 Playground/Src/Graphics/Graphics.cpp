@@ -58,7 +58,9 @@ void Graphics::renderFrame()
 	static float ambientLightIntensity = 0.1f;
 	static DirectX::XMVECTOR lightDir = { 0.8f, 0, 0 };
 	static DirectX::XMVECTOR rayDir = { 0.8f, 0, 0 };
+	static float shadowBias = 0.001f;
 	t_time += 0.01f;
+
 
 	dirLight.setRotation(lightDir);
 	for (int i = 0; i < renderables.size(); i++)
@@ -85,6 +87,7 @@ void Graphics::renderFrame()
 
 	pixelInfoLightingBuffer.data.ambientLightIntensity = ambientLightIntensity;
 	pixelInfoLightingBuffer.data.ambientLightColour = DirectX::XMFLOAT3(1, 1, 0);
+	pixelInfoLightingBuffer.data.bias = shadowBias;
 	/*if (!pixelInfoLightingBuffer.applyChanges())
 		return;*/
 
@@ -138,8 +141,10 @@ void Graphics::renderFrame()
 	}
 
 	//Draw skybox
+
 	skyboxMaterial.bind(context.Get());
 	skybox.draw(camera.GetViewDirectionMatrix() * camera.GetProjectionMatrix());
+
 	//Render all transparent objects
 
 	for (std::set<Renderable*, TransparentRenderableCompare>::iterator it = transparentRenderables.begin(); it != transparentRenderables.end(); ++it)
@@ -285,6 +290,7 @@ void Graphics::renderFrame()
 
 	ImGui::Text(fpsString.c_str());
 	ImGui::SliderFloat("Ambient light intensity", &ambientLightIntensity, 0, 1, "%.2f");
+	ImGui::SliderFloat("Shadow bias", &shadowBias, 0.0f, 1.0f, "%.3f");
 	ImGui::SliderFloat("Animation timeline", &t_time, 0.0f, 100.0f, "%.2f");
 	ImGui::SliderFloat3("Light dir", &lightDir.m128_f32[0], -1.0f, 1.0f, "%.2f");
 	if (ImGui::SliderFloat3("Ray Look dir", &rayDir.m128_f32[0], -1.0f, 1.0f, "%.2f"))
@@ -498,7 +504,21 @@ bool Graphics::initDirectX(HWND hwnd, int width, int height)
 		samplerDesc.MinLOD = 0;
 		samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
-		hr = device->CreateSamplerState(&samplerDesc, samplerState.GetAddressOf());
+		hr = device->CreateSamplerState(&samplerDesc, defaultSamplerState.GetAddressOf());
+		COM_ERROR_IF_FAILED(hr, "Error creating sampler state");
+
+		ZeroMemory(&samplerDesc, sizeof(D3D11_SAMPLER_DESC));
+
+		samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+		samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+		samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+		samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+
+		samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+		samplerDesc.MinLOD = 0;
+		samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+		hr = device->CreateSamplerState(&samplerDesc, shadowSamplerState.GetAddressOf());
 		COM_ERROR_IF_FAILED(hr, "Error creating sampler state");
 
 		//Create blend states
@@ -635,31 +655,32 @@ bool Graphics::initScene()
 		hr = pixelUnlitBasicBuffer.init(device.Get(), context.Get());
 		COM_ERROR_IF_FAILED(hr, "Failed to create constant buffer");
 
-		regularMaterial.setRenderStates(defaultDepthStencilState.Get(), defaultRasterizerState.Get(), samplerState.Get(), disabledBlendState.Get());
+		regularMaterial.setRenderStates(defaultDepthStencilState.Get(), defaultRasterizerState.Get(), defaultSamplerState.Get(), disabledBlendState.Get());
+		regularMaterial.setSamplerState2(shadowSamplerState.Get());
 		regularMaterial.setShaders(&vertexShader, &pixelShader);
 		regularMaterial.addVertexConstantBuffer(&vertexInfoConstantBuffer);
 		regularMaterial.addVertexConstantBuffer(&vertexInfoLightingBuffer);
 		regularMaterial.addPixelConstantBuffer(&pixelInfoLightingBuffer);
 
-		regularSkinnedMaterial.setRenderStates(defaultDepthStencilState.Get(), defaultRasterizerState.Get(), samplerState.Get(), disabledBlendState.Get());
+		regularSkinnedMaterial.setRenderStates(defaultDepthStencilState.Get(), defaultRasterizerState.Get(), defaultSamplerState.Get(), disabledBlendState.Get());
 		regularSkinnedMaterial.setShaders(&skinnedVertexShader, &pixelShader);
 		regularSkinnedMaterial.addVertexConstantBuffer(&vertexSkinnedInfoConstantBuffer);
 		regularSkinnedMaterial.addPixelConstantBuffer(&pixelInfoLightingBuffer);
 
-		depthRenderingMaterial.setRenderStates(defaultDepthStencilState.Get(), lightDepthRenderingRasterizerState.Get(), samplerState.Get(), disabledBlendState.Get());
+		depthRenderingMaterial.setRenderStates(defaultDepthStencilState.Get(), lightDepthRenderingRasterizerState.Get(), defaultSamplerState.Get(), disabledBlendState.Get());
 		depthRenderingMaterial.setShaders(&vertexShader, &depthBasicShader);
 		depthRenderingMaterial.addVertexConstantBuffer(&vertexInfoConstantBuffer);
 
-		unlitScreenRenderingMaterial.setRenderStates(depthTestDisabledDepthStencilState.Get(), debugRasterizerState.Get(), samplerState.Get(), defaultBlendState.Get());
+		unlitScreenRenderingMaterial.setRenderStates(depthTestDisabledDepthStencilState.Get(), debugRasterizerState.Get(), defaultSamplerState.Get(), defaultBlendState.Get());
 		unlitScreenRenderingMaterial.setShaders(&vertexShader, &unlitTransparentPixelShader);
 		unlitScreenRenderingMaterial.addVertexConstantBuffer(&vertexInfoConstantBuffer);
 		unlitScreenRenderingMaterial.setRenderQueue(RenderQueue::TRANSPARENT_QUEUE);
 
-		skyboxMaterial.setRenderStates(defaultDepthStencilState.Get(), debugRasterizerState.Get(), samplerState.Get(), disabledBlendState.Get());
+		skyboxMaterial.setRenderStates(defaultDepthStencilState.Get(), debugRasterizerState.Get(), defaultSamplerState.Get(), disabledBlendState.Get());
 		skyboxMaterial.setShaders(&vertexShader, &unlitBasicPixelShader);
 		skyboxMaterial.addVertexConstantBuffer(&vertexInfoConstantBuffer);
 
-		debugViewRenderingMaterial.setRenderStates(defaultDepthStencilState.Get(), debugRasterizerState.Get(), samplerState.Get(), disabledBlendState.Get());
+		debugViewRenderingMaterial.setRenderStates(defaultDepthStencilState.Get(), debugRasterizerState.Get(), defaultSamplerState.Get(), disabledBlendState.Get());
 		debugViewRenderingMaterial.setShaders(&vertexShader, &unlitBasicPixelShader);
 		debugViewRenderingMaterial.addVertexConstantBuffer(&vertexInfoConstantBuffer);
 		debugViewRenderingMaterial.addPixelConstantBuffer(&pixelUnlitBasicBuffer);
@@ -673,22 +694,23 @@ bool Graphics::initScene()
 			return false;
 		renderables.emplace_back(&regularMaterial, model);
 
-		model = new Model;
-		if (!model->init(Primitive3DModels::QUAD.vertices, Primitive3DModels::QUAD.indices, device.Get(), context.Get(), texture.Get(), vertexInfoConstantBuffer))
+		Model quadModel;
+		if (!quadModel.init(Primitive3DModels::QUAD.vertices, Primitive3DModels::QUAD.indices, device.Get(), context.Get(), texture.Get(), vertexInfoConstantBuffer))
 			return false;
+
+		model = new Model;
+		*model = quadModel;
 		renderables.emplace_back(&unlitScreenRenderingMaterial, model);
 		renderables.at(renderables.size() - 1).transform.SetPosition(2, 2, 5);
 
 		model = new Model;
-		if (!model->init(Primitive3DModels::QUAD.vertices, Primitive3DModels::QUAD.indices, device.Get(), context.Get(), texture.Get(), vertexInfoConstantBuffer))
-			return false;
+		*model = quadModel;
 		renderables.emplace_back(&unlitScreenRenderingMaterial, model);
 		renderables.at(renderables.size() - 1).transform.SetPosition(1.5f, 2, 4);
 		renderables.at(renderables.size() - 1).transform.SetRotation(0, 0, 45);
 
 		model = new Model;
-		if (!model->init(Primitive3DModels::QUAD.vertices, Primitive3DModels::QUAD.indices, device.Get(), context.Get(), texture.Get(), vertexInfoConstantBuffer))
-			return false;
+		*model = quadModel;
 		renderables.emplace_back(&unlitScreenRenderingMaterial, model);
 		renderables.at(renderables.size() - 1).transform.SetPosition(2, 2, 3);
 
@@ -705,19 +727,6 @@ bool Graphics::initScene()
 		renderables.at(renderables.size() - 1).transform.SetPosition(0, 2, 0);
 
 		dirLight.enableShadowMapRendering(&renderTexture);
-
-		/*Model model1;
-		if (!model1.init("Resources\\Models\\cottage_obj.obj", device.Get(), context.Get(), texture.Get(), vertexInfoConstantBuffer))
-			return false;
-		models.push_back(model1);
-
-		Model model2;
-		if (!model2.init(Primitive3DModels::QUAD.vertices, Primitive3DModels::QUAD.indices, device.Get(), context.Get(), texture.Get(), vertexInfoConstantBuffer))
-			return false;
-		models.push_back(model2);
-
-		if (!skinnedModel.init("Resources\\Models\\animCylinder.fbx", device.Get(), context.Get(), texture.Get(), vertexSkinnedInfoConstantBuffer))
-			return false;*/
 
 		std::wstring cubemapLocations[6];
 		cubemapLocations[0] = L"Resources\\Textures\\Cubemaps\\Sahara Desert Cubemap\\sahara_ft.png";

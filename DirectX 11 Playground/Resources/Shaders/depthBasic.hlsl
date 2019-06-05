@@ -8,6 +8,6 @@ struct PS_IN
 
 float4 main(PS_IN input) : SV_TARGET
 {
-	float3 col = input.pos.z/input.pos.w;
+	float3 col = (input.pos.z/input.pos.w)*0.5 + 0.5;
 	return float4(col,1);
 }
