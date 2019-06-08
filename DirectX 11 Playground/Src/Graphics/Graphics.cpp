@@ -662,18 +662,35 @@ bool Graphics::initScene()
 
 		DebugViewer::setDebugMaterialAndColourData(&debugViewRenderingMaterial, &pixelUnlitBasicBuffer.data.colour);
 
-		Model* model;
-		model = new Model;
-		if (!model->init("Resources\\Models\\cottage_obj.obj", device.Get(), context.Get(), texture.Get(), vertexInfoConstantBuffer))
-			return false;
-		renderables.emplace_back(&regularMaterial, model);
-
 		if (!postProcessingQuad.init(Primitive3DModels::QUAD.vertices, Primitive3DModels::QUAD.indices, device.Get(), context.Get(), postProcessingRenderTexture.getShaderResourceView(), vertexInfoConstantBuffer))
 			return false;
+
+		Model* model;
+		model = new Model;
+		if (!model->init("Resources\\Models\\cottage_obj.fbx", device.Get(), context.Get(), texture.Get(), vertexInfoConstantBuffer))
+			return false;
+		renderables.emplace_back(&regularMaterial, model);
+		renderables.at(renderables.size() - 1).transform.SetRotation(DirectX::XM_PI / 2, 0, DirectX::XM_PI / 2);
+		renderables.at(renderables.size() - 1).transform.SetScale(1, 0.5f, 1);
+
+		model = new Model;
+		if (!model->init("Resources\\Models\\box.fbx", device.Get(), context.Get(), texture.Get(), vertexInfoConstantBuffer))
+			return false;
+		renderables.emplace_back(&regularMaterial, model);
+		renderables.at(renderables.size() - 1).transform.SetPosition(-2, 1, 0);
+		renderables.at(renderables.size() - 1).transform.SetScale(0.5f, 0.5f, 0.5f);
+	
 
 		Model quadModel;
 		if (!quadModel.init(Primitive3DModels::QUAD.vertices, Primitive3DModels::QUAD.indices, device.Get(), context.Get(), texture.Get(), vertexInfoConstantBuffer))
 			return false;
+
+		model = new Model;
+		*model = quadModel;
+		renderables.emplace_back(&regularMaterial, model);
+		renderables.at(renderables.size() - 1).transform.SetPosition(0.0f, -1, 0);
+		renderables.at(renderables.size() - 1).transform.SetRotation(DirectX::XM_PI / 2, 0, DirectX::XM_PI / 2);
+		renderables.at(renderables.size() - 1).transform.SetScale(10, 10, 10);
 
 		model = new Model;
 		*model = quadModel;
@@ -691,11 +708,6 @@ bool Graphics::initScene()
 		renderables.emplace_back(&unlitScreenRenderingMaterial, model);
 		renderables.at(renderables.size() - 1).transform.SetPosition(2, 2, 3);
 
-		model = new Model;
-		if (!model->init("Resources\\Models\\stairsLong.obj", device.Get(), context.Get(), texture.Get(), vertexInfoConstantBuffer))
-			return false;
-		renderables.emplace_back(&regularMaterial, model);
-		renderables.at(renderables.size() - 1).transform.SetPosition(0, 1, -3);
 
 		SkinnedModel* skinnedModel = new SkinnedModel;
 		if (!skinnedModel->init("Resources\\Models\\animCylinder.fbx", device.Get(), context.Get(), texture.Get(), vertexSkinnedInfoConstantBuffer))

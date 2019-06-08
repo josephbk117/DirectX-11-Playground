@@ -295,7 +295,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Resources\Shaders\depthBasic.hlsl" />
     <FxCompile Include="Resources\Shaders\skinnedVertexShader.hlsl">
       <Filter>Resource Files\Shaders\Vertex Shaders</Filter>
     </FxCompile>
@@ -308,9 +307,18 @@
     <FxCompile Include="Resources\Shaders\unlitBasic.hlsl">
       <Filter>Resource Files\Shaders\Pixel Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Resources\Shaders\unlitTransparent.hlsl" />
-    <FxCompile Include="Resources\Shaders\postProcessingVertexShader.hlsl" />
-    <FxCompile Include="Resources\Shaders\postProcessingPixelShader.hlsl" />
+    <FxCompile Include="Resources\Shaders\depthBasic.hlsl">
+      <Filter>Resource Files\Shaders\Pixel Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\postProcessingPixelShader.hlsl">
+      <Filter>Resource Files\Shaders\Pixel Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\postProcessingVertexShader.hlsl">
+      <Filter>Resource Files\Shaders\Vertex Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\Shaders\unlitTransparent.hlsl">
+      <Filter>Resource Files\Shaders\Pixel Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Resources\Textures\bitshiftProductions.png">

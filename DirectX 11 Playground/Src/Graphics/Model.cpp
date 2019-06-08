@@ -74,9 +74,7 @@ void Model::drawDebugView(const XMMATRIX& worldMatrix, const XMMATRIX& viewProje
 
 std::vector<Mesh>& Model::getMeshes()
 {
-
 	return meshes;
-
 }
 
 bool Model::loadModel(const std::string & filePath)
@@ -87,7 +85,10 @@ bool Model::loadModel(const std::string & filePath)
 		aiProcess_Triangulate | aiProcess_ConvertToLeftHanded);
 
 	if (pScene == nullptr)
+	{
+		ErrorLogger::log("Reading mesh data from file : " + filePath + " failed");
 		return false;
+	}
 
 	this->processNode(pScene->mRootNode, pScene);
 	return true;
@@ -118,9 +119,9 @@ Mesh Model::processMesh(aiMesh * mesh, const aiScene * scene)
 	{
 		Vertex vertex;
 
-		vertex.pos.x = mesh->mVertices[i].x * 0.1f;
-		vertex.pos.y = mesh->mVertices[i].y * 0.1f;
-		vertex.pos.z = mesh->mVertices[i].z * 0.1f;
+		vertex.pos.x = mesh->mVertices[i].x;
+		vertex.pos.y = mesh->mVertices[i].y;
+		vertex.pos.z = mesh->mVertices[i].z;
 
 		vertex.normal.x = mesh->mNormals[i].x;
 		vertex.normal.y = mesh->mNormals[i].y;

@@ -4,6 +4,7 @@ BaseTransform::BaseTransform()
 {
 	SetPosition(0, 0, 0);
 	SetRotation(0, 0, 0);
+	SetScale(1, 1, 1);
 }
 
 const XMMATRIX & BaseTransform::GetMatrix() const
@@ -93,6 +94,36 @@ void BaseTransform::AdjustRotation(float x, float y, float z)
 	this->UpdateMatrix();
 }
 
+void BaseTransform::SetScale(const XMVECTOR& scale)
+{
+	XMStoreFloat3(&this->scale, scale);
+	this->scaleVector = scale;
+	this->UpdateMatrix();
+}
+
+void BaseTransform::SetScale(float x, float y, float z)
+{
+	this->scale = XMFLOAT3(x, y, z);
+	this->scaleVector = XMLoadFloat3(&this->scale);
+	this->UpdateMatrix();
+}
+
+void BaseTransform::AdjustScale(const XMVECTOR& scale)
+{
+	this->scaleVector += scale;
+	XMStoreFloat3(&this->scale, this->scaleVector);
+	this->UpdateMatrix();
+}
+
+void BaseTransform::AdjustScale(float x, float y, float z)
+{
+	this->scale.x += x;
+	this->scale.y += y;
+	this->scale.z += z;
+	this->scaleVector = XMLoadFloat3(&this->scale);
+	this->UpdateMatrix();
+}
+
 void BaseTransform::SetLookAtPos(XMFLOAT3 lookAtPos)
 {
 	//Verify that look at pos is not the same as cam pos. They cannot be the same as that wouldn't make sense and would result in undefined behavior.
@@ -143,7 +174,7 @@ const XMVECTOR & BaseTransform::GetLeftVector()
 
 void BaseTransform::UpdateMatrix() //Updates view matrix and also updates the movement vectors
 {
-	this->matrix = XMMatrixRotationRollPitchYaw(this->rot.x, this->rot.y, this->rot.z) * XMMatrixTranslation(this->pos.x, this->pos.y, this->pos.z);
+	this->matrix = XMMatrixRotationRollPitchYaw(this->rot.x, this->rot.y, this->rot.z) * XMMatrixScaling(this->scale.x, this->scale.y, this->scale.z ) * XMMatrixTranslation(this->pos.x, this->pos.y, this->pos.z);
 	XMMATRIX vecRotationMatrix = XMMatrixRotationRollPitchYaw(0.0f, this->rot.y, 0.0f);
 	this->vec_forward = XMVector3TransformCoord(this->DEFAULT_FORWARD_VECTOR, vecRotationMatrix);
 	this->vec_backward = XMVector3TransformCoord(this->DEFAULT_BACKWARD_VECTOR, vecRotationMatrix);
@@ -153,7 +184,7 @@ void BaseTransform::UpdateMatrix() //Updates view matrix and also updates the mo
 
 void Transform::UpdateMatrix()
 {
-	this->matrix = XMMatrixRotationRollPitchYaw(this->rot.x, this->rot.y, this->rot.z) * XMMatrixTranslation(this->pos.x, this->pos.y, this->pos.z);
+	this->matrix = XMMatrixRotationRollPitchYaw(this->rot.x, this->rot.y, this->rot.z) * XMMatrixScaling(this->scale.x, this->scale.y, this->scale.z) * XMMatrixTranslation(this->pos.x, this->pos.y, this->pos.z);
 	XMMATRIX vecRotationMatrix = XMMatrixRotationRollPitchYaw(0.0f, this->rot.y, 0.0f);
 	this->vec_forward = XMVector3TransformCoord(this->DEFAULT_FORWARD_VECTOR, vecRotationMatrix);
 	this->vec_backward = XMVector3TransformCoord(this->DEFAULT_BACKWARD_VECTOR, vecRotationMatrix);
