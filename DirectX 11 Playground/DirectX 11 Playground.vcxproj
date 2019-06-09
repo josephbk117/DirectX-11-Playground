@@ -326,6 +326,7 @@
     <Image Include="Resources\Textures\Cubemaps\Sahara Desert Cubemap\sahara_lf.png" />
     <Image Include="Resources\Textures\Cubemaps\Sahara Desert Cubemap\sahara_rt.png" />
     <Image Include="Resources\Textures\Cubemaps\Sahara Desert Cubemap\sahara_up.png" />
+    <Image Include="Resources\Textures\seamless_ground.jpg" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

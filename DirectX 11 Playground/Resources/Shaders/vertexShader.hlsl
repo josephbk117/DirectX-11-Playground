@@ -9,6 +9,7 @@ cbuffer perObjBuffer : register(b0)
 cbuffer lightBuffer : register(b1)
 {
 	float4x4 lightMatrix;
+	float3 lightDirection;
 }
 
 struct VS_IN
@@ -25,6 +26,7 @@ struct VS_OUT
 	float3 norm : NORMAL;
 	float weight : TEXCOORD1;
 	float4 lightPos : TEXCOORD2;
+	float3 lightDir : TEXCOORD3;
 };
 
 VS_OUT main(VS_IN input)
@@ -36,5 +38,6 @@ VS_OUT main(VS_IN input)
 	o.tex = input.tex;
 	o.norm = normalize(mul(float4(input.norm, 0), worldMatrix));
 	o.weight = 0;
+	o.lightDir = lightDirection;
 	return o;
 }

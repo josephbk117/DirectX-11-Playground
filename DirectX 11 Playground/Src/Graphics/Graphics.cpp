@@ -93,6 +93,7 @@ void Graphics::renderFrame()
 	vertexInfoConstantBuffer.data.mvpMatrix = DirectX::XMMatrixTranspose(vertexInfoConstantBuffer.data.mvpMatrix);
 
 	vertexInfoLightingBuffer.data.lightMatrix = dirLight.GetLightMatrix();
+	vertexInfoLightingBuffer.data.lightDirection = dirLight.getDirection();
 
 	pixelInfoLightingBuffer.data.ambientLightIntensity = ambientLightIntensity;
 	pixelInfoLightingBuffer.data.ambientLightColour = DirectX::XMFLOAT3(1, 1, 0);
@@ -608,7 +609,13 @@ bool Graphics::initScene()
 {
 	try
 	{
-		HRESULT hr = DirectX::CreateWICTextureFromFile(device.Get(), L"Resources\\Textures\\cottage_diffuse.png", nullptr, texture.GetAddressOf());
+		HRESULT hr = DirectX::CreateWICTextureFromFile(device.Get(), L"Resources\\Textures\\cottage_diffuse.png", nullptr, texture1.GetAddressOf());
+		COM_ERROR_IF_FAILED(hr, "Failed to create WIC texture from file");
+
+		hr = DirectX::CreateWICTextureFromFile(device.Get(), L"Resources\\Textures\\seamless_ground.jpg", nullptr, texture2.GetAddressOf());
+		COM_ERROR_IF_FAILED(hr, "Failed to create WIC texture from file");
+
+		hr = DirectX::CreateWICTextureFromFile(device.Get(), L"Resources\\Textures\\crate.jpg", nullptr, texture3.GetAddressOf());
 		COM_ERROR_IF_FAILED(hr, "Failed to create WIC texture from file");
 
 		hr = vertexInfoConstantBuffer.init(device.Get(), context.Get());
@@ -647,6 +654,10 @@ bool Graphics::initScene()
 		unlitScreenRenderingMaterial.addVertexConstantBuffer(&vertexInfoConstantBuffer);
 		unlitScreenRenderingMaterial.setRenderQueue(RenderQueue::TRANSPARENT_QUEUE);
 
+		unlitMaterial.setRenderStates(defaultDepthStencilState.Get(), defaultRasterizerState.Get(), defaultSamplerState.Get(), disabledBlendState.Get());
+		unlitMaterial.setShaders(&vertexShader, &unlitBasicPixelShader);
+		unlitMaterial.addVertexConstantBuffer(&vertexInfoConstantBuffer);
+
 		skyboxMaterial.setRenderStates(defaultDepthStencilState.Get(), debugRasterizerState.Get(), defaultSamplerState.Get(), disabledBlendState.Get());
 		skyboxMaterial.setShaders(&vertexShader, &unlitBasicPixelShader);
 		skyboxMaterial.addVertexConstantBuffer(&vertexInfoConstantBuffer);
@@ -661,28 +672,29 @@ bool Graphics::initScene()
 		postProcessingMaterial.setShaders(&postProcessingVertexShader, &postProcessingPixelShader);
 
 		DebugViewer::setDebugMaterialAndColourData(&debugViewRenderingMaterial, &pixelUnlitBasicBuffer.data.colour);
+		dirLight.enableShadowMapRendering(&lightDepthRenderTexture);
 
 		if (!postProcessingQuad.init(Primitive3DModels::QUAD.vertices, Primitive3DModels::QUAD.indices, device.Get(), context.Get(), postProcessingRenderTexture.getShaderResourceView(), vertexInfoConstantBuffer))
 			return false;
 
 		Model* model;
 		model = new Model;
-		if (!model->init("Resources\\Models\\cottage_obj.fbx", device.Get(), context.Get(), texture.Get(), vertexInfoConstantBuffer))
+		if (!model->init("Resources\\Models\\cottage_obj.fbx", device.Get(), context.Get(), texture1.Get(), vertexInfoConstantBuffer))
 			return false;
 		renderables.emplace_back(&regularMaterial, model);
+		renderables.at(renderables.size() - 1).transform.SetPosition(0, -0.5f, 0);
 		renderables.at(renderables.size() - 1).transform.SetRotation(DirectX::XM_PI / 2, 0, DirectX::XM_PI / 2);
 		renderables.at(renderables.size() - 1).transform.SetScale(1, 0.5f, 1);
 
 		model = new Model;
-		if (!model->init("Resources\\Models\\box.fbx", device.Get(), context.Get(), texture.Get(), vertexInfoConstantBuffer))
+		if (!model->init("Resources\\Models\\box.fbx", device.Get(), context.Get(), texture3.Get(), vertexInfoConstantBuffer))
 			return false;
 		renderables.emplace_back(&regularMaterial, model);
-		renderables.at(renderables.size() - 1).transform.SetPosition(-2, 1, 0);
+		renderables.at(renderables.size() - 1).transform.SetPosition(-3, 1, 0);
 		renderables.at(renderables.size() - 1).transform.SetScale(0.5f, 0.5f, 0.5f);
-	
 
 		Model quadModel;
-		if (!quadModel.init(Primitive3DModels::QUAD.vertices, Primitive3DModels::QUAD.indices, device.Get(), context.Get(), texture.Get(), vertexInfoConstantBuffer))
+		if (!quadModel.init(Primitive3DModels::QUAD.vertices, Primitive3DModels::QUAD.indices, device.Get(), context.Get(), texture2.Get(), vertexInfoConstantBuffer))
 			return false;
 
 		model = new Model;
@@ -710,12 +722,11 @@ bool Graphics::initScene()
 
 
 		SkinnedModel* skinnedModel = new SkinnedModel;
-		if (!skinnedModel->init("Resources\\Models\\animCylinder.fbx", device.Get(), context.Get(), texture.Get(), vertexSkinnedInfoConstantBuffer))
+		if (!skinnedModel->init("Resources\\Models\\animCylinder.fbx", device.Get(), context.Get(), texture1.Get(), vertexSkinnedInfoConstantBuffer))
 			return false;
 		renderables.emplace_back(&regularSkinnedMaterial, skinnedModel);
 		renderables.at(renderables.size() - 1).transform.SetPosition(0, 2, 0);
 
-		dirLight.enableShadowMapRendering(&lightDepthRenderTexture);
 
 		std::wstring cubemapLocations[6];
 		cubemapLocations[0] = L"Resources\\Textures\\Cubemaps\\Sahara Desert Cubemap\\sahara_ft.png";

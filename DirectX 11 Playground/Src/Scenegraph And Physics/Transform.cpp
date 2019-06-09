@@ -152,22 +152,22 @@ void BaseTransform::SetLookAtPos(XMFLOAT3 lookAtPos)
 	this->SetRotation(pitch, yaw, 0.0f);
 }
 
-const XMVECTOR & BaseTransform::GetForwardVector()
+const XMVECTOR & BaseTransform::GetForwardVector() const
 {
 	return this->vec_forward;
 }
 
-const XMVECTOR & BaseTransform::GetRightVector()
+const XMVECTOR & BaseTransform::GetRightVector() const
 {
 	return this->vec_right;
 }
 
-const XMVECTOR & BaseTransform::GetBackwardVector()
+const XMVECTOR & BaseTransform::GetBackwardVector() const
 {
 	return this->vec_backward;
 }
 
-const XMVECTOR & BaseTransform::GetLeftVector()
+const XMVECTOR & BaseTransform::GetLeftVector() const
 {
 	return this->vec_left;
 }

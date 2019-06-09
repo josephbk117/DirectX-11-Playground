@@ -25,10 +25,10 @@ public:
 	void AdjustScale(const XMVECTOR& rot);
 	void AdjustScale(float x, float y, float z);
 	void SetLookAtPos(XMFLOAT3 lookAtPos);
-	const XMVECTOR & GetForwardVector();
-	const XMVECTOR & GetRightVector();
-	const XMVECTOR & GetBackwardVector();
-	const XMVECTOR & GetLeftVector();
+	const XMVECTOR & GetForwardVector()const;
+	const XMVECTOR & GetRightVector()const;
+	const XMVECTOR & GetBackwardVector()const;
+	const XMVECTOR & GetLeftVector()const;
 
 protected:
 	virtual void UpdateMatrix();

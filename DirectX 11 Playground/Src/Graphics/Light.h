@@ -64,6 +64,10 @@ public:
 		return lightCamera.GetRenderTexture();
 	}
 
+	const XMVECTOR& getDirection()
+	{
+		return lightCamera.GetRotationVector();
+	}
 
 };
 

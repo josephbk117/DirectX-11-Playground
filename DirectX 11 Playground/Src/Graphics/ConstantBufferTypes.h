@@ -15,6 +15,7 @@ struct CB_VS_Skinned_VertexShader : public CB_VS_VertexShader
 struct CB_VS_LightBuffer
 {
 	DirectX::XMMATRIX lightMatrix;
+	DirectX::XMVECTOR lightDirection;
 };
 
 struct CB_PS_LightBuffer
