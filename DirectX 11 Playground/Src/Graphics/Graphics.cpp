@@ -71,8 +71,8 @@ void Graphics::renderFrame()
 {
 	static float t_time = 0;
 	static float ambientLightIntensity = 0.1f;
+	static DirectX::XMVECTOR ambientLightColour = {0.3f, 0.3f, 0.3f };
 	static DirectX::XMVECTOR lightDir = { 0.8f, 0, 0 };
-	static DirectX::XMVECTOR rayDir = { 0.8f, 0, 0 };
 	static float shadowBias = 0.001f;
 	static bool renderWithPostProcessing = false;
 	t_time += 0.01f;
@@ -96,8 +96,10 @@ void Graphics::renderFrame()
 	vertexInfoLightingBuffer.data.lightDirection = dirLight.getDirection();
 
 	pixelInfoLightingBuffer.data.ambientLightIntensity = ambientLightIntensity;
-	pixelInfoLightingBuffer.data.ambientLightColour = DirectX::XMFLOAT3(1, 1, 0);
+	XMStoreFloat3(&pixelInfoLightingBuffer.data.ambientLightColour, ambientLightColour);
 	pixelInfoLightingBuffer.data.bias = shadowBias;
+
+	pixelUnlitBasicBuffer.data.colour = { 1,1,1,0 };
 
 	float bgColour[] = { 0.1f,0.1f,0.1f,1 };
 
@@ -200,7 +202,7 @@ void Graphics::renderFrame()
 	ray4.draw(device.Get(), context.Get(), vertexInfoConstantBuffer, camera.GetMatrix() * camera.GetProjectionMatrix());
 
 	static Ray ray5;
-	ray5.setDirection(rayDir);
+	ray5.setDirection(dirLight.getDirection());
 	ray5.setOrigin(XMFLOAT3{ 0, 2, 0 });
 	ray5.draw(device.Get(), context.Get(), vertexInfoConstantBuffer, camera.GetMatrix() * camera.GetProjectionMatrix());
 
@@ -255,13 +257,10 @@ void Graphics::renderFrame()
 
 	ImGui::Text(fpsString.c_str());
 	ImGui::SliderFloat("Ambient light intensity", &ambientLightIntensity, 0, 1, "%.2f");
+	ImGui::ColorEdit3("Ambient light colour", &ambientLightColour.m128_f32[0]);
 	ImGui::SliderFloat("Shadow bias", &shadowBias, 0.0f, 1.0f, "%.3f");
 	ImGui::SliderFloat("Animation timeline", &t_time, 0.0f, 100.0f, "%.2f");
 	ImGui::SliderFloat3("Light dir", &lightDir.m128_f32[0], -3.141f, 3.141f, "%.2f");
-	if (ImGui::SliderFloat3("Ray Look dir", &rayDir.m128_f32[0], -1.0f, 1.0f, "%.2f"))
-	{
-		ray5.setDirection(rayDir);
-	}
 	ImGui::ColorEdit3("Bounding box colour", &pixelUnlitBasicBuffer.data.colour.m128_f32[0]);
 	ImGui::Checkbox("Render with post processing", &renderWithPostProcessing);
 	ImGui::End();
@@ -661,6 +660,7 @@ bool Graphics::initScene()
 		skyboxMaterial.setRenderStates(defaultDepthStencilState.Get(), debugRasterizerState.Get(), defaultSamplerState.Get(), disabledBlendState.Get());
 		skyboxMaterial.setShaders(&vertexShader, &unlitBasicPixelShader);
 		skyboxMaterial.addVertexConstantBuffer(&vertexInfoConstantBuffer);
+		skyboxMaterial.addPixelConstantBuffer(&pixelUnlitBasicBuffer);
 
 		debugViewRenderingMaterial.setRenderStates(defaultDepthStencilState.Get(), debugRasterizerState.Get(), defaultSamplerState.Get(), disabledBlendState.Get());
 		debugViewRenderingMaterial.setShaders(&vertexShader, &unlitBasicPixelShader);

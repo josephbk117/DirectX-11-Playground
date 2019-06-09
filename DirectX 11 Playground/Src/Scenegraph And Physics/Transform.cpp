@@ -66,7 +66,7 @@ void BaseTransform::SetRotation(const XMVECTOR & rot)
 {
 	this->rotVector = rot;
 	this->rotVector = XMVector3Normalize(this->rotVector);
-	XMStoreFloat3(&this->rot, rot);
+	XMStoreFloat3(&this->rot, this->rotVector);
 	this->UpdateMatrix();
 }
 
@@ -175,19 +175,18 @@ const XMVECTOR & BaseTransform::GetLeftVector() const
 void BaseTransform::UpdateMatrix() //Updates view matrix and also updates the movement vectors
 {
 	this->matrix = XMMatrixRotationRollPitchYaw(this->rot.x, this->rot.y, this->rot.z) * XMMatrixScaling(this->scale.x, this->scale.y, this->scale.z ) * XMMatrixTranslation(this->pos.x, this->pos.y, this->pos.z);
-	XMMATRIX vecRotationMatrix = XMMatrixRotationRollPitchYaw(0.0f, this->rot.y, 0.0f);
-	this->vec_forward = XMVector3TransformCoord(this->DEFAULT_FORWARD_VECTOR, vecRotationMatrix);
-	this->vec_backward = XMVector3TransformCoord(this->DEFAULT_BACKWARD_VECTOR, vecRotationMatrix);
-	this->vec_left = XMVector3TransformCoord(this->DEFAULT_LEFT_VECTOR, vecRotationMatrix);
-	this->vec_right = XMVector3TransformCoord(this->DEFAULT_RIGHT_VECTOR, vecRotationMatrix);
+	this->vec_forward = XMVector3TransformCoord(this->DEFAULT_FORWARD_VECTOR, XMMatrixRotationRollPitchYaw(this->rot.x, this->rot.y, this->rot.z));
+	this->vec_backward = XMVector3TransformCoord(this->DEFAULT_BACKWARD_VECTOR, XMMatrixRotationRollPitchYaw(this->rot.x, this->rot.y, this->rot.z));
+	this->vec_left = XMVector3TransformCoord(this->DEFAULT_LEFT_VECTOR, XMMatrixRotationRollPitchYaw(this->rot.x, this->rot.y, this->rot.z));
+	this->vec_right = XMVector3TransformCoord(this->DEFAULT_RIGHT_VECTOR, XMMatrixRotationRollPitchYaw(this->rot.x, this->rot.y, this->rot.z));
 }
 
 void Transform::UpdateMatrix()
 {
 	this->matrix = XMMatrixRotationRollPitchYaw(this->rot.x, this->rot.y, this->rot.z) * XMMatrixScaling(this->scale.x, this->scale.y, this->scale.z) * XMMatrixTranslation(this->pos.x, this->pos.y, this->pos.z);
 	XMMATRIX vecRotationMatrix = XMMatrixRotationRollPitchYaw(0.0f, this->rot.y, 0.0f);
-	this->vec_forward = XMVector3TransformCoord(this->DEFAULT_FORWARD_VECTOR, vecRotationMatrix);
-	this->vec_backward = XMVector3TransformCoord(this->DEFAULT_BACKWARD_VECTOR, vecRotationMatrix);
-	this->vec_left = XMVector3TransformCoord(this->DEFAULT_LEFT_VECTOR, vecRotationMatrix);
-	this->vec_right = XMVector3TransformCoord(this->DEFAULT_RIGHT_VECTOR, vecRotationMatrix);
+	this->vec_forward = XMVector3TransformCoord(this->DEFAULT_FORWARD_VECTOR, XMMatrixRotationRollPitchYaw(this->rot.x, this->rot.y, this->rot.z));
+	this->vec_backward = XMVector3TransformCoord(this->DEFAULT_BACKWARD_VECTOR, XMMatrixRotationRollPitchYaw(this->rot.x, this->rot.y, this->rot.z));
+	this->vec_left = XMVector3TransformCoord(this->DEFAULT_LEFT_VECTOR, XMMatrixRotationRollPitchYaw(this->rot.x, this->rot.y, this->rot.z));
+	this->vec_right = XMVector3TransformCoord(this->DEFAULT_RIGHT_VECTOR, XMMatrixRotationRollPitchYaw(this->rot.x, this->rot.y, this->rot.z));
 }

@@ -33,6 +33,7 @@ public:
 		m_colourToSet.m128_f32[0] = r;
 		m_colourToSet.m128_f32[1] = g;
 		m_colourToSet.m128_f32[2] = b;
+		m_colourToSet.m128_f32[3] = 1.0f;
 	}
 	static void startDebugView(ID3D11DeviceContext* context)
 	{
@@ -52,6 +53,7 @@ public:
 		m_colour->m128_f32[0] = m_colourToSet.m128_f32[0];
 		m_colour->m128_f32[1] = m_colourToSet.m128_f32[1];
 		m_colour->m128_f32[2] = m_colourToSet.m128_f32[2];
+		m_colour->m128_f32[3] = 1.0f;
 
 		m_material->bind(context);
 	}
@@ -64,6 +66,7 @@ public:
 		m_colour->m128_f32[0] = m_prevColour.m128_f32[0];
 		m_colour->m128_f32[1] = m_prevColour.m128_f32[1];
 		m_colour->m128_f32[2] = m_prevColour.m128_f32[2];
+		m_colour->m128_f32[3] = 1.0f;
 
 		m_prevActiveMaterial->bind(context);
 	}
@@ -71,5 +74,5 @@ public:
 Material* DebugViewer::m_material = nullptr;
 Material* DebugViewer::m_prevActiveMaterial = nullptr;
 DirectX::XMVECTOR* DebugViewer::m_colour = nullptr;
-DirectX::XMVECTOR DebugViewer::m_colourToSet = { 1,1,1 };
-DirectX::XMVECTOR DebugViewer::m_prevColour = { 1,1,1 };
+DirectX::XMVECTOR DebugViewer::m_colourToSet = { 1,1,1,1 };
+DirectX::XMVECTOR DebugViewer::m_prevColour = { 1,1,1,1 };

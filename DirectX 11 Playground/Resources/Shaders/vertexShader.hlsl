@@ -38,6 +38,6 @@ VS_OUT main(VS_IN input)
 	o.tex = input.tex;
 	o.norm = normalize(mul(float4(input.norm, 0), worldMatrix));
 	o.weight = 0;
-	o.lightDir = lightDirection;
+	o.lightDir = normalize(lightDirection);
 	return o;
 }
