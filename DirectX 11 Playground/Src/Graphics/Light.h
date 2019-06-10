@@ -52,7 +52,8 @@ public:
 	{
 		return shadowRenderingEnabled;
 	}
-
+	/*All draw commands will render  objects to the light's render texture after this function call
+	*/
 	void bindShadowMapRenderTexture()const
 	{
 		lightCamera.GetRenderTexture()->setRenderTarget();
@@ -63,7 +64,8 @@ public:
 	{
 		return lightCamera.GetRenderTexture();
 	}
-
+	/*Get direction veector if the light
+	*/
 	const XMVECTOR& getDirection()
 	{
 		return lightCamera.GetRotationVector();

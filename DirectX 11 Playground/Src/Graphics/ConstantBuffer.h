@@ -13,6 +13,7 @@ public:
 	virtual ID3D11Buffer* const* getAddressOf()const = 0;
 	virtual HRESULT init(ID3D11Device* device, ID3D11DeviceContext* deviceContext) = 0;
 	virtual bool applyChanges() = 0;
+	virtual bool applyChanges(void* data, unsigned int dataSize) = 0;
 };
 
 class BaseVertexConstantBuffer : public BaseConstantBuffer
@@ -32,6 +33,7 @@ public:
 	}
 	virtual HRESULT init(ID3D11Device* device, ID3D11DeviceContext* deviceContext) = 0;
 	virtual bool applyChanges() = 0;
+	virtual bool applyChanges(void* _data, unsigned int dataSize) = 0;
 };
 
 class BasePixelConstantBuffer : public BaseConstantBuffer
@@ -51,6 +53,7 @@ public:
 	}
 	virtual HRESULT init(ID3D11Device* device, ID3D11DeviceContext* deviceContext) = 0;
 	virtual bool applyChanges() = 0;
+	virtual bool applyChanges(void* _data, unsigned int dataSize) = 0;
 };
 
 template<class T>
@@ -87,10 +90,25 @@ public:
 		HRESULT hr = deviceContext->Map(buffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedresource);
 		if (FAILED(hr))
 		{
-			ErrorLogger::log(hr, "Could not bind constant buffer");
+			ErrorLogger::log(hr, "Could not bind vertex constant buffer");
 			return false;
 		}
 		CopyMemory(mappedresource.pData, &data, sizeof(T));
+		deviceContext->Unmap(buffer.Get(), 0);
+		deviceContext->VSSetConstantBuffers(0, 1, buffer.GetAddressOf());
+		return true;
+	}
+
+	bool applyChanges(void* _data, unsigned int dataSize) override
+	{
+		D3D11_MAPPED_SUBRESOURCE mappedresource;
+		HRESULT hr = deviceContext->Map(buffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedresource);
+		if (FAILED(hr))
+		{
+			ErrorLogger::log(hr, "Could not bind vertex constant buffer");
+			return false;
+		}
+		CopyMemory(mappedresource.pData, _data, dataSize);
 		deviceContext->Unmap(buffer.Get(), 0);
 		deviceContext->VSSetConstantBuffers(0, 1, buffer.GetAddressOf());
 		return true;
@@ -132,10 +150,25 @@ public:
 		HRESULT hr = deviceContext->Map(buffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedresource);
 		if (FAILED(hr))
 		{
-			ErrorLogger::log(hr, "Could not bind constant buffer");
+			ErrorLogger::log(hr, "Could not bind pixel constant buffer");
 			return false;
 		}
 		CopyMemory(mappedresource.pData, &data, sizeof(T));
+		deviceContext->Unmap(buffer.Get(), 0);
+		deviceContext->PSSetConstantBuffers(0, 1, buffer.GetAddressOf());
+		return true;
+	}
+
+	bool applyChanges(void* _data, unsigned int dataSize) override
+	{
+		D3D11_MAPPED_SUBRESOURCE mappedresource;
+		HRESULT hr = deviceContext->Map(buffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedresource);
+		if (FAILED(hr))
+		{
+			ErrorLogger::log(hr, "Could not bind pixel constant buffer");
+			return false;
+		}
+		CopyMemory(mappedresource.pData, _data, dataSize);
 		deviceContext->Unmap(buffer.Get(), 0);
 		deviceContext->PSSetConstantBuffers(0, 1, buffer.GetAddressOf());
 		return true;

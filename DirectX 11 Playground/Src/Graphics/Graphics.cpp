@@ -99,7 +99,7 @@ void Graphics::renderFrame()
 	XMStoreFloat3(&pixelInfoLightingBuffer.data.ambientLightColour, ambientLightColour);
 	pixelInfoLightingBuffer.data.bias = shadowBias;
 
-	pixelUnlitBasicBuffer.data.colour = { 1,1,1,0 };
+	//pixelUnlitBasicBuffer.data.colour = { 1,1,1,0 };
 
 	float bgColour[] = { 0.1f,0.1f,0.1f,1 };
 
@@ -651,16 +651,26 @@ bool Graphics::initScene()
 		unlitScreenRenderingMaterial.setRenderStates(depthTestDisabledDepthStencilState.Get(), debugRasterizerState.Get(), defaultSamplerState.Get(), defaultBlendState.Get());
 		unlitScreenRenderingMaterial.setShaders(&vertexShader, &unlitTransparentPixelShader);
 		unlitScreenRenderingMaterial.addVertexConstantBuffer(&vertexInfoConstantBuffer);
+		unlitScreenRenderingMaterial.addPixelConstantBuffer(&pixelUnlitBasicBuffer);
+
+		CB_PS_UnlitBasic tempUnlitBasic;
+		tempUnlitBasic.colour = { 1,0,1,0.25f };
+
+		unlitScreenRenderingMaterial.setPixelConstantBufferData(0, static_cast<void*>(&tempUnlitBasic), sizeof(CB_PS_UnlitBasic));
 		unlitScreenRenderingMaterial.setRenderQueue(RenderQueue::TRANSPARENT_QUEUE);
 
 		unlitMaterial.setRenderStates(defaultDepthStencilState.Get(), defaultRasterizerState.Get(), defaultSamplerState.Get(), disabledBlendState.Get());
 		unlitMaterial.setShaders(&vertexShader, &unlitBasicPixelShader);
 		unlitMaterial.addVertexConstantBuffer(&vertexInfoConstantBuffer);
+		unlitMaterial.addPixelConstantBuffer(&pixelUnlitBasicBuffer);
 
 		skyboxMaterial.setRenderStates(defaultDepthStencilState.Get(), debugRasterizerState.Get(), defaultSamplerState.Get(), disabledBlendState.Get());
 		skyboxMaterial.setShaders(&vertexShader, &unlitBasicPixelShader);
 		skyboxMaterial.addVertexConstantBuffer(&vertexInfoConstantBuffer);
 		skyboxMaterial.addPixelConstantBuffer(&pixelUnlitBasicBuffer);
+
+		tempUnlitBasic.colour = { 1,0,1,0 };
+		skyboxMaterial.setPixelConstantBufferData(0, static_cast<void*>(&tempUnlitBasic), sizeof(CB_PS_UnlitBasic));
 
 		debugViewRenderingMaterial.setRenderStates(defaultDepthStencilState.Get(), debugRasterizerState.Get(), defaultSamplerState.Get(), disabledBlendState.Get());
 		debugViewRenderingMaterial.setShaders(&vertexShader, &unlitBasicPixelShader);

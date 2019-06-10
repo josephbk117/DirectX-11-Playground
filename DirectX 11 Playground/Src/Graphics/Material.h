@@ -6,6 +6,8 @@
 #include <wrl\client.h>
 
 enum RenderQueue { OPAQUE_QUEUE = 1000, TRANSPARENT_QUEUE = 2000, POST_PROCESSING_QUEUE = 3000 };
+typedef std::vector<std::pair<void*, unsigned int>> VertexConstantBufferPerMaterialInfo;
+typedef VertexConstantBufferPerMaterialInfo PixelConstantBufferPerMaterialInfo;
 
 class Material
 {
@@ -33,6 +35,9 @@ private:
 	std::vector<BaseVertexConstantBuffer*> vertexConstantBuffers;
 	std::vector<BasePixelConstantBuffer*> pixelConstantBuffers;
 
+	VertexConstantBufferPerMaterialInfo vertexCBdataAndSizePairs;
+	PixelConstantBufferPerMaterialInfo pixelCBdataAndSizePairs;
+
 	int renderQueue = RenderQueue::OPAQUE_QUEUE;
 	bool castShadow = true;
 	bool recieveShadow = true;
@@ -43,8 +48,14 @@ private:
 public:
 	Material();
 	~Material();
+	/*Mandatory call to set up the basic material render states
+	*/
 	void setRenderStates(ID3D11DepthStencilState* depthStencilState, ID3D11RasterizerState* rasterizerState, ID3D11SamplerState* samplerState, ID3D11BlendState* blendState);
+	/*Set up optional 2nd sampler state
+	*/
 	void setSamplerState2(ID3D11SamplerState* samplerState);
+	/*Set up optional 3rd sampler state
+	*/
 	void setSamplerState3(ID3D11SamplerState* samplerState);
 	void setShadowAndRenderQueueStates(int queueIndex, bool castShadow, bool recieveShadow);
 	/* Can use enum RenderQueue to get basis queue indices for common object types like Opaque, Transparent, etc..
@@ -55,10 +66,21 @@ public:
 	void setRenderQueue(int queueIndex);
 	void setIfCastsShadow(bool castShadow);
 	void setIfRecieveShadow(bool recieveShadow);
+	/*Mandatory call to set up basic vertex and pixel shader to be used
+	*/
 	void setShaders(VertexShader* vertexShader, PixelShader* pixelShader);
+	/*Set the yopology type for the mesh : Triangle List, Line List, etc..
+	*/
 	void setTopologyType(D3D11_PRIMITIVE_TOPOLOGY topology);
 	void addVertexConstantBuffer(BaseVertexConstantBuffer* constantBuffer);
 	void addPixelConstantBuffer(BasePixelConstantBuffer* constantBuffer);
+	void setVertexConstantBufferData(unsigned int index, void* data, unsigned int dataSize);
+	void setPixelConstantBufferData(unsigned int index, void* data, unsigned int dataSize);
+	template<class T>
+	T getPixelConstantBufferData(unsigned int index)
+	{
+		return *(static_cast<T*>(pixelCBdataAndSizePairs.at(index).first));
+	}
 	bool doesCastShadow()const;
 	bool doesRecieveShadow()const;
 	int getRenderQueue()const;

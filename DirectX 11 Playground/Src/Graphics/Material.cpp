@@ -29,12 +29,12 @@ void Material::setRenderStates(ID3D11DepthStencilState* depthStencilState, ID3D1
 #endif
 }
 
-void Material::setSamplerState2(ID3D11SamplerState * samplerState)
+void Material::setSamplerState2(ID3D11SamplerState* samplerState)
 {
 	this->samplerState2 = samplerState;
 }
 
-void Material::setSamplerState3(ID3D11SamplerState * samplerState)
+void Material::setSamplerState3(ID3D11SamplerState* samplerState)
 {
 	this->samplerState3 = samplerState;
 }
@@ -80,11 +80,33 @@ void Material::setTopologyType(D3D11_PRIMITIVE_TOPOLOGY topology)
 void Material::addVertexConstantBuffer(BaseVertexConstantBuffer* constantBuffer)
 {
 	vertexConstantBuffers.push_back(constantBuffer);
+	vertexCBdataAndSizePairs.push_back(std::make_pair<void*, unsigned int>(nullptr, 0));
 }
 
 void Material::addPixelConstantBuffer(BasePixelConstantBuffer* constantBuffer)
 {
 	pixelConstantBuffers.push_back(constantBuffer);
+	pixelCBdataAndSizePairs.push_back(std::make_pair<void*, unsigned int>(nullptr, 0));
+}
+
+void Material::setVertexConstantBufferData(unsigned int index, void* data, unsigned int dataSize)
+{
+	if (vertexCBdataAndSizePairs.at(index).first != nullptr)
+		delete vertexCBdataAndSizePairs.at(index).first;
+
+	vertexCBdataAndSizePairs.at(index).first = new char[dataSize];
+	std::memcpy(vertexCBdataAndSizePairs.at(index).first, data, dataSize);
+	vertexCBdataAndSizePairs.at(index).second = dataSize;
+}
+
+void Material::setPixelConstantBufferData(unsigned int index, void* data, unsigned int dataSize)
+{
+	if (pixelCBdataAndSizePairs.at(index).first != nullptr)
+		delete pixelCBdataAndSizePairs.at(index).first;
+
+	pixelCBdataAndSizePairs.at(index).first = new char[dataSize];
+	std::memcpy(pixelCBdataAndSizePairs.at(index).first, data, dataSize);
+	pixelCBdataAndSizePairs.at(index).second = dataSize;
 }
 
 bool Material::doesCastShadow() const
@@ -102,14 +124,14 @@ int Material::getRenderQueue() const
 	return renderQueue;
 }
 
-void Material::getShadowAndRenderQueueStates(int & queue, bool & castShadow, bool & recieveShadow)
+void Material::getShadowAndRenderQueueStates(int& queue, bool& castShadow, bool& recieveShadow)
 {
 	queue = this->renderQueue;
 	castShadow = this->castShadow;
 	recieveShadow = this->recieveShadow;
 }
 
-void Material::bind(ID3D11DeviceContext * context) const
+void Material::bind(ID3D11DeviceContext* context) const
 {
 	if (prevBoundMaterial == const_cast<Material*>(this))
 		return;
@@ -118,7 +140,7 @@ void Material::bind(ID3D11DeviceContext * context) const
 	{
 		ErrorLogger::log("Material was not completly initialized before binding");
 		exit(-1);
-}
+	}
 #endif
 	context->IASetPrimitiveTopology(topology);
 	if (prevRasterizerState != rasterizerState)
@@ -130,7 +152,7 @@ void Material::bind(ID3D11DeviceContext * context) const
 	if (prevSamplerState != samplerState1)
 		context->PSSetSamplers(0, 1, &samplerState1);
 
-	if(samplerState2 != nullptr)
+	if (samplerState2 != nullptr)
 		context->PSSetSamplers(1, 1, &samplerState2);
 	if (samplerState3 != nullptr)
 		context->PSSetSamplers(2, 1, &samplerState3);
@@ -143,13 +165,19 @@ void Material::bind(ID3D11DeviceContext * context) const
 
 	for (unsigned int index = 0; index < vertexConstantBuffers.size(); index++)
 	{
-		vertexConstantBuffers[index]->applyChanges();
+		if (vertexCBdataAndSizePairs.at(index).first == nullptr)
+			vertexConstantBuffers.at(index)->applyChanges();
+		else
+			vertexConstantBuffers.at(index)->applyChanges(vertexCBdataAndSizePairs.at(index).first, vertexCBdataAndSizePairs.at(index).second);
 		context->VSSetConstantBuffers(index, 1, vertexConstantBuffers[index]->getAddressOf());
 	}
 
 	for (unsigned int index = 0; index < pixelConstantBuffers.size(); index++)
 	{
-		pixelConstantBuffers[index]->applyChanges();
+		if (pixelCBdataAndSizePairs.at(index).first == nullptr)
+			pixelConstantBuffers.at(index)->applyChanges();
+		else
+			pixelConstantBuffers.at(index)->applyChanges(pixelCBdataAndSizePairs.at(index).first, pixelCBdataAndSizePairs.at(index).second);
 		context->PSSetConstantBuffers(index, 1, pixelConstantBuffers[index]->getAddressOf());
 	}
 
@@ -163,7 +191,7 @@ void Material::bind(ID3D11DeviceContext * context) const
 	prevPixelShader = pixelShader;
 }
 
-void Material::bind(ID3D11DeviceContext * context, PixelShader * overridePixelShader) const
+void Material::bind(ID3D11DeviceContext* context, PixelShader* overridePixelShader) const
 {
 #if _DEBUG
 	if (std::find(&isCompletlyInitialized[0], &isCompletlyInitialized[3], false) == nullptr)
@@ -189,7 +217,7 @@ void Material::bind(ID3D11DeviceContext * context, PixelShader * overridePixelSh
 		context->PSSetConstantBuffers(index, 1, pixelConstantBuffers[index]->getAddressOf());
 }
 
-void Material::bind(ID3D11DeviceContext * context, VertexShader * overrideOvertexShader) const
+void Material::bind(ID3D11DeviceContext* context, VertexShader* overrideOvertexShader) const
 {
 #if _DEBUG
 	if (std::find(&isCompletlyInitialized[0], &isCompletlyInitialized[3], false) == nullptr)
@@ -215,7 +243,7 @@ void Material::bind(ID3D11DeviceContext * context, VertexShader * overrideOverte
 		context->PSSetConstantBuffers(index, 1, pixelConstantBuffers[index]->getAddressOf());
 }
 
-void Material::bind(ID3D11DeviceContext * context, VertexShader * overrideOvertexShader, PixelShader * overridePixelShader) const
+void Material::bind(ID3D11DeviceContext* context, VertexShader* overrideOvertexShader, PixelShader* overridePixelShader) const
 {
 #if _DEBUG
 	if (std::find(&isCompletlyInitialized[0], &isCompletlyInitialized[3], false) == nullptr)
@@ -241,7 +269,7 @@ void Material::bind(ID3D11DeviceContext * context, VertexShader * overrideOverte
 		context->PSSetConstantBuffers(index, 1, pixelConstantBuffers[index]->getAddressOf());
 }
 
-Material * const Material::getCurrentBoundMaterial()
+Material* const Material::getCurrentBoundMaterial()
 {
 	return prevBoundMaterial;
 }
