@@ -82,7 +82,7 @@ bool Model::loadModel(const std::string & filePath)
 	Assimp::Importer importer;
 
 	const aiScene* pScene = importer.ReadFile(filePath,
-		aiProcess_Triangulate | aiProcess_ConvertToLeftHanded);
+		aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_ConvertToLeftHanded);
 
 	if (pScene == nullptr)
 	{
