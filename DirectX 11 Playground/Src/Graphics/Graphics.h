@@ -1,7 +1,6 @@
 #pragma once
 #include <d3d11.h>
-#include <wrl\client.h>
-#include <WICTextureLoader.h>
+#include "TextureManager.h"
 #include "AdapterReader.h"
 #include "Shader.h"
 #include "Camera.h"
@@ -80,9 +79,9 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> shadowSamplerState;
 	Microsoft::WRL::ComPtr<ID3D11BlendState> defaultBlendState;
 	Microsoft::WRL::ComPtr<ID3D11BlendState> disabledBlendState;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture1;
+	/*Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture1;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture2;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture3;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture3;*/
 
 	Timer timer;
 

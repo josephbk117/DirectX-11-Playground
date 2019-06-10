@@ -525,6 +525,9 @@ bool Graphics::initDirectX(HWND hwnd, int width, int height)
 		//Initialize an additional Rendertexture
 		lightDepthRenderTexture.init(device.Get(), context.Get(), depthStencilView.Get(), width, height);
 		postProcessingRenderTexture.init(device.Get(), context.Get(), depthStencilView.Get(), width, height);
+
+		//Initialize Texture Manager
+		TextureManager::init(device.Get());
 	}
 	catch (COMException & e)
 	{
@@ -608,16 +611,19 @@ bool Graphics::initScene()
 {
 	try
 	{
-		HRESULT hr = DirectX::CreateWICTextureFromFile(device.Get(), L"Resources\\Textures\\cottage_diffuse.png", nullptr, texture1.GetAddressOf());
+		TextureManager::addTexture(L"Resources\\Textures\\cottage_diffuse.png", "cottage_diffuse");
+		TextureManager::addTexture(L"Resources\\Textures\\seamless_ground.jpg", "seamless_ground");
+		TextureManager::addTexture(L"Resources\\Textures\\crate.jpg", "crate");
+		/*HRESULT hr = DirectX::CreateWICTextureFromFile(device.Get(), L"Resources\\Textures\\cottage_diffuse.png", nullptr, texture1.GetAddressOf());
 		COM_ERROR_IF_FAILED(hr, "Failed to create WIC texture from file");
 
 		hr = DirectX::CreateWICTextureFromFile(device.Get(), L"Resources\\Textures\\seamless_ground.jpg", nullptr, texture2.GetAddressOf());
 		COM_ERROR_IF_FAILED(hr, "Failed to create WIC texture from file");
 
 		hr = DirectX::CreateWICTextureFromFile(device.Get(), L"Resources\\Textures\\crate.jpg", nullptr, texture3.GetAddressOf());
-		COM_ERROR_IF_FAILED(hr, "Failed to create WIC texture from file");
+		COM_ERROR_IF_FAILED(hr, "Failed to create WIC texture from file");*/
 
-		hr = vertexInfoConstantBuffer.init(device.Get(), context.Get());
+		HRESULT hr = vertexInfoConstantBuffer.init(device.Get(), context.Get());
 		COM_ERROR_IF_FAILED(hr, "Failed to create constant buffer");
 
 		hr = vertexSkinnedInfoConstantBuffer.init(device.Get(), context.Get());
@@ -689,7 +695,7 @@ bool Graphics::initScene()
 
 		Model* model;
 		model = new Model;
-		if (!model->init("Resources\\Models\\cottage_obj.fbx", device.Get(), context.Get(), texture1.Get(), vertexInfoConstantBuffer))
+		if (!model->init("Resources\\Models\\cottage_obj.fbx", device.Get(), context.Get(), TextureManager::getTexture("cottage_diffuse"), vertexInfoConstantBuffer))
 			return false;
 		renderables.emplace_back(&regularMaterial, model);
 		renderables.at(renderables.size() - 1).transform.SetPosition(0, -0.5f, 0);
@@ -697,14 +703,14 @@ bool Graphics::initScene()
 		renderables.at(renderables.size() - 1).transform.SetScale(1, 0.5f, 1);
 
 		model = new Model;
-		if (!model->init("Resources\\Models\\box.fbx", device.Get(), context.Get(), texture3.Get(), vertexInfoConstantBuffer))
+		if (!model->init("Resources\\Models\\box.fbx", device.Get(), context.Get(), TextureManager::getTexture("crate"), vertexInfoConstantBuffer))
 			return false;
 		renderables.emplace_back(&regularMaterial, model);
 		renderables.at(renderables.size() - 1).transform.SetPosition(-3, 1, 0);
 		renderables.at(renderables.size() - 1).transform.SetScale(0.5f, 0.5f, 0.5f);
 
 		Model quadModel;
-		if (!quadModel.init(Primitive3DModels::QUAD.vertices, Primitive3DModels::QUAD.indices, device.Get(), context.Get(), texture2.Get(), vertexInfoConstantBuffer))
+		if (!quadModel.init(Primitive3DModels::QUAD.vertices, Primitive3DModels::QUAD.indices, device.Get(), context.Get(), TextureManager::getTexture("seamless_ground"), vertexInfoConstantBuffer))
 			return false;
 
 		model = new Model;
@@ -732,7 +738,7 @@ bool Graphics::initScene()
 
 
 		SkinnedModel* skinnedModel = new SkinnedModel;
-		if (!skinnedModel->init("Resources\\Models\\animCylinder.fbx", device.Get(), context.Get(), texture1.Get(), vertexSkinnedInfoConstantBuffer))
+		if (!skinnedModel->init("Resources\\Models\\animCylinder.fbx", device.Get(), context.Get(), TextureManager::getTexture("crate"), vertexSkinnedInfoConstantBuffer))
 			return false;
 		renderables.emplace_back(&regularSkinnedMaterial, skinnedModel);
 		renderables.at(renderables.size() - 1).transform.SetPosition(0, 2, 0);

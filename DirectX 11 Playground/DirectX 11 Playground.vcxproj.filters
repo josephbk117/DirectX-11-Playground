@@ -156,6 +156,9 @@
     <ClCompile Include="Src\Graphics\Animator.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Graphics\TextureManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\ErrorLogger.h">
@@ -293,6 +296,9 @@
     <ClInclude Include="Src\Graphics\DebugViewer.h">
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Graphics\TextureManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\Shaders\skinnedVertexShader.hlsl">
@@ -349,7 +355,7 @@
       <Filter>Resource Files\Images</Filter>
     </Image>
     <Image Include="Resources\Textures\seamless_ground.jpg">
-      <Filter>Resource Files</Filter>
+      <Filter>Resource Files\Images</Filter>
     </Image>
   </ItemGroup>
 </Project>

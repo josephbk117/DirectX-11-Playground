@@ -186,6 +186,7 @@
     <ClCompile Include="Src\WindowContainer.cpp" />
     <ClCompile Include="Src\Timer.cpp" />
     <ClCompile Include="Src\Scenegraph And Physics\Transform.cpp" />
+    <ClCompile Include="Src\Graphics\TextureManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Graphics\Animator.h" />
@@ -233,6 +234,7 @@
     <ClInclude Include="Src\Graphics\VertexBuffer.h" />
     <ClInclude Include="Src\Timer.h" />
     <ClInclude Include="Src\Scenegraph And Physics\Transform.h" />
+    <ClInclude Include="Src\Graphics\TextureManager.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\Shaders\depthBasic.hlsl">
