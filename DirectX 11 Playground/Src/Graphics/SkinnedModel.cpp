@@ -1,6 +1,7 @@
 #include "SkinnedModel.h"
 #include <iostream>
-bool SkinnedModel::init(const std::string & filePath, ID3D11Device * device, ID3D11DeviceContext * context, ID3D11ShaderResourceView * texture, VertexConstantBuffer<CB_VS_Skinned_VertexShader>& cb_vs_vertexShader)
+bool SkinnedModel::init(const std::string& filePath, ID3D11Device* device, ID3D11DeviceContext* context, ID3D11ShaderResourceView* texture,
+	VertexConstantBuffer<CB_VS_Skinned_VertexShader>& cb_vs_vertexShader, std::function<void(XMFLOAT3& vertex)> vertexProcessFunc)
 {
 	this->device = device;
 	this->context = context;
@@ -9,10 +10,10 @@ bool SkinnedModel::init(const std::string & filePath, ID3D11Device * device, ID3
 
 	try
 	{
-		if (!this->loadModel(filePath))
+		if (!this->loadModel(filePath, vertexProcessFunc))
 			return false;
 	}
-	catch (COMException & exception)
+	catch (COMException& exception)
 	{
 		ErrorLogger::log(exception);
 		return false;
@@ -20,7 +21,8 @@ bool SkinnedModel::init(const std::string & filePath, ID3D11Device * device, ID3
 	return true;
 }
 
-bool SkinnedModel::init(std::vector<SkinnedVertex> vertices, std::vector<DWORD> indices, ID3D11Device * device, ID3D11DeviceContext * context, ID3D11ShaderResourceView * texture, VertexConstantBuffer<CB_VS_Skinned_VertexShader>& cb_vs_vertexShader)
+bool SkinnedModel::init(std::vector<SkinnedVertex> vertices, std::vector<DWORD> indices, ID3D11Device* device, ID3D11DeviceContext* context,
+	ID3D11ShaderResourceView* texture, VertexConstantBuffer<CB_VS_Skinned_VertexShader>& cb_vs_vertexShader, std::function<void(XMFLOAT3& vertex)> vertexProcessFunc)
 {
 	this->device = device;
 	this->context = context;
@@ -31,12 +33,12 @@ bool SkinnedModel::init(std::vector<SkinnedVertex> vertices, std::vector<DWORD> 
 	return true;
 }
 
-void SkinnedModel::setTexture(ID3D11ShaderResourceView * texture)
+void SkinnedModel::setTexture(ID3D11ShaderResourceView* texture)
 {
 	this->texture1 = texture;
 }
 
-void SkinnedModel::setTexture2(ID3D11ShaderResourceView * texture)
+void SkinnedModel::setTexture2(ID3D11ShaderResourceView* texture)
 {
 	this->texture2 = texture;
 }
@@ -54,26 +56,26 @@ void SkinnedModel::draw(const XMMATRIX& worldMatrix, const XMMATRIX& viewProject
 		mesh.draw();
 }
 
-bool SkinnedModel::loadModel(const std::string & filePath)
+bool SkinnedModel::loadModel(const std::string& filePath, std::function<void(XMFLOAT3& vertex)> vertexProcessFunc)
 {
 	Assimp::Importer importer;
 	const aiScene* pScene = importer.ReadFile(filePath,
 		aiProcess_Triangulate | aiProcess_ConvertToLeftHanded);
 	if (pScene == nullptr)
 		return false;
-	this->processNode(pScene->mRootNode, pScene);
+	this->processNode(pScene->mRootNode, pScene, vertexProcessFunc);
 	return true;
 }
 
-void SkinnedModel::processNode(aiNode * node, const aiScene * scene)
+void SkinnedModel::processNode(aiNode* node, const aiScene* scene, std::function<void(XMFLOAT3& vertex)> vertexProcessFunc)
 {
 	for (UINT i = 0; i < node->mNumMeshes; i++)
 	{
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-		meshes.push_back(this->processMesh(mesh, scene));
+		meshes.push_back(this->processMesh(mesh, scene, vertexProcessFunc));
 	}
 	for (UINT i = 0; i < node->mNumChildren; i++)
-		this->processNode(node->mChildren[i], scene);
+		this->processNode(node->mChildren[i], scene, vertexProcessFunc);
 }
 
 struct VertexSkinInfo
@@ -82,7 +84,7 @@ struct VertexSkinInfo
 	float weights = 0.0f;
 };
 
-SkinnedMesh SkinnedModel::processMesh(aiMesh * mesh, const aiScene * scene)
+SkinnedMesh SkinnedModel::processMesh(aiMesh* mesh, const aiScene* scene, std::function<void(XMFLOAT3& vertex)> vertexProcessFunc)
 {
 	if (scene->HasAnimations())
 	{
@@ -144,9 +146,12 @@ SkinnedMesh SkinnedModel::processMesh(aiMesh * mesh, const aiScene * scene)
 	{
 		SkinnedVertex vertex;
 
-		vertex.pos.x = mesh->mVertices[i].x * 0.1f;
-		vertex.pos.y = mesh->mVertices[i].y * 0.1f;
-		vertex.pos.z = mesh->mVertices[i].z * 0.1f;
+		vertex.pos.x = mesh->mVertices[i].x;
+		vertex.pos.y = mesh->mVertices[i].y;
+		vertex.pos.z = mesh->mVertices[i].z;
+
+		if (vertexProcessFunc != nullptr)
+			vertexProcessFunc(vertex.pos);
 
 		vertex.normal.x = mesh->mNormals[i].x;
 		vertex.normal.y = mesh->mNormals[i].y;

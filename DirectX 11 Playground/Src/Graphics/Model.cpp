@@ -1,6 +1,7 @@
 #include "Model.h"
 
-bool Model::init(const std::string& filePath, ID3D11Device * device, ID3D11DeviceContext * context, ID3D11ShaderResourceView * texture, VertexConstantBuffer<CB_VS_VertexShader>& cb_vs_vertexShader)
+bool Model::init(const std::string& filePath, ID3D11Device* device, ID3D11DeviceContext* context,
+	ID3D11ShaderResourceView* texture, VertexConstantBuffer<CB_VS_VertexShader>& cb_vs_vertexShader, std::function<void(XMFLOAT3& vertex)> vertexProcessFunc)
 {
 	this->device = device;
 	this->context = context;
@@ -9,10 +10,10 @@ bool Model::init(const std::string& filePath, ID3D11Device * device, ID3D11Devic
 
 	try
 	{
-		if (!this->loadModel(filePath))
+		if (!this->loadModel(filePath, vertexProcessFunc))
 			return false;
 	}
-	catch (COMException & exception)
+	catch (COMException& exception)
 	{
 		ErrorLogger::log(exception);
 		return false;
@@ -20,8 +21,8 @@ bool Model::init(const std::string& filePath, ID3D11Device * device, ID3D11Devic
 	return true;
 }
 
-bool Model::init(std::vector<Vertex> vertices, std::vector<DWORD> indices, ID3D11Device * device, ID3D11DeviceContext* context,
-	ID3D11ShaderResourceView* texture, VertexConstantBuffer<CB_VS_VertexShader>& cb_vs_vertexShader)
+bool Model::init(std::vector<Vertex> vertices, std::vector<DWORD> indices, ID3D11Device* device, ID3D11DeviceContext* context,
+	ID3D11ShaderResourceView* texture, VertexConstantBuffer<CB_VS_VertexShader>& cb_vs_vertexShader, std::function<void(XMFLOAT3& vertex)> vertexProcessFunc)
 {
 	this->device = device;
 	this->context = context;
@@ -32,12 +33,12 @@ bool Model::init(std::vector<Vertex> vertices, std::vector<DWORD> indices, ID3D1
 	return true;
 }
 
-void Model::setTexture(ID3D11ShaderResourceView * texture)
+void Model::setTexture(ID3D11ShaderResourceView* texture)
 {
 	this->texture1 = texture;
 }
 
-void Model::setTexture2(ID3D11ShaderResourceView * texture)
+void Model::setTexture2(ID3D11ShaderResourceView* texture)
 {
 	this->texture2 = texture;
 }
@@ -77,7 +78,7 @@ std::vector<Mesh>& Model::getMeshes()
 	return meshes;
 }
 
-bool Model::loadModel(const std::string & filePath)
+bool Model::loadModel(const std::string& filePath, std::function<void(XMFLOAT3& vertex)> vertexProcessFunc)
 {
 	Assimp::Importer importer;
 
@@ -90,25 +91,22 @@ bool Model::loadModel(const std::string & filePath)
 		return false;
 	}
 
-	this->processNode(pScene->mRootNode, pScene);
+	this->processNode(pScene->mRootNode, pScene, vertexProcessFunc);
 	return true;
 }
 
-void Model::processNode(aiNode * node, const aiScene * scene)
+void Model::processNode(aiNode* node, const aiScene* scene, std::function<void(XMFLOAT3& vertex)> vertexProcessFunc)
 {
 	for (UINT i = 0; i < node->mNumMeshes; i++)
 	{
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-		meshes.push_back(this->processMesh(mesh, scene));
+		meshes.push_back(this->processMesh(mesh, scene, vertexProcessFunc));
 	}
-
 	for (UINT i = 0; i < node->mNumChildren; i++)
-	{
-		this->processNode(node->mChildren[i], scene);
-	}
+		this->processNode(node->mChildren[i], scene, vertexProcessFunc);
 }
 
-Mesh Model::processMesh(aiMesh * mesh, const aiScene * scene)
+Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene, std::function<void(XMFLOAT3& vertex)> vertexProcessFunc)
 {
 	// Data to fill
 	std::vector<Vertex> vertices;
@@ -123,13 +121,16 @@ Mesh Model::processMesh(aiMesh * mesh, const aiScene * scene)
 		vertex.pos.y = mesh->mVertices[i].y;
 		vertex.pos.z = mesh->mVertices[i].z;
 
+		if (vertexProcessFunc != nullptr)
+			vertexProcessFunc(vertex.pos);
+
 		vertex.normal.x = mesh->mNormals[i].x;
 		vertex.normal.y = mesh->mNormals[i].y;
 		vertex.normal.z = mesh->mNormals[i].z;
 
 		if (mesh->mTextureCoords[0])
 		{
-			vertex.texCoord.x = (float)mesh->mTextureCoords[0][i].x;
+			vertex.texCoord.x = static_cast<float>(mesh->mTextureCoords[0][i].x);
 			vertex.texCoord.y = (float)mesh->mTextureCoords[0][i].y;
 		}
 

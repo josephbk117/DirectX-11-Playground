@@ -71,7 +71,7 @@ void Graphics::renderFrame()
 {
 	static float t_time = 0;
 	static float ambientLightIntensity = 0.1f;
-	static DirectX::XMVECTOR ambientLightColour = {0.3f, 0.3f, 0.3f };
+	static DirectX::XMVECTOR ambientLightColour = { 0.3f, 0.3f, 0.3f };
 	static DirectX::XMVECTOR lightDir = { 0.8f, 0, 0 };
 	static float shadowBias = 0.001f;
 	static bool renderWithPostProcessing = false;
@@ -90,7 +90,7 @@ void Graphics::renderFrame()
 	vertexSkinnedInfoConstantBuffer.data.jointMatrices[2] = vertexSkinnedInfoConstantBuffer.data.jointMatrices[2] * vertexSkinnedInfoConstantBuffer.data.jointMatrices[2];
 
 	vertexInfoConstantBuffer.data.mvpMatrix = DirectX::XMMatrixIdentity() * camera.GetMatrix() * camera.GetProjectionMatrix();
-	vertexInfoConstantBuffer.data.mvpMatrix = DirectX::XMMatrixTranspose(vertexInfoConstantBuffer.data.mvpMatrix);
+	//vertexInfoConstantBuffer.data.mvpMatrix = DirectX::XMMatrixTranspose(vertexInfoConstantBuffer.data.mvpMatrix);
 
 	vertexInfoLightingBuffer.data.lightMatrix = dirLight.GetLightMatrix();
 	vertexInfoLightingBuffer.data.lightDirection = dirLight.getDirection();
@@ -169,7 +169,7 @@ void Graphics::renderFrame()
 		(*it)->draw(context.Get(), camera.GetMatrix() * camera.GetProjectionMatrix());
 	}
 
-	DebugViewer::setColour( 1, 1, 0 );
+	DebugViewer::setColour(1, 1, 0);
 	DebugViewer::startDebugView(context.Get());
 
 	static Ray ray1;
@@ -529,7 +529,7 @@ bool Graphics::initDirectX(HWND hwnd, int width, int height)
 		//Initialize Texture Manager
 		TextureManager::init(device.Get());
 	}
-	catch (COMException & e)
+	catch (COMException& e)
 	{
 		ErrorLogger::log(e);
 		return false;
@@ -614,14 +614,6 @@ bool Graphics::initScene()
 		TextureManager::addTexture(L"Resources\\Textures\\cottage_diffuse.png", "cottage_diffuse");
 		TextureManager::addTexture(L"Resources\\Textures\\seamless_ground.jpg", "seamless_ground");
 		TextureManager::addTexture(L"Resources\\Textures\\crate.jpg", "crate");
-		/*HRESULT hr = DirectX::CreateWICTextureFromFile(device.Get(), L"Resources\\Textures\\cottage_diffuse.png", nullptr, texture1.GetAddressOf());
-		COM_ERROR_IF_FAILED(hr, "Failed to create WIC texture from file");
-
-		hr = DirectX::CreateWICTextureFromFile(device.Get(), L"Resources\\Textures\\seamless_ground.jpg", nullptr, texture2.GetAddressOf());
-		COM_ERROR_IF_FAILED(hr, "Failed to create WIC texture from file");
-
-		hr = DirectX::CreateWICTextureFromFile(device.Get(), L"Resources\\Textures\\crate.jpg", nullptr, texture3.GetAddressOf());
-		COM_ERROR_IF_FAILED(hr, "Failed to create WIC texture from file");*/
 
 		HRESULT hr = vertexInfoConstantBuffer.init(device.Get(), context.Get());
 		COM_ERROR_IF_FAILED(hr, "Failed to create constant buffer");
@@ -736,9 +728,9 @@ bool Graphics::initScene()
 		renderables.emplace_back(&unlitScreenRenderingMaterial, model);
 		renderables.at(renderables.size() - 1).transform.SetPosition(2, 2, 3);
 
-
 		SkinnedModel* skinnedModel = new SkinnedModel;
-		if (!skinnedModel->init("Resources\\Models\\animCylinder.fbx", device.Get(), context.Get(), TextureManager::getTexture("crate"), vertexSkinnedInfoConstantBuffer))
+		if (!skinnedModel->init("Resources\\Models\\animCylinder.fbx", device.Get(), context.Get(),
+			TextureManager::getTexture("crate"), vertexSkinnedInfoConstantBuffer, [](XMFLOAT3& vertex) { vertex.x *= 0.1f; vertex.y *= 0.1f; vertex.z *= 0.1f; }))
 			return false;
 		renderables.emplace_back(&regularSkinnedMaterial, skinnedModel);
 		renderables.at(renderables.size() - 1).transform.SetPosition(0, 2, 0);
@@ -758,7 +750,7 @@ bool Graphics::initScene()
 		camera.SetPosition(0.0f, 2.0f, -2.0f);
 		camera.SetPerspectiveProjectionValues(60.0f, 1.0f, 0.1f, 100.0f);
 	}
-	catch (COMException & e)
+	catch (COMException& e)
 	{
 		ErrorLogger::log(e);
 		return false;
