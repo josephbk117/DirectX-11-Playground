@@ -127,6 +127,7 @@ void Graphics::renderFrame()
 	refCameraPos = camera.GetPositionVector();
 	std::set<Renderable*, OpaqueRenderableCompare> opaqueRenderables;
 	std::set<Renderable*, TransparentRenderableCompare> transparentRenderables;
+	std::set<Renderable*, OpaqueRenderableCompare> postProcessedRenderables;
 	for (unsigned int i = 0; i < renderables.size(); i++)
 	{
 		int renderQueueIndex = renderables.at(i).getMaterial()->getRenderQueue();
@@ -134,6 +135,8 @@ void Graphics::renderFrame()
 			opaqueRenderables.insert(&renderables[i]);
 		else if (renderQueueIndex >= RenderQueue::TRANSPARENT_QUEUE && renderQueueIndex < RenderQueue::POST_PROCESSING_QUEUE)
 			transparentRenderables.insert(&renderables[i]);
+		else if (renderQueueIndex >= RenderQueue::POST_PROCESSING_QUEUE)
+			postProcessedRenderables.insert(&renderables[i]);
 	}
 
 	if (!renderWithPostProcessing)
@@ -166,6 +169,12 @@ void Graphics::renderFrame()
 	for (std::set<Renderable*, TransparentRenderableCompare>::iterator it = transparentRenderables.begin(); it != transparentRenderables.end(); ++it)
 	{
 		(*it)->setShadowMapTexture(dirLight.getShadowMapRenderTexture());
+		(*it)->draw(context.Get(), camera.GetMatrix() * camera.GetProjectionMatrix());
+	}
+
+	//Render post processed views
+	for (std::set<Renderable*, OpaqueRenderableCompare>::iterator it = postProcessedRenderables.begin(); it != postProcessedRenderables.end(); ++it)
+	{
 		(*it)->draw(context.Get(), camera.GetMatrix() * camera.GetProjectionMatrix());
 	}
 
@@ -678,6 +687,9 @@ bool Graphics::initScene()
 
 		postProcessingMaterial.setRenderStates(defaultDepthStencilState.Get(), defaultRasterizerState.Get(), defaultSamplerState.Get(), disabledBlendState.Get());
 		postProcessingMaterial.setShaders(&postProcessingVertexShader, &postProcessingPixelShader);
+		postProcessingMaterial.setRenderQueue(RenderQueue::POST_PROCESSING_QUEUE);
+		postProcessingMaterial.setIfCastsShadow(false);
+		postProcessingMaterial.setIfRecieveShadow(false);
 
 		DebugViewer::setDebugMaterialAndColourData(&debugViewRenderingMaterial, &pixelUnlitBasicBuffer.data.colour);
 		dirLight.enableShadowMapRendering(&lightDepthRenderTexture);
@@ -727,6 +739,17 @@ bool Graphics::initScene()
 		*model = quadModel;
 		renderables.emplace_back(&unlitScreenRenderingMaterial, model);
 		renderables.at(renderables.size() - 1).transform.SetPosition(2, 2, 3);
+
+		model = new Model;
+		if (!model->init(Primitive3DModels::QUAD.vertices, Primitive3DModels::QUAD.indices, device.Get(), context.Get(), 
+			lightDepthRenderTexture.getShaderResourceView(), vertexInfoConstantBuffer, [](XMFLOAT3& vertex) 
+			{ 
+				vertex.x *= 0.5f; vertex.y *= 0.5f; vertex.z *= 0.5;
+				vertex.x -= 0.25f;
+				vertex.y += 0.25f;
+			}))
+			return false;
+		renderables.emplace_back(&postProcessingMaterial, model);
 
 		SkinnedModel* skinnedModel = new SkinnedModel;
 		if (!skinnedModel->init("Resources\\Models\\animCylinder.fbx", device.Get(), context.Get(),

@@ -16,7 +16,7 @@ struct VS_OUT
 VS_OUT main(VS_IN input)
 {
 	VS_OUT o;
-	o.pos = float4(input.pos*2,1.0);
+	o.pos = float4(input.pos * 2, 1.0);
 	o.tex = input.tex;
 	return o;
 }

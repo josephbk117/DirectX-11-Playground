@@ -29,6 +29,12 @@ bool Model::init(std::vector<Vertex> vertices, std::vector<DWORD> indices, ID3D1
 	this->texture1 = texture;
 	this->cb_vs_vertexShader = &cb_vs_vertexShader;
 
+	if (vertexProcessFunc != nullptr)
+	{
+		for (Vertex& vertex : vertices)
+			vertexProcessFunc(vertex.pos);
+	}
+
 	meshes.push_back(Mesh(this->device, this->context, vertices, indices));
 	return true;
 }

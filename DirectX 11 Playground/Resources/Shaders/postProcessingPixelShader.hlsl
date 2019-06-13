@@ -7,7 +7,6 @@ struct PS_IN
 Texture2D objTexture : TEXTURE : register(t0);
 SamplerState objSamplerState : SAMPLER : register(s0);
 
-
 float4 main(PS_IN input) : SV_TARGET
 {
 	float3 col = 1.0 - objTexture.Sample(objSamplerState, input.tex);
