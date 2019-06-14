@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -155,6 +155,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Graphics\Particle System\Particle.cpp" />
+    <ClCompile Include="Src\Graphics\Particle System\ParticleSystem.cpp" />
     <ClCompile Include="Src\Graphics\Animator.cpp" />
     <ClCompile Include="Src\Graphics\Renderable.cpp" />
     <ClCompile Include="Src\Scenegraph And Physics\OBB.cpp" />
@@ -189,6 +191,8 @@
     <ClCompile Include="Src\Graphics\TextureManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\Graphics\Particle System\Particle.h" />
+    <ClInclude Include="Src\Graphics\Particle System\ParticleSystem.h" />
     <ClInclude Include="Src\Graphics\Animator.h" />
     <ClInclude Include="Src\Graphics\Renderable.h" />
     <ClInclude Include="Src\Graphics\DebugViewer.h" />

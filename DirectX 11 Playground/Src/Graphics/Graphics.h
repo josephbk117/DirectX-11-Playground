@@ -12,6 +12,7 @@
 #include "Skybox.h"
 #include "Material.h"
 #include "Renderable.h"
+#include "Particle System/ParticleSystem.h"
 #include "..\\Timer.h"
 #include "Renderable.h"
 #include "ImGui\imgui.h"
@@ -67,6 +68,8 @@ private:
 	Material skyboxMaterial;
 	Material debugViewRenderingMaterial;
 	Material postProcessingMaterial;
+
+	ParticleSystem particleSystem;
 
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> depthStencilView;
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> depthStencilBuffer;

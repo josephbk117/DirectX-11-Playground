@@ -61,6 +61,12 @@
     <Filter Include="Header Files\Scene graph and Physics">
       <UniqueIdentifier>{1b562169-e8fc-4d33-934d-b38b7bbfdf79}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Graphics\Particle System">
+      <UniqueIdentifier>{ba6349e2-695e-4919-b62a-ab45504e3bc2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Graphics\Particle System">
+      <UniqueIdentifier>{a2229f79-2124-466b-90b2-4525c1ece89d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\MainApp.cpp">
@@ -158,6 +164,12 @@
     </ClCompile>
     <ClCompile Include="Src\Graphics\TextureManager.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Graphics\Particle System\Particle.cpp">
+      <Filter>Source Files\Graphics\Particle System</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Graphics\Particle System\ParticleSystem.cpp">
+      <Filter>Source Files\Graphics\Particle System</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -298,6 +310,12 @@
     </ClInclude>
     <ClInclude Include="Src\Graphics\TextureManager.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Graphics\Particle System\Particle.h">
+      <Filter>Header Files\Graphics\Particle System</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Graphics\Particle System\ParticleSystem.h">
+      <Filter>Header Files\Graphics\Particle System</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
