@@ -2,6 +2,7 @@
 #include "Particle.h"
 #include "../Material.h"
 #include "../Mesh.h"
+#include "../Camera.h"
 #include <vector>
 
 struct ParticleSystemSettings
@@ -23,9 +24,7 @@ private:
 	VertexConstantBuffer<CB_VS_VertexShader> m_constantBuffer;
 public:
 	void init(ID3D11Device* device, ID3D11DeviceContext* context, const ParticleSystemSettings& settings);
-	void start();
 	void update(float deltaTime);
-	void draw(ID3D11DeviceContext* context, const XMMATRIX& viewProjectionMatrix, VertexConstantBuffer<CB_VS_VertexShader>& constantBuffer);
-	void stop();
+	void draw(ID3D11DeviceContext* context, const Camera& camera, VertexConstantBuffer<CB_VS_VertexShader>& constantBuffer);
 	~ParticleSystem();
 };

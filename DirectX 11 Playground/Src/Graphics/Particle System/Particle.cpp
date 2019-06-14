@@ -36,6 +36,8 @@ bool Particle::update(float deltaTime)
 	DirectX::XMStoreFloat3(&m_velocity, velocity);
 	DirectX::XMStoreFloat3(&m_pos, position);
 
+	m_rotation += deltaTime * 2.0f;
+
 	m_elapsedTime += deltaTime;
 	return m_elapsedTime <= m_lifeTime;
 }

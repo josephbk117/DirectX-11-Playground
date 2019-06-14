@@ -1,5 +1,6 @@
 #include "ParticleSystem.h"
 #include "../Primitive3DModels.h"
+
 void ParticleSystem::init(ID3D11Device* device, ID3D11DeviceContext* context, const ParticleSystemSettings& settings)
 {
 	this->m_settings = settings;
@@ -13,14 +14,10 @@ void ParticleSystem::init(ID3D11Device* device, ID3D11DeviceContext* context, co
 
 	for (unsigned int index = 0; index < m_settings.maxParticles; index++)
 	{
-		m_particles.emplace_back(XMFLOAT3{ index * 1.0f, 0, 0 }, 
-			XMFLOAT3{ 2.0f * index/m_settings.maxParticles*1.0f, 6.0f * index / m_settings.maxParticles * 1.0f, 2.0f * index / m_settings.maxParticles * 1.0f }, 
-			m_settings.gravity, m_settings.maxLifetimeForParticle, 1.0f, sinf(index * 10.0f/3.142f) * 0.5f + 0.5f);
+		m_particles.emplace_back(XMFLOAT3{ index * 1.0f, 0, 0 },
+			XMFLOAT3{ 2.0f * index / m_settings.maxParticles * 1.0f, 6.0f * index / m_settings.maxParticles * 1.0f, 2.0f * index / m_settings.maxParticles * 1.0f },
+			m_settings.gravity, m_settings.maxLifetimeForParticle, 1.0f, sinf(index * 10.0f / 3.142f) * 0.5f + 0.5f);
 	}
-}
-
-void ParticleSystem::start()
-{
 }
 
 void ParticleSystem::update(float deltaTime)
@@ -29,22 +26,22 @@ void ParticleSystem::update(float deltaTime)
 		particle.update(deltaTime);
 }
 
-void ParticleSystem::draw(ID3D11DeviceContext* context, const XMMATRIX& viewProjectionMatrix, VertexConstantBuffer<CB_VS_VertexShader>& constantBuffer)
+void ParticleSystem::draw(ID3D11DeviceContext* context, const Camera& camera, VertexConstantBuffer<CB_VS_VertexShader>& constantBuffer)
 {
+	XMMATRIX viewProjectionMatrix = camera.GetMatrix() * camera.GetProjectionMatrix();
 	m_settings.material->bind(context);
 	for (const Particle& particle : m_particles)
 	{
 		XMFLOAT3 position = particle.getPosition();
 		float scale = particle.getScale();
-		constantBuffer.data.mvpMatrix = DirectX::XMMatrixScaling(scale, scale, scale) * DirectX::XMMatrixTranslation(position.x, position.y, position.z) * viewProjectionMatrix;
-		constantBuffer.data.worldMatrix = DirectX::XMMatrixScaling(scale, scale, scale) * DirectX::XMMatrixTranslation(position.x, position.y, position.z);
+		float angle = atan2(position.x - camera.GetPositionFloat3().x, position.z - camera.GetPositionFloat3().z) * (180.0 / 3.142f);
+		float rotation = (float)angle * 0.0174532925f;
+		constantBuffer.data.worldMatrix = DirectX::XMMatrixRotationY(rotation) * DirectX::XMMatrixScaling(scale, scale, scale) * DirectX::XMMatrixTranslation(position.x, position.y, position.z);
+		constantBuffer.data.mvpMatrix = constantBuffer.data.worldMatrix * viewProjectionMatrix;
+
 		constantBuffer.applyChanges();
 		m_mesh->draw();
 	}
-}
-
-void ParticleSystem::stop()
-{
 }
 
 ParticleSystem::~ParticleSystem()

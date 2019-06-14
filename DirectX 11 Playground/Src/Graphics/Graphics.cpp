@@ -159,8 +159,8 @@ void Graphics::renderFrame()
 		(*it)->draw(context.Get(), camera.GetMatrix() * camera.GetProjectionMatrix());
 	}
 
-	particleSystem.update(1.0f / 600.0f);
-	particleSystem.draw(context.Get(), camera.GetMatrix() * camera.GetProjectionMatrix(), vertexInfoConstantBuffer);
+	particleSystem.update(1.0f / 6000.0f);
+	particleSystem.draw(context.Get(), camera, vertexInfoConstantBuffer);
 
 	//Draw skybox
 
@@ -572,7 +572,7 @@ bool Graphics::initShaders()
 		shaderfolder = L"..\\Release\\";
 #endif
 #endif
-	}
+}
 
 	D3D11_INPUT_ELEMENT_DESC layout[] =
 	{
@@ -748,13 +748,15 @@ bool Graphics::initScene()
 
 		model = new Model;
 		if (!model->init(Primitive3DModels::QUAD.vertices, Primitive3DModels::QUAD.indices, device.Get(), context.Get(),
-			lightDepthRenderTexture.getShaderResourceView(), vertexInfoConstantBuffer, [](XMFLOAT3& vertex)
+			lightDepthRenderTexture.getShaderResourceView(), vertexInfoConstantBuffer,
+			[](XMFLOAT3& vertex)
 			{
 				vertex.x *= 0.5f; vertex.y *= 0.5f; vertex.z *= 0.5;
 				vertex.x -= 0.25f;
 				vertex.y += 0.25f;
 			}))
 			return false;
+
 			renderables.emplace_back(&postProcessingMaterial, model);
 
 			SkinnedModel* skinnedModel = new SkinnedModel;
@@ -767,7 +769,7 @@ bool Graphics::initScene()
 			ParticleSystemSettings particleSystemSettings;
 			particleSystemSettings.emissionRate = 1;
 			particleSystemSettings.gravity = 1;
-			particleSystemSettings.maxLifetimeForParticle = 10;
+			particleSystemSettings.maxLifetimeForParticle = 100;
 			particleSystemSettings.maxParticles = 10;
 			particleSystemSettings.material = &unlitMaterial;
 
