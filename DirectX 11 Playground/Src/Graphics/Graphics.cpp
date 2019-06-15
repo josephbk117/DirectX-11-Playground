@@ -159,7 +159,7 @@ void Graphics::renderFrame()
 		(*it)->draw(context.Get(), camera.GetMatrix() * camera.GetProjectionMatrix());
 	}
 
-	particleSystem.update(1.0f / 6000.0f);
+	particleSystem.update(1.0f / 600.0f);
 	particleSystem.draw(context.Get(), camera, vertexInfoConstantBuffer);
 
 	//Draw skybox
@@ -767,10 +767,10 @@ bool Graphics::initScene()
 			renderables.at(renderables.size() - 1).transform.SetPosition(0, 2, 0);
 
 			ParticleSystemSettings particleSystemSettings;
-			particleSystemSettings.emissionRate = 1;
+			particleSystemSettings.emissionRate = 20;
 			particleSystemSettings.gravity = 1;
-			particleSystemSettings.maxLifetimeForParticle = 100;
-			particleSystemSettings.maxParticles = 10;
+			particleSystemSettings.maxLifetimeForParticle = 5;
+			particleSystemSettings.maxParticles = 100;
 			particleSystemSettings.material = &unlitMaterial;
 
 			particleSystem.init(device.Get(), context.Get(), particleSystemSettings);

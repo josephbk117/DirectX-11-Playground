@@ -10,11 +10,15 @@ private:
 	float m_rotation = 0.0f;
 	float m_scale = 1.0f;
 	float m_elapsedTime = 0;
+	bool m_isActive = false;
 public:
 	Particle() {};
 	Particle(const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& velocity, float gravity, float lifeTime, float rotation, float scale);
 	DirectX::XMFLOAT3 getPosition()const;
 	float getRotation()const;
 	float getScale()const;
+	bool getActiveState()const;
+	void setActiveState(bool isActive);
+	void resetStates(const DirectX::XMFLOAT3& pos, const DirectX::XMFLOAT3& velocity, float gravity, float lifeTime, float rotation, float scale);
 	bool update(float deltaTime);
 };
