@@ -159,7 +159,7 @@ void Graphics::renderFrame()
 		(*it)->draw(context.Get(), camera.GetMatrix() * camera.GetProjectionMatrix());
 	}
 
-	particleSystem.update(1.0f / 600.0f);
+	particleSystem.update(1.0f / 60.0f);
 	particleSystem.draw(context.Get(), camera, vertexInfoConstantBuffer);
 
 	//Draw skybox
@@ -767,12 +767,27 @@ bool Graphics::initScene()
 			renderables.at(renderables.size() - 1).transform.SetPosition(0, 2, 0);
 
 			ParticleSystemSettings particleSystemSettings;
-			particleSystemSettings.emissionRate = 20;
-			particleSystemSettings.gravity = 1;
-			particleSystemSettings.maxLifetimeForParticle = 5;
+
+			particleSystemSettings.spawnOffset.maxX = 0;
+			particleSystemSettings.spawnOffset.minX = 0;
+
+			particleSystemSettings.spawnOffset.maxY = 0;
+			particleSystemSettings.spawnOffset.minY = 0;
+
+			particleSystemSettings.spawnOffset.maxZ = 0;
+			particleSystemSettings.spawnOffset.minZ = 0;
+
+			particleSystemSettings.emissionInfo.emissionAmount = 5;
+			particleSystemSettings.emissionInfo.emissionFrequency = 0.1f;
+			particleSystemSettings.lifeSpan.maxLifeTime = 5;
+			particleSystemSettings.lifeSpan.minLifeTime = 5;
+			particleSystemSettings.scale.minScale = 0.1f;
+			particleSystemSettings.scale.maxScale = 0.25f;
 			particleSystemSettings.maxParticles = 100;
+			particleSystemSettings.gravity = 0.5f;
 			particleSystemSettings.material = &unlitMaterial;
 
+			particleSystem.transform.SetPosition(4, 0, 0);
 			particleSystem.init(device.Get(), context.Get(), particleSystemSettings);
 
 			std::wstring cubemapLocations[6];
